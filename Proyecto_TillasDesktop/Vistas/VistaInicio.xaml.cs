@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,14 +11,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Proyecto_TillasDesktop
+namespace TillasDesktop.UI.Vistas
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Lógica de interacción para VistaInicio.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class VistaInicio : UserControl
     {
-        public MainWindow()
+        public VistaInicio()
         {
             InitializeComponent();
         }

@@ -1,0 +1,58 @@
+﻿<Window x:Class="TillasDesktop.UI.Vistas.MenuInicio"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TillasDesktop.UI.Vistas"
+        mc:Ignorable="d"
+        Title="Tillas Desktop - Inicio" Height="768" Width="1100">
+
+    <Window.Resources>
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MenuButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="20,15"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="230"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- BARRA LATERAL -->
+        <Border Grid.Column="0" Background="#1a365d">
+            <StackPanel Margin="0,20,0,0">
+                <TextBlock Text="≡" Foreground="White" FontSize="28" Margin="20,0,0,20" Cursor="Hand"/>
+
+                <Button Content="🏠  INICIO" Style="{StaticResource MenuButton}" Background="#2b6cb0"/>
+                <Button Content="🛒  PUNTO DE VENTA" Style="{StaticResource MenuButton}"/>
+                <Button Content="📦  INVENTARIO" Style="{StaticResource MenuButton}"/>
+                <Button Content="👥  CLIENTES" Style="{StaticResource MenuButton}"/>
+                <Button Content="📈  REPORTES" Style="{StaticResource MenuButton}"/>
+                <Button Content="⚙  CONFIGURACIÓN" Style="{StaticResource MenuButton}"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Column="1" Margin="20">
+            <ContentControl x:Name="AreaPrincipal"/>
+        </Grid>
+    </Grid>
+</Window>

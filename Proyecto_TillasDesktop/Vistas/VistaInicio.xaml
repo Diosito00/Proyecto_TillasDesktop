@@ -1,0 +1,131 @@
+﻿<UserControl x:Class="TillasDesktop.UI.Vistas.VistaInicio"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TillasDesktop.UI.Vistas"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             Background="#F0F4F8">
+
+    <UserControl.Resources>
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MenuButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="20,15"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </UserControl.Resources>
+    <!-- CONTENIDO PRINCIPAL -->
+    <Grid Grid.Column="1" Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- CABECERA -->
+            <RowDefinition Height="Auto"/>
+            <!-- KPIs -->
+            <RowDefinition Height="*"/>
+            <!-- GRÁFICO -->
+            <RowDefinition Height="Auto"/>
+            <!-- TABLA -->
+        </Grid.RowDefinitions>
+
+        <!-- CABECERA -->
+        <Grid Grid.Row="0" Margin="10,0,10,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox Width="350" Height="38" HorizontalAlignment="Left" Padding="10,8" 
+                 Background="White" BorderBrush="#cbd5e0" BorderThickness="1" Foreground="#a0aec0" 
+                 Text="🔍 Buscar productos, ventas..."/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="35" Height="35" CornerRadius="17.5" Background="#cbd5e0" Margin="0,0,10,0">
+                    <TextBlock Text="👤" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="Admin" FontWeight="Bold" Foreground="#2d3748"/>
+                    <TextBlock Text="fecha/hora" FontSize="11" Foreground="#718096"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <!-- TARJETAS KPI -->
+        <UniformGrid Grid.Row="1" Columns="3">
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Margin="20,15">
+                    <TextBlock Text="VENTAS HOY" FontSize="12" FontWeight="Bold" Foreground="#718096"/>
+                    <TextBlock Text="$$$$" FontSize="32" FontWeight="ExtraBold" Foreground="#2d3748" Margin="0,5,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Margin="20,15">
+                    <TextBlock Text="NUEVOS PEDIDOS" FontSize="12" FontWeight="Bold" Foreground="#718096"/>
+                    <TextBlock Text="38" FontSize="32" FontWeight="ExtraBold" Foreground="#2d3748" Margin="0,5,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource CardStyle}">
+                <StackPanel Margin="20,15">
+                    <TextBlock Text="ALERTAS DE STOCK" FontSize="12" FontWeight="Bold" Foreground="#718096"/>
+                    <TextBlock Text="5 Modelos" FontSize="32" FontWeight="ExtraBold" Foreground="#e53e3e" Margin="0,5,0,0"/>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <!-- GRAFICO -->
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="RESUMEN VENTAS SEMANAL" FontSize="13" FontWeight="Bold" Foreground="#4a5568" Margin="0,0,0,15"/>
+
+                <Border Grid.Row="1" Background="#ebf8ff" CornerRadius="8" BorderBrush="#bee3f8" BorderThickness="1">
+                    <TextBlock Text="instalar paquete NuGet 'LiveCharts.wpf' para graficar"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#3182ce" FontWeight="SemiBold"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- TABLA VENTAS -->
+        <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="20" Margin="10,10,10,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="ÚLTIMAS VENTAS" FontSize="13" FontWeight="Bold" Foreground="#4a5568" Margin="0,0,0,15"/>
+
+                <DataGrid Grid.Row="1" Height="140" AutoGenerateColumns="False" Background="White"
+                      RowBackground="#f7fafc" AlternatingRowBackground="White" HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#e2e8f0" BorderThickness="0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID VENTA" Width="100" Binding="{Binding ID}"/>
+                        <DataGridTextColumn Header="FECHA" Width="120" Binding="{Binding Fecha}"/>
+                        <DataGridTextColumn Header="CLIENTE" Width="220" Binding="{Binding Cliente}"/>
+                        <DataGridTextColumn Header="TOTAL" Width="120" Binding="{Binding Total}"/>
+                        <DataGridTextColumn Header="VENDEDOR" Width="*" Binding="{Binding Vendedor}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
