@@ -7,4 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Configuracion\" />
+    <Folder Include="Repositorios\" />
+  </ItemGroup>
+
 </Project>

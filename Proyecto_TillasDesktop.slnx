@@ -1,3 +1,6 @@
 <Solution>
-  <Project Path="Proyecto_TillasDesktop/Proyecto_TillasDesktop.csproj" />
+  <Project Path="Proyecto_TillasDesktop/TillasDesktop.UI.csproj" />
+  <Project Path="TillasDesktop.BLL/TillasDesktop.BLL.csproj" />
+  <Project Path="TillasDesktop.DAL/TillasDesktop.DAL.csproj" />
+  <Project Path="TillasDesktop.Entities/TillasDesktop.Entities.csproj" />
 </Solution>
