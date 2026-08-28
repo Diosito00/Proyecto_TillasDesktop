@@ -42,12 +42,12 @@
             <StackPanel Margin="0,20,0,0">
                 <TextBlock Text="≡" Foreground="White" FontSize="28" Margin="20,0,0,20" Cursor="Hand"/>
 
-                <Button Content="🏠  INICIO" Style="{StaticResource MenuButton}" Background="#2b6cb0"/>
-                <Button Content="🛒  PUNTO DE VENTA" Style="{StaticResource MenuButton}"/>
-                <Button Content="📦  INVENTARIO" Style="{StaticResource MenuButton}"/>
-                <Button Content="👥  CLIENTES" Style="{StaticResource MenuButton}"/>
-                <Button Content="📈  REPORTES" Style="{StaticResource MenuButton}"/>
-                <Button Content="⚙  CONFIGURACIÓN" Style="{StaticResource MenuButton}"/>
+                <Button x:Name="btnInicio" Content="🏠  INICIO" Style="{StaticResource MenuButton}" Click="BtnInicio_Click"/>
+                <Button x:Name="btnPuntoVenta" Content="🛒  PUNTO DE VENTA" Style="{StaticResource MenuButton}" Click="BtnPuntoVenta_Click"/>
+                <Button x:Name="btnInventario" Content="📦  INVENTARIO" Style="{StaticResource MenuButton}" Click="BtnInventario_Click"/>
+                <Button x:Name="btnClientes" Content="👥  CLIENTES" Style="{StaticResource MenuButton}" Click="BtnClientes_Click"/>
+                <Button x:Name="btnReportes" Content="📈  REPORTES" Style="{StaticResource MenuButton}" Click="BtnReportes_Click"/>
+                <Button x:Name="btnConfiguracion" Content="⚙  CONFIGURACIÓN" Style="{StaticResource MenuButton}" Click="BtnConfiguracion_Click"/>
             </StackPanel>
         </Border>
 

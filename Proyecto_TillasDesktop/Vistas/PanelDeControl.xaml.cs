@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TillasDesktop.UI.Vistas;
 
 namespace TillasDesktop.UI.Vistas
 {
@@ -20,7 +21,42 @@ namespace TillasDesktop.UI.Vistas
         public MenuInicio()
         {
             InitializeComponent();
+
+            // Cargar la vista de Inicio por defecto al arrancar el programa
             AreaPrincipal.Content = new VistaInicio();
+        }
+
+        private void BtnInicio_Click(object sender, RoutedEventArgs e)
+        {
+            AreaPrincipal.Content = new VistaInicio();
+        }
+
+        private void BtnClientes_Click(object sender, RoutedEventArgs e)
+        {
+            // Instancia el UserControl de Clientes (asegúrate de haberlo creado en la carpeta Views)
+            // AreaPrincipal.Content = new VistaClientes();
+        }
+
+        private void BtnReportes_Click(object sender, RoutedEventArgs e)
+        {
+            // Instancia el UserControl de Reportes
+            // AreaPrincipal.Content = new VistaReportes();
+        }
+
+        // Métodos vacíos listos para cuando crees el resto de las vistas
+        private void BtnPuntoVenta_Click(object sender, RoutedEventArgs e)
+        {
+            // AreaPrincipal.Content = new VistaPuntoVenta();
+        }
+
+        private void BtnInventario_Click(object sender, RoutedEventArgs e)
+        {
+            // AreaPrincipal.Content = new VistaInventario();
+        }
+
+        private void BtnConfiguracion_Click(object sender, RoutedEventArgs e)
+        {
+            // AreaPrincipal.Content = new VistaConfiguracion();
         }
     }
 }
