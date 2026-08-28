@@ -1,0 +1,87 @@
+﻿<!-- UserControl es el contenedor principal de la vista en WPF (funciona como un componente o pantalla reutilizable dentro de una ventana principal). -->
+<!-- x:Class define la ruta de la clase de C# que controla la lógica de este diseño XAML. -->
+<UserControl x:Class="TillasDesktop.UI.Vistas.ClientesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="#F0F4F8">
+    <!-- Color de fondo general para toda la vista -->
+
+    <!-- Grid principal que organiza los elementos en filas con un margen de 20 píxeles alrededor. -->
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Fila 0: Se ajusta automáticamente al tamaño de la cabecera (título, buscador y botón). -->
+            <RowDefinition Height="*"/>
+            <!-- Fila 1: Ocupa todo el espacio restante disponible para mostrar la tabla de clientes. -->
+        </Grid.RowDefinitions>
+
+        <!-- Cabecera: Organiza el título a la izquierda y el buscador/botón a la derecha en una misma línea. -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,20" LastChildFill="False">
+            <!-- Título de la sección visualizado en grande y negrita. -->
+            <TextBlock Text="GESTIÓN DE CLIENTES" FontSize="20" FontWeight="Bold" Foreground="#102A43" VerticalAlignment="Center"/>
+
+            <!-- Panel horizontal que agrupa el buscador y el botón de agregar a la derecha. -->
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                <!-- Cuadro de texto (TextBox) destinado a filtrar o buscar clientes en la tabla. -->
+                <TextBox x:Name="txtBuscar" Width="250" Height="35" Padding="8,5" VerticalContentAlignment="Center" 
+                         BorderBrush="#BCCCDC" BorderThickness="1" Margin="0,0,15,0"/>
+
+                <!-- Botón interactivo para abrir el formulario y registrar un nuevo cliente. -->
+                <Button x:Name="btnAgregarCliente" Content="AGREGAR CLIENTE" Width="150" Height="35" 
+                        Background="#102A43" Foreground="White" FontWeight="Bold" Cursor="Hand" Click="BtnAgregarCliente_Click">
+                    <!-- ControlTemplate personalizado para darle bordes redondeados (CornerRadius) al botón. -->
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Tarjeta Contenedora: Un contenedor visual blanco con esquinas redondeadas y sombra para estilizar la tabla. -->
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="15">
+            <!-- Efecto de sombra sutil alrededor de la tarjeta. -->
+            <Border.Effect>
+                <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+            </Border.Effect>
+
+            <!-- DataGrid: Tabla de datos interactiva para listar, ordenar y mostrar los registros de los clientes. -->
+            <DataGrid x:Name="dgClientes" AutoGenerateColumns="False" CanUserAddRows="False" 
+                      GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E2E8F0" BorderBrush="Transparent" Background="White">
+                <DataGrid.Columns>
+                    <!-- Columna que muestra el ID único del cliente. -->
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+
+                    <!-- Columna que muestra el Nombre; el ancho '*' hace que ocupe el espacio flexible restante. -->
+                    <DataGridTextColumn Header="NOMBRE" Binding="{Binding NombreCompleto}" Width="*"/>
+
+                    <!-- Columna para el documento (DNI o CUIT). -->
+                    <DataGridTextColumn Header="DNI / CUIT" Binding="{Binding Documento}" Width="150"/>
+
+                    <!-- Columna para el número de teléfono. -->
+                    <DataGridTextColumn Header="TELÉFONO" Binding="{Binding Telefono}" Width="150"/>
+
+                    <!-- Columna para el correo electrónico. -->
+                    <DataGridTextColumn Header="EMAIL" Binding="{Binding Email}" Width="200"/>
+
+                    <!-- Columna personalizada para albergar los botones de acciones (Editar y Eliminar) por cada fila. -->
+                    <DataGridTemplateColumn Header="ACCIONES" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <!-- Botón con icono de lápiz para editar el cliente seleccionado. -->
+                                    <Button Content="✏️" Background="Transparent" BorderBrush="Transparent" Cursor="Hand" Click="BtnEditar_Click" Margin="0,0,8,0"/>
+                                    <!-- Botón con icono de tacho de basura para eliminar el cliente seleccionado. -->
+                                    <Button Content="🗑️" Background="Transparent" BorderBrush="Transparent" Cursor="Hand" Click="BtnEliminar_Click"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

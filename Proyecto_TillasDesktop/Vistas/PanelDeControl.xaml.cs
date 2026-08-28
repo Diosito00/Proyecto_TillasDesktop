@@ -31,7 +31,11 @@ namespace TillasDesktop.UI.Vistas
 
         private void BtnClientes_Click(object sender, RoutedEventArgs e)
         {
+<<<<<<< Updated upstream
             // AreaPrincipal.Content = new VistaClientes();
+=======
+            AreaPrincipal.Content = new TillasDesktop.UI.Vistas.ClientesView();
+>>>>>>> Stashed changes
         }
 
         private void BtnReportes_Click(object sender, RoutedEventArgs e)

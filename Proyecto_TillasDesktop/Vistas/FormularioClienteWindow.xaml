@@ -1,0 +1,52 @@
+﻿<!-- Define una ventana de WPF (Window). x:Class enlaza este diseño visual con su respectiva clase de lógica en C#. -->
+<Window x:Class="TillasDesktop.UI.Vistas.FormularioClienteWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Registrar Cliente" Height="420" Width="400" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Background="#F0F4F8">
+
+    <!-- Grid principal que organiza los elementos de la ventana en filas con un margen interno de 20 píxeles. -->
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Fila 0: Se adapta automáticamente al espacio del título. -->
+            <RowDefinition Height="*"/>
+            <!-- Fila 1: Ocupa todo el espacio intermedio disponible para los campos de texto. -->
+            <RowDefinition Height="Auto"/>
+            <!-- Fila 2: Se adapta automáticamente al tamaño del botón inferior. -->
+        </Grid.RowDefinitions>
+
+        <!-- Título principal del formulario visualizado en la parte superior. -->
+        <TextBlock Text="NUEVO CLIENTE" FontSize="18" FontWeight="Bold" Foreground="#102A43" Margin="0,0,0,15"/>
+
+        <!-- StackPanel ubicado en la fila 1 que apila verticalmente las etiquetas y los campos de entrada (TextBox). -->
+        <StackPanel Grid.Row="1">
+            <!-- Etiqueta y campo de texto para el Nombre Completo -->
+            <TextBlock Text="Nombre Completo:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtNombre" Height="30" Padding="5" Margin="0,0,0,10"/>
+
+            <!-- Etiqueta y campo de texto para el DNI o CUIT -->
+            <TextBlock Text="DNI / CUIT:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtDocumento" Height="30" Padding="5" Margin="0,0,0,10"/>
+
+            <!-- Etiqueta y campo de texto para el Teléfono -->
+            <TextBlock Text="Teléfono:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtTelefono" Height="30" Padding="5" Margin="0,0,0,10"/>
+
+            <!-- Etiqueta y campo de texto para el Email -->
+            <TextBlock Text="Email:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtEmail" Height="30" Padding="5"/>
+        </StackPanel>
+
+        <!-- Botón de guardado ubicado en la fila 2 que ejecuta el método BtnGuardar_Click al presionarlo. -->
+        <Button Grid.Row="2" Content="GUARDAR CLIENTE" Height="40" Background="#102A43" Foreground="White" FontWeight="Bold" Cursor="Hand" Click="BtnGuardar_Click">
+            <!-- Plantilla personalizada (ControlTemplate) para redondear las esquinas del botón mediante un Border con CornerRadius. -->
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+    </Grid>
+</Window>
