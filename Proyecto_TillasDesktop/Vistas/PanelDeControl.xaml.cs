@@ -21,8 +21,6 @@ namespace TillasDesktop.UI.Vistas
         public MenuInicio()
         {
             InitializeComponent();
-
-            // Cargar la vista de Inicio por defecto al arrancar el programa
             AreaPrincipal.Content = new VistaInicio();
         }
 
@@ -33,20 +31,17 @@ namespace TillasDesktop.UI.Vistas
 
         private void BtnClientes_Click(object sender, RoutedEventArgs e)
         {
-            // Instancia el UserControl de Clientes (asegúrate de haberlo creado en la carpeta Views)
             // AreaPrincipal.Content = new VistaClientes();
         }
 
         private void BtnReportes_Click(object sender, RoutedEventArgs e)
         {
-            // Instancia el UserControl de Reportes
             // AreaPrincipal.Content = new VistaReportes();
         }
 
-        // Métodos vacíos listos para cuando crees el resto de las vistas
         private void BtnPuntoVenta_Click(object sender, RoutedEventArgs e)
         {
-            // AreaPrincipal.Content = new VistaPuntoVenta();
+            AreaPrincipal.Content = new VistaPuntoDeVenta();
         }
 
         private void BtnInventario_Click(object sender, RoutedEventArgs e)
