@@ -32,7 +32,7 @@ namespace TillasDesktop.UI.Vistas
         private void BtnClientes_Click(object sender, RoutedEventArgs e)
         {
 
-            AreaPrincipal.Content = new TillasDesktop.UI.Vistas.ClientesView();
+            AreaPrincipal.Content = new ClientesView();
 
         }
 
@@ -48,7 +48,7 @@ namespace TillasDesktop.UI.Vistas
 
         private void BtnInventario_Click(object sender, RoutedEventArgs e)
         {
-            // AreaPrincipal.Content = new VistaInventario();
+            AreaPrincipal.Content = new VistaInventario();
         }
 
         private void BtnConfiguracion_Click(object sender, RoutedEventArgs e)

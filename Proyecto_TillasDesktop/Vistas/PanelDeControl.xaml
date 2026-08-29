@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TillasDesktop.UI.Vistas"
         mc:Ignorable="d"
-        Title="Tillas Desktop - Inicio" Height="768" Width="1100">
+        Title="Tillas Desktop - Inicio" Height="768" Width="1100"
+        WindowState="Maximized">
 
     <Window.Resources>
         <Style x:Key="CardStyle" TargetType="Border">
