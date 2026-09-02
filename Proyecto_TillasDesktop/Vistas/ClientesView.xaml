@@ -3,7 +3,10 @@
 <UserControl x:Class="TillasDesktop.UI.Vistas.ClientesView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Background="#F0F4F8">
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Background="#F0F4F8">
     <!-- Color de fondo general para toda la vista -->
 
     <!-- Grid principal que organiza los elementos en filas con un margen de 20 píxeles alrededor. -->
@@ -53,13 +56,17 @@
                       GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E2E8F0" BorderBrush="Transparent" Background="White">
                 <DataGrid.Columns>
                     <!-- Columna que muestra el ID único del cliente. -->
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
 
                     <!-- Columna que muestra el Nombre; el ancho '*' hace que ocupe el espacio flexible restante. -->
-                    <DataGridTextColumn Header="NOMBRE" Binding="{Binding NombreCompleto}" Width="*"/>
+                    <DataGridTextColumn Header="NOMBRE" Binding="{Binding Nombre}" Width="*"/>
+                    <!-- Columna que muestra el Apellido; el ancho '*' hace que ocupe el espacio flexible restante. -->
+                    <DataGridTextColumn Header="APELLIDO" Binding="{Binding Apellido}" Width="*"/>
 
-                    <!-- Columna para el documento (DNI o CUIT). -->
-                    <DataGridTextColumn Header="DNI / CUIT" Binding="{Binding Documento}" Width="150"/>
+                    <!-- Columna para el documento (DNI). -->
+                    <DataGridTextColumn Header="DNI" Binding="{Binding DNI}" Width="150"/>
+                    <!-- Columna para el CUIT. -->
+                    <DataGridTextColumn Header="CUIT" Binding="{Binding CUIT}" Width="*"/>
 
                     <!-- Columna para el número de teléfono. -->
                     <DataGridTextColumn Header="TELÉFONO" Binding="{Binding Telefono}" Width="150"/>

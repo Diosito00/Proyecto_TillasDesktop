@@ -1,5 +1,6 @@
 ﻿using System.Windows; // Importa los componentes esenciales de la interfaz y ventanas de WPF.
-using TillasDesktop.UI.Modelos; // Importa los modelos del proyecto (como la clase Cliente).
+using TillasDesktop.Entities.Modelos;// Importa los modelos del proyecto (como la clase Cliente).
+
 
 namespace TillasDesktop.UI.Vistas
 {
@@ -21,8 +22,10 @@ namespace TillasDesktop.UI.Vistas
             InitializeComponent(); // Inicializa los componentes de la interfaz.
 
             // Rellena los cuadros de texto del formulario con la información del cliente que se va a editar.
-            txtNombre.Text = clienteAEditar.NombreCompleto;
-            txtDocumento.Text = clienteAEditar.Documento;
+            txtNombre.Text = clienteAEditar.Nombre;
+            txtApellido.Text = clienteAEditar.Apellido;
+            txtDNI.Text = clienteAEditar.DNI;
+            txtCUIT.Text = clienteAEditar.CUIT;
             txtTelefono.Text = clienteAEditar.Telefono;
             txtEmail.Text = clienteAEditar.Email;
 
@@ -37,12 +40,16 @@ namespace TillasDesktop.UI.Vistas
             if (NuevoCliente == null)
             {
                 NuevoCliente = new Cliente(); // Instancia un nuevo objeto Cliente.
-                NuevoCliente.Id = 104; // Asigna un ID temporal para el registro nuevo.
+
+                 // Buscamos la ventana principal activa para calcular el siguiente ID de forma dinámica
+                var mainWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
             }
 
             // Captura y asigna al objeto los valores actualizados que el usuario escribió en los TextBox.
-            NuevoCliente.NombreCompleto = txtNombre.Text;
-            NuevoCliente.Documento = txtDocumento.Text;
+            NuevoCliente.Nombre = txtNombre.Text;
+            NuevoCliente.Apellido = txtApellido.Text;
+            NuevoCliente.DNI = txtDNI.Text;
+            NuevoCliente.CUIT = txtCUIT.Text;
             NuevoCliente.Telefono = txtTelefono.Text;
             NuevoCliente.Email = txtEmail.Text;
 

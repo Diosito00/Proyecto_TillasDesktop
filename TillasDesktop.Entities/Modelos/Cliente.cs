@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel; // Importa las herramientas para la notificación de cambios en las propiedades (necesario para WPF).
+using System.Drawing;
 using System.Runtime.CompilerServices; // Importa atributos para detectar automáticamente el nombre de la propiedad que cambió.
 
-namespace TillasDesktop.UI.Modelos
+namespace TillasDesktop.Entities.Modelos
 {
     // La clase Cliente representa la estructura de los datos de un cliente. 
     // Hereda de INotifyPropertyChanged para que la interfaz gráfica (WPF) se entere cuando sus valores cambian.
@@ -9,8 +10,10 @@ namespace TillasDesktop.UI.Modelos
     {
         // Campos privados que almacenan internamente los datos del cliente de forma segura.
         private int _id;
-        private string _nombreCompleto = string.Empty;
-        private string _documento = string.Empty;
+        private string _apellido = string.Empty;
+        private string _nombre = string.Empty;
+        private string _dni = string.Empty;
+        private string _cuit = string.Empty;
         private string _telefono = string.Empty;
         private string _email = string.Empty;
 
@@ -22,18 +25,32 @@ namespace TillasDesktop.UI.Modelos
         }
 
         // Propiedad pública para el Nombre Completo del cliente.
-        public string NombreCompleto
+        public string Apellido
         {
-            get => _nombreCompleto; // Retorna el nombre actual.
-            set { _nombreCompleto = value; OnPropertyChanged(); } // Actualiza el nombre y avisa a la interfaz.
+            get => _apellido; // Retorna el apellido actual.
+            set { _apellido = value; OnPropertyChanged(); } // Actualiza el apellido y avisa a la interfaz.
+        }
+
+        // Propiedad pública para el Nombre del cliente.
+        public string Nombre
+        {
+            get => _nombre; // Retorna el nombre actual.
+            set { _nombre = value; OnPropertyChanged(); } // Actualiza el nombre y avisa a la interfaz.
         }
 
         // Propiedad pública para el Documento (DNI / CUIT) del cliente.
-        public string Documento
+        public string DNI
         {
-            get => _documento; // Retorna el documento actual.
-            set { _documento = value; OnPropertyChanged(); } // Actualiza el documento y avisa a la interfaz.
+            get => _dni; // Retorna el documento actual.
+            set { _dni = value; OnPropertyChanged(); } // Actualiza el documento y avisa a la interfaz.
         }
+
+        // Propiedad pública para el CUIT del cliente.
+        public string CUIT
+        {
+            get => _cuit; // Retorna el CUIT actual.
+            set { _cuit = value; OnPropertyChanged(); } // Actualiza el CUIT y avisa a la interfaz.
+        }   
 
         // Propiedad pública para el Teléfono del cliente.
         public string Telefono

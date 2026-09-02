@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic; // Importa las colecciones genéricas estándar de C#.
 using System.Windows; // Importa clases base de WPF como MessageBox y RoutedEventArgs.
 using System.Windows.Controls; // Importa controles de interfaz como UserControl y DataGrid.
-using TillasDesktop.UI.Modelos; // Importa los modelos del proyecto (como la clase Cliente).
+using TillasDesktop.Entities.Modelos;// Importa los modelos del proyecto (como la clase Cliente).
 using System.Collections.ObjectModel; // Importa ObservableCollection, que avisa automáticamente a la UI cuando cambian los elementos de la lista.
+
 
 namespace TillasDesktop.UI.Vistas
 {
@@ -25,9 +26,9 @@ namespace TillasDesktop.UI.Vistas
             // Inicializa la colección observable con tres clientes de ejemplo precargados.
             ListaClientes = new ObservableCollection<Cliente>
             {
-                new Cliente { Id = 101, NombreCompleto = "Carlos Alberto Rodríguez", Documento = "DNI 15.223.102", Telefono = "+54 379 455-1122", Email = "carlos.rod@mail.com" },
-                new Cliente { Id = 102, NombreCompleto = "María Elena Gómez", Documento = "CUIT 27-22334455-8", Telefono = "+54 379 511-9988", Email = "maria.g@mail.com" },
-                new Cliente { Id = 103, NombreCompleto = "María Gómez", Documento = "DNI 15.223.103", Telefono = "+54 379 511-9988", Email = "maria.m@mail.com" }
+                new Cliente { Id = 101, Nombre = "Carlos", Apellido = "Rodríguez", DNI = "15.223.102", CUIT = "27-22334455-8", Telefono = "+54 379 455-1122", Email = "carlos.rod@mail.com" },
+                new Cliente { Id = 102, Nombre = "María", Apellido = "Gómez", DNI = "15.223.103", CUIT = "27-22334455-8", Telefono = "+54 379 511-9988", Email = "maria.g@mail.com" },
+                new Cliente { Id = 103, Nombre = "María", Apellido = "Gómez", DNI = "15.223.103", CUIT = "27-22334455-8", Telefono = "+54 379 511-9988", Email = "maria.m@mail.com" }
             };
 
             // Conecta la colección directamente al origen de datos (ItemsSource) del DataGrid visual.
@@ -46,6 +47,11 @@ namespace TillasDesktop.UI.Vistas
             // Si el resultado fue exitoso y el cliente creado no es nulo...
             if (resultado == true && formulario.NuevoCliente != null)
             {
+
+                // Calcula el ID automáticamente: si la lista tiene elementos, busca el ID máximo y suma 1; si está vacía, empieza en 1.
+                int nuevoId = ListaClientes.Count > 0 ? ListaClientes.Max(c => c.Id) + 1 : 1;
+                formulario.NuevoCliente.Id = nuevoId;
+
                 // Se añade el nuevo cliente a la lista observable para que aparezca automáticamente en la tabla.
                 ListaClientes.Add(formulario.NuevoCliente);
             }
@@ -94,7 +100,7 @@ namespace TillasDesktop.UI.Vistas
             if (clienteSeleccionado != null)
             {
                 // Muestra una ventana de confirmación antes de proceder a borrar el registro.
-                MessageBoxResult resultado = MessageBox.Show($"¿Desea eliminar a {clienteSeleccionado.NombreCompleto}?", "Confirmar eliminación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                MessageBoxResult resultado = MessageBox.Show($"¿Desea eliminar a {clienteSeleccionado.Nombre} {clienteSeleccionado.Apellido }?", "Confirmar eliminación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
                 // Si el usuario confirma haciendo clic en "Sí"...
                 if (resultado == MessageBoxResult.Yes)
