@@ -38,7 +38,7 @@ namespace TillasDesktop.UI.Vistas
 
         private void BtnReportes_Click(object sender, RoutedEventArgs e)
         {
-            // AreaPrincipal.Content = new VistaReportes();
+            AreaPrincipal.Content = new TillasDesktop.UI.Vistas.ReportesView();
         }
 
         private void BtnPuntoVenta_Click(object sender, RoutedEventArgs e)
