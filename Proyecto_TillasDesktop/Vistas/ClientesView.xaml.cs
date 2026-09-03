@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic; // Importa las colecciones genéricas estándar de C#.
 using System.Windows; // Importa clases base de WPF como MessageBox y RoutedEventArgs.
 using System.Windows.Controls; // Importa controles de interfaz como UserControl y DataGrid.
-using TillasDesktop.Entities.Modelos;// Importa los modelos del proyecto (como la clase Cliente).
+using TillasDesktop.UI.Modelos;// Importa los modelos del proyecto (como la clase Cliente).
 using System.Collections.ObjectModel; // Importa ObservableCollection, que avisa automáticamente a la UI cuando cambian los elementos de la lista.
 
 
@@ -11,7 +11,7 @@ namespace TillasDesktop.UI.Vistas
     public partial class ClientesView : UserControl
     {
         // Colección observable global que almacena la lista de clientes vinculada a la interfaz. Puede ser nula inicialmente (?).
-        public ObservableCollection<Cliente>? ListaClientes { get; set; }
+        public ObservableCollection<ClienteViewModel>? ListaClientes { get; set; }
 
         // Constructor de la vista: se ejecuta al inicializar el componente y carga los datos de prueba.
         public ClientesView()
@@ -24,11 +24,11 @@ namespace TillasDesktop.UI.Vistas
         private void CargarClientesPrueba()
         {
             // Inicializa la colección observable con tres clientes de ejemplo precargados.
-            ListaClientes = new ObservableCollection<Cliente>
+            ListaClientes = new ObservableCollection<ClienteViewModel>
             {
-                new Cliente { Id = 101, Nombre = "Carlos", Apellido = "Rodríguez", DNI = "15.223.102", CUIT = "27-22334455-8", Telefono = "+54 379 455-1122", Email = "carlos.rod@mail.com" },
-                new Cliente { Id = 102, Nombre = "María", Apellido = "Gómez", DNI = "15.223.103", CUIT = "27-22334455-8", Telefono = "+54 379 511-9988", Email = "maria.g@mail.com" },
-                new Cliente { Id = 103, Nombre = "María", Apellido = "Gómez", DNI = "15.223.103", CUIT = "27-22334455-8", Telefono = "+54 379 511-9988", Email = "maria.m@mail.com" }
+                new ClienteViewModel { Id = 101, Nombre = "Carlos", Apellido = "Rodríguez", DNI = "15.223.102", CUIT = "27-22334455-8", Telefono = "+54 379 455-1122", Email = "carlos.rod@mail.com" },
+                new ClienteViewModel { Id = 102, Nombre = "María", Apellido = "Gómez", DNI = "15.223.103", CUIT = "27-22334455-8", Telefono = "+54 379 511-9988", Email = "maria.g@mail.com" },
+                new ClienteViewModel { Id = 103, Nombre = "María", Apellido = "Gómez", DNI = "15.223.103", CUIT = "27-22334455-8", Telefono = "+54 379 511-9988", Email = "maria.m@mail.com" }
             };
 
             // Conecta la colección directamente al origen de datos (ItemsSource) del DataGrid visual.
@@ -61,7 +61,7 @@ namespace TillasDesktop.UI.Vistas
         private void BtnEditar_Click(object sender, RoutedEventArgs e)
         {
             // Obtiene el objeto de la fila seleccionada actualmente en el DataGrid y lo convierte a tipo Cliente.
-            Cliente clienteSeleccionado = (Cliente)dgClientes.SelectedItem;
+            ClienteViewModel clienteSeleccionado = (ClienteViewModel)dgClientes.SelectedItem;
 
             // Verifica que realmente se haya seleccionado un cliente.
             if (clienteSeleccionado != null)
@@ -94,7 +94,7 @@ namespace TillasDesktop.UI.Vistas
         private void BtnEliminar_Click(object sender, RoutedEventArgs e)
         {
             // Obtiene el cliente seleccionado de la fila de la tabla.
-            Cliente clienteSeleccionado = (Cliente)dgClientes.SelectedItem;
+            ClienteViewModel clienteSeleccionado = (ClienteViewModel)dgClientes.SelectedItem;
 
             // Valida que exista un cliente seleccionado.
             if (clienteSeleccionado != null)

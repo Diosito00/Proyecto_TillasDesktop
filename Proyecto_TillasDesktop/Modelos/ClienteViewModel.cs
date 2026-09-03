@@ -1,12 +1,8 @@
-﻿using System.ComponentModel; // Importa las herramientas para la notificación de cambios en las propiedades (necesario para WPF).
-using System.Drawing;
-using System.Runtime.CompilerServices; // Importa atributos para detectar automáticamente el nombre de la propiedad que cambió.
-
-namespace TillasDesktop.Entities.Modelos
+﻿namespace TillasDesktop.UI.Modelos
 {
     // La clase Cliente representa la estructura de los datos de un cliente. 
     // Hereda de INotifyPropertyChanged para que la interfaz gráfica (WPF) se entere cuando sus valores cambian.
-    public class Cliente : INotifyPropertyChanged
+    public class ClienteViewModel : ViewModelBase
     {
         // Campos privados que almacenan internamente los datos del cliente de forma segura.
         private int _id;
@@ -64,16 +60,6 @@ namespace TillasDesktop.Entities.Modelos
         {
             get => _email; // Retorna el email actual.
             set { _email = value; OnPropertyChanged(); } // Actualiza el email y avisa a la interfaz.
-        }
-
-        // Evento requerido por la interfaz INotifyPropertyChanged para detectar los cambios de las propiedades.
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        // Método encargado de disparar la notificación hacia la interfaz gráfica.
-        // [CallerMemberName] detecta automáticamente el nombre de la propiedad que acaba de modificarse.
-        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

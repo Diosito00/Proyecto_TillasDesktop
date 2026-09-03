@@ -1,5 +1,5 @@
 ﻿using System.Windows; // Importa los componentes esenciales de la interfaz y ventanas de WPF.
-using TillasDesktop.Entities.Modelos;// Importa los modelos del proyecto (como la clase Cliente).
+using TillasDesktop.UI.Modelos;// Importa los modelos del proyecto (como la clase Cliente).
 
 
 namespace TillasDesktop.UI.Vistas
@@ -8,7 +8,7 @@ namespace TillasDesktop.UI.Vistas
     public partial class FormularioClienteWindow : Window
     {
         // Propiedad pública que almacena el cliente creado o editado para ser devuelto a la ventana principal.
-        public Cliente? NuevoCliente { get; set; }
+        public ClienteViewModel? NuevoCliente { get; set; }
 
         // Constructor vacío: se utiliza cuando se quiere dar de alta/crear un nuevo cliente desde cero.
         public FormularioClienteWindow()
@@ -17,7 +17,7 @@ namespace TillasDesktop.UI.Vistas
         }
 
         // Constructor con parámetros: se utiliza cuando se quiere editar un cliente existente, recibiendo sus datos actuales.
-        public FormularioClienteWindow(Cliente clienteAEditar)
+        public FormularioClienteWindow(ClienteViewModel clienteAEditar)
         {
             InitializeComponent(); // Inicializa los componentes de la interfaz.
 
@@ -39,7 +39,7 @@ namespace TillasDesktop.UI.Vistas
             // Valida si la propiedad es nula (significa que es un alta nueva y no una edición).
             if (NuevoCliente == null)
             {
-                NuevoCliente = new Cliente(); // Instancia un nuevo objeto Cliente.
+                NuevoCliente = new ClienteViewModel(); // Instancia un nuevo objeto Cliente.
 
                  // Buscamos la ventana principal activa para calcular el siguiente ID de forma dinámica
                 var mainWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);

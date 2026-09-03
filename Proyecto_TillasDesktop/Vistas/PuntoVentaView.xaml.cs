@@ -10,17 +10,20 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TillasDesktop.UI.Modelos;
 
 namespace TillasDesktop.UI.Vistas
 {
     /// <summary>
-    /// Lógica de interacción para VistaInventario.xaml
+    /// Lógica de interacción para VistaPuntoDeVenta.xaml
     /// </summary>
-    public partial class VistaInventario : UserControl
+    public partial class PuntoVentaView : UserControl
     {
-        public VistaInventario()
+        public PuntoVentaView()
         {
             InitializeComponent();
+            // Asignamos el Modelo como contexto de datos de esta pantalla
+            this.DataContext = new PuntoVentaViewModel();
         }
     }
 }

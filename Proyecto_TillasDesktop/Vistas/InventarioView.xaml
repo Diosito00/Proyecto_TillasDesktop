@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="TillasDesktop.UI.Vistas.VistaInventario"
+﻿<UserControl x:Class="TillasDesktop.UI.Vistas.InventarioView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -34,7 +34,7 @@
                 <!-- Buscador -->
                 <TextBox Grid.Column="1" Width="350" Height="40" Margin="30,0,0,0" Padding="10,8" HorizontalAlignment="Left"
                          FontSize="14" Background="#edf2f7" BorderBrush="#cbd5e0" BorderThickness="1" 
-                         Text="🔍 Buscar por código SKU, marca o modelo..."/>
+                         Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <!-- Botones -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
@@ -46,7 +46,7 @@
                             </Style>
                         </Button.Resources>
                     </Button>
-                    <Button Content="+ NUEVO MODELO" Height="40" Width="150" 
+                    <Button Content="+ NUEVO MODELO" Height="40" Width="150" Command="{Binding NuevoModeloCommand}"
                             Background="#3182ce" Foreground="White" FontWeight="Bold" Cursor="Hand">
                         <Button.Resources>
                             <Style TargetType="Border">
@@ -63,11 +63,11 @@
             <Border.Effect>
                 <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
             </Border.Effect>
-            <DataGrid x:Name="dgInventario" AutoGenerateColumns="False" Background="White" 
+            <DataGrid x:Name="dgInventario" AutoGenerateColumns="False" Background="White" ItemsSource="{Binding ListaProductos}"
                       RowBackground="#f7fafc" AlternatingRowBackground="White" HeadersVisibility="Column" 
                       GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#e2e8f0" BorderThickness="0" FontSize="14">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="CÓDIGO (SKU)" Width="130" Binding="{Binding Codigo_Modelo}"/>
+                    <DataGridTextColumn Header="CÓDIGO" Width="130" Binding="{Binding Codigo_Modelo}"/>
                     <DataGridTextColumn Header="NOMBRE DEL MODELO" Width="*" Binding="{Binding Nombre}"/>
                     <DataGridTextColumn Header="MARCA" Width="120" Binding="{Binding Marca}"/>
                     <DataGridTextColumn Header="CATEGORÍA" Width="120" Binding="{Binding Categoria}"/>

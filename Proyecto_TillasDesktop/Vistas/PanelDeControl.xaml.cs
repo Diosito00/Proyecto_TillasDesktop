@@ -21,12 +21,12 @@ namespace TillasDesktop.UI.Vistas
         public MenuInicio()
         {
             InitializeComponent();
-            AreaPrincipal.Content = new VistaInicio();
+            AreaPrincipal.Content = new InicioView();
         }
 
         private void BtnInicio_Click(object sender, RoutedEventArgs e)
         {
-            AreaPrincipal.Content = new VistaInicio();
+            AreaPrincipal.Content = new InicioView();
         }
 
         private void BtnClientes_Click(object sender, RoutedEventArgs e)
@@ -43,12 +43,12 @@ namespace TillasDesktop.UI.Vistas
 
         private void BtnPuntoVenta_Click(object sender, RoutedEventArgs e)
         {
-            AreaPrincipal.Content = new VistaPuntoDeVenta();
+            AreaPrincipal.Content = new PuntoVentaView();
         }
 
         private void BtnInventario_Click(object sender, RoutedEventArgs e)
         {
-            AreaPrincipal.Content = new VistaInventario();
+            AreaPrincipal.Content = new InventarioView();
         }
 
         private void BtnConfiguracion_Click(object sender, RoutedEventArgs e)

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="TillasDesktop.UI.Vistas.VistaPuntoDeVenta"
+﻿<UserControl x:Class="TillasDesktop.UI.Vistas.PuntoVentaView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -84,7 +84,7 @@
                 </Border>
 
                 <!-- Botón Cobrar -->
-                <Button x:Name="btnCobrar" Content="CONFIRMAR COBRO" Height="60" 
+                <Button x:Name="btnCobrar" Content="CONFIRMAR COBRO" Height="60" Command="{Binding CobrarCommand}"
                         Background="#48bb78" Foreground="White" FontSize="18" FontWeight="Bold" Cursor="Hand">
                     <Button.Resources>
                         <Style TargetType="Border">

@@ -7,10 +7,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Inventario\" />
-    <Folder Include="Facturacion\" />
-    <Folder Include="Usuarios\" />
-  </ItemGroup>
-
 </Project>

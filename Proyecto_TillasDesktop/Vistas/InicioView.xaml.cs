@@ -18,12 +18,12 @@ namespace TillasDesktop.UI.Vistas
     /// <summary>
     /// Lógica de interacción para VistaInicio.xaml
     /// </summary>
-    public partial class VistaInicio : UserControl
+    public partial class InicioView : UserControl
     {
         public SeriesCollection SeriesCollection { get; set; }
         public string[] Labels { get; set; }
         public Func<double, string> Formatter { get; set; }
-        public VistaInicio()
+        public InicioView()
         {
             InitializeComponent();
             
