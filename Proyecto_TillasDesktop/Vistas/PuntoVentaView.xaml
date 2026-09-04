@@ -27,11 +27,11 @@
 
                 <!-- Buscador de Código de Barras -->
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-                    <TextBox x:Name="txtCodigoBarras" Width="383" Height="40" Padding="10,8" FontSize="16"
-                             Background="#edf2f7" BorderBrush="#cbd5e0" BorderThickness="1" 
-                             Tag="Escanear código o buscar modelo..." VerticalContentAlignment="Center"/>
-                    <Button x:Name="btnBuscar" Content="AGREGAR" Width="100" Margin="10,0,0,0" 
-                            Background="#3182ce" Foreground="White" FontWeight="Bold" Cursor="Hand">
+                    <TextBox Text="{Binding CodigoBusqueda, UpdateSourceTrigger=PropertyChanged}" 
+                             Width="383" Height="40" Padding="10,8" FontSize="16" Background="#edf2f7" BorderBrush="#cbd5e0" 
+                             BorderThickness="1" VerticalContentAlignment="Center"/>
+                    <Button Content="BUSCAR" Command="{Binding BuscarProductoCommand}" Width="100" 
+                            Margin="10,0,0,0" Background="#3182ce" Foreground="White" FontWeight="Bold" Cursor="Hand">
                         <Button.Resources>
                             <Style TargetType="Border">
                                 <Setter Property="CornerRadius" Value="5"/>
@@ -41,15 +41,24 @@
                 </StackPanel>
 
                 <!-- Tabla del Carrito -->
-                <DataGrid x:Name="dgCarrito" Grid.Row="1" AutoGenerateColumns="False" Background="White" 
+                <DataGrid x:Name="dgCarrito" ItemsSource="{Binding Carrito}" Grid.Row="1" AutoGenerateColumns="False" Background="White"
                           RowBackground="#f7fafc" AlternatingRowBackground="White" HeadersVisibility="Column" 
                           GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#e2e8f0" BorderThickness="1" BorderBrush="#e2e8f0" FontSize="14">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="CANT" Width="60" Binding="{Binding Cantidad}"/>
                         <DataGridTextColumn Header="MODELO" Width="*" Binding="{Binding NombreProducto}"/>
                         <DataGridTextColumn Header="TALLE" Width="70" Binding="{Binding Talle}"/>
-                        <DataGridTextColumn Header="PRECIO" Width="100" Binding="{Binding PrecioUnitario, StringFormat=C}"/>
-                        <DataGridTextColumn Header="SUBTOTAL" Width="100" Binding="{Binding Subtotal, StringFormat=C}"/>
+                        <DataGridTextColumn Header="SUBTOTAL" Binding="{Binding PrecioUnitario, StringFormat={}{0:C}}" Width="120"/>
+                        <DataGridTextColumn Header="SUBTOTAL" Binding="{Binding Subtotal, StringFormat={}{0:C}}" Width="120"/>
+                        <DataGridTemplateColumn Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <!-- CommandParameter envía el ítem de esta fila exacta al ViewModel -->
+                                    <Button Content="X" Command="{Binding DataContext.EliminarItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                            CommandParameter="{Binding}" Background="#fc8181" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
@@ -79,7 +88,8 @@
                 <Border Background="#ebf8ff" CornerRadius="8" Padding="20" Margin="0,0,0,30">
                     <StackPanel>
                         <TextBlock Text="TOTAL A COBRAR" FontSize="14" FontWeight="Bold" Foreground="#3182ce" HorizontalAlignment="Center"/>
-                        <TextBlock x:Name="lblTotal" Text="$0.00" FontSize="42" FontWeight="ExtraBold" Foreground="#2b6cb0" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                        <TextBlock x:Name="lblTotal" Text="{Binding TotalCobrar, StringFormat={}{0:C}}" FontSize="42" FontWeight="ExtraBold" 
+                                   Foreground="#2b6cb0" HorizontalAlignment="Center" Margin="0,10,0,0"/>
                     </StackPanel>
                 </Border>
 

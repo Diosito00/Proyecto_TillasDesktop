@@ -1,55 +1,103 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows.Input;
+using System.Linq;
 using System.Windows;
+using System.Windows.Input;
+using TillasDesktop.Entities.Facturacion;
 
 namespace TillasDesktop.UI.Modelos
 {
     public class PuntoVentaViewModel : ViewModelBase
     {
         private decimal _totalCobrar;
+        private string _codigoBusqueda;
 
-        // ObservableCollection actualiza el DataGrid del XAML automáticamente
         public ObservableCollection<DetalleVentaViewModel> Carrito { get; set; }
-        // Declaramos el comando
-        public ICommand CobrarCommand { get; }
+
+        // Catálogo simulado hasta conectar MariaDB
+        private ObservableCollection<ProductoViewModel> _catalogoPrueba;
+
+        public string CodigoBusqueda
+        {
+            get => _codigoBusqueda;
+            set { _codigoBusqueda = value; OnPropertyChanged(); }
+        }
 
         public decimal TotalCobrar
         {
-            get { return _totalCobrar; }
+            get => _totalCobrar;
             set { _totalCobrar = value; OnPropertyChanged(); }
         }
+
+        public ICommand CobrarCommand { get; }
+        public ICommand BuscarProductoCommand { get; }
+        public ICommand EliminarItemCommand { get; }
 
         public PuntoVentaViewModel()
         {
             Carrito = new ObservableCollection<DetalleVentaViewModel>();
-
-            // Sobrescribimos un evento para recalcular el total cada vez que la lista cambie
             Carrito.CollectionChanged += (s, e) => RecalcularTotal();
 
-            // Inicializamos el comando en el constructor
-            // Parámetro 1: Qué hacer al hacer clic (EjecutarCobro)
-            // Parámetro 2: Cuándo está habilitado el botón (PuedeCobrar)
+            // Llenamos el catálogo de prueba
+            _catalogoPrueba = new ObservableCollection<ProductoViewModel>
+            {
+                new ProductoViewModel { Codigo_Modelo = "779001", Nombre = "Air Force 1 - Talle 42", Precio_Venta = 125000 },
+                new ProductoViewModel { Codigo_Modelo = "779002", Nombre = "Samba OG - Talle 39", Precio_Venta = 110000 }
+            };
+
             CobrarCommand = new RelayCommand(EjecutarCobro, PuedeCobrar);
+            BuscarProductoCommand = new RelayCommand(BuscarYAgregarProducto);
+            EliminarItemCommand = new RelayCommand(EliminarItem);
         }
 
-        public void AgregarProductoAlCarrito(DetalleVentaViewModel nuevoItem)
+        private void BuscarYAgregarProducto(object parametro)
         {
-            Carrito.Add(nuevoItem);
+            if (string.IsNullOrWhiteSpace(CodigoBusqueda)) return;
+
+            var productoEncontrado = _catalogoPrueba.FirstOrDefault(p => p.Codigo_Modelo == CodigoBusqueda);
+
+            if (productoEncontrado != null)
+            {
+                // Verificamos si ya está en el carrito para sumar la cantidad
+                var itemExistente = Carrito.FirstOrDefault(c => c.NombreProducto == productoEncontrado.Nombre);
+
+                if (itemExistente != null)
+                {
+                    itemExistente.Cantidad += 1;
+                    RecalcularTotal(); // Agrega esta línea para actualizar el total general de la caja
+                }
+                else
+                {
+                    var nuevoDetalle = new DetalleVenta
+                    {
+                        Precio_Unitario = productoEncontrado.Precio_Venta,
+                        Cantidad = 1
+                    };
+                    Carrito.Add(new DetalleVentaViewModel(nuevoDetalle, productoEncontrado.Nombre));
+                }
+
+                CodigoBusqueda = string.Empty; // Limpiamos el buscador
+            }
+            else
+            {
+                MessageBox.Show("Producto no encontrado. Verifique el código.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
-        // El método que se ejecuta al presionar "CONFIRMAR COBRO"
+        private void EliminarItem(object parametro)
+        {
+            if (parametro is DetalleVentaViewModel itemAEliminar)
+            {
+                Carrito.Remove(itemAEliminar);
+            }
+        }
+
         private void EjecutarCobro(object parametro)
         {
             MessageBox.Show($"¡Venta procesada con éxito por un total de {TotalCobrar:C}!", "Cobro exitoso");
-            Carrito.Clear(); // Vaciamos el carrito después de cobrar
+            Carrito.Clear();
         }
 
-        // Lógica que decide si el botón se puede presionar (retorna true o false)
-        private bool PuedeCobrar(object parametro)
-        {
-            // El botón solo estará activo si el carrito tiene al menos 1 producto
-            return Carrito.Count > 0;
-        }
+        private bool PuedeCobrar(object parametro) => Carrito.Count > 0;
 
         public void RecalcularTotal()
         {
