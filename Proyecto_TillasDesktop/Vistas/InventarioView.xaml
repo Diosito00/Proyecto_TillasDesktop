@@ -38,8 +38,8 @@
 
                 <!-- Botones -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button Content="📦 INGRESAR STOCK" Height="40" Width="160" Margin="0,0,15,0" 
-                            Background="#e2e8f0" Foreground="#4a5568" FontWeight="Bold" Cursor="Hand">
+                    <Button Content="📦 INGRESAR STOCK" Height="40" Width="160" Command="{Binding IngresarStockCommand}"
+                            Margin="0,0,15,0" Background="#e2e8f0" Foreground="#4a5568" FontWeight="Bold" Cursor="Hand">
                         <Button.Resources>
                             <Style TargetType="Border">
                                 <Setter Property="CornerRadius" Value="6"/>
@@ -64,8 +64,8 @@
                 <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
             </Border.Effect>
             <DataGrid x:Name="dgInventario" AutoGenerateColumns="False" Background="White" ItemsSource="{Binding ListaProductos}"
-                      RowBackground="#f7fafc" AlternatingRowBackground="White" HeadersVisibility="Column" 
-                      GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#e2e8f0" BorderThickness="0" FontSize="14">
+                      SelectedItem="{Binding ProductoSeleccionado}" RowBackground="#f7fafc" AlternatingRowBackground="White" 
+                      HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#e2e8f0" BorderThickness="0" FontSize="14">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="CÓDIGO" Width="130" Binding="{Binding Codigo_Modelo}"/>
                     <DataGridTextColumn Header="NOMBRE DEL MODELO" Width="*" Binding="{Binding Nombre}"/>

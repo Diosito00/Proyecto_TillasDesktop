@@ -24,6 +24,7 @@ namespace TillasDesktop.UI.Modelos
 
         public ICommand GuardarCommand { get; }
         public Action CerrarVentana { get; set; } // Acción para cerrar la ventana desde el ViewModel
+        public Action<ProductoViewModel> OnModeloGuardado { get; set; } // Una acción que recibirá el nuevo producto para enviarlo al inventario
 
         public NuevoModeloViewModel()
         {
@@ -44,6 +45,20 @@ namespace TillasDesktop.UI.Modelos
 
         private void Guardar(object parametro)
         {
+            // 1. Ensamblamos el nuevo objeto con los datos del formulario
+            var nuevoProducto = new ProductoViewModel
+            {
+                Codigo_Modelo = this.CodigoModelo,
+                Nombre = this.Nombre,
+                Marca = this.MarcaSeleccionada.Nombre,
+                Categoria = this.CategoriaSeleccionada.Nombre,
+                Precio_Venta = this.PrecioVenta,
+                StockTotal = 0 // Empieza sin stock hasta que se haga un ingreso
+            };
+
+            // 2. Ejecutamos la acción para enviarlo de vuelta a la pantalla principal
+            OnModeloGuardado?.Invoke(nuevoProducto);
+
             MessageBox.Show($"Modelo {Nombre} guardado con éxito.", "Éxito");
             CerrarVentana?.Invoke();
         }

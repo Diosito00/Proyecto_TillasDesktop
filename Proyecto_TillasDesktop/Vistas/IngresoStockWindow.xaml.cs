@@ -9,16 +9,15 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using TillasDesktop.UI.Modelos;
 
 namespace TillasDesktop.UI.Vistas
 {
     /// <summary>
-    /// Lógica de interacción para NuevoModeloWindow.xaml
+    /// Lógica de interacción para IngresoStockWindow.xaml
     /// </summary>
-    public partial class NuevoModeloWindow : Window
+    public partial class IngresoStockWindow : Window
     {
-        public NuevoModeloWindow()
+        public IngresoStockWindow()
         {
             InitializeComponent();
         }

@@ -1,0 +1,34 @@
+﻿<Window x:Class="TillasDesktop.UI.Vistas.IngresoStockWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Ingreso de Stock" Height="400" Width="400" 
+        WindowStartupLocation="CenterScreen" Background="#F0F4F8" ResizeMode="NoResize">
+
+    <Border Background="White" CornerRadius="10" Margin="20" Padding="20">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
+        </Border.Effect>
+        <StackPanel>
+            <TextBlock Text="INGRESAR MERCADERÍA" FontSize="18" FontWeight="ExtraBold" Foreground="#2d3748" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+
+            <!-- Etiqueta de solo lectura para saber qué estamos modificando -->
+            <TextBlock Text="{Binding ProductoResumen}" FontSize="14" FontWeight="Bold" Foreground="#3182ce" TextWrapping="Wrap" Margin="0,0,0,25"/>
+
+            <TextBlock Text="Talle" FontWeight="SemiBold" Foreground="#718096" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding Talle, UpdateSourceTrigger=PropertyChanged}" Height="35" Padding="5" Margin="0,0,0,15"/>
+
+            <TextBlock Text="Cantidad a Ingresar" FontWeight="SemiBold" Foreground="#718096" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding Cantidad, UpdateSourceTrigger=PropertyChanged}" Height="35" Padding="5" Margin="0,0,0,25"/>
+
+            <Button Content="CONFIRMAR INGRESO" Command="{Binding GuardarCommand}" Height="45" Foreground="White" FontWeight="Bold" Cursor="Hand">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="#48bb78" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </StackPanel>
+    </Border>
+</Window>
