@@ -26,8 +26,7 @@
             <!-- Panel horizontal que agrupa el buscador y el botón de agregar a la derecha. -->
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                 <!-- Cuadro de texto (TextBox) destinado a filtrar o buscar clientes en la tabla. -->
-                <TextBox x:Name="txtBuscar" Width="250" Height="35" Padding="8,5" VerticalContentAlignment="Center" 
-                         BorderBrush="#BCCCDC" BorderThickness="1" Margin="0,0,15,0"/>
+                <TextBox x:Name="txtBuscar" Width="200" Height="30" VerticalContentAlignment="Center" Margin="0,0,10,0" Padding="5" TextChanged="TxtBuscar_TextChanged"/>
 
                 <!-- Botón interactivo para abrir el formulario y registrar un nuevo cliente. -->
                 <Button x:Name="btnAgregarCliente" Content="AGREGAR CLIENTE" Width="150" Height="35" 

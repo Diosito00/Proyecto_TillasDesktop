@@ -1,5 +1,8 @@
 ﻿using System.Windows; // Importa los componentes esenciales de la interfaz y ventanas de WPF.
+using System.Windows.Input;
+using TillasDesktop.Entities.Usuarios;
 using TillasDesktop.UI.Modelos;// Importa los modelos del proyecto (como la clase Cliente).
+using System.Text.RegularExpressions;
 
 
 namespace TillasDesktop.UI.Vistas
@@ -36,16 +39,54 @@ namespace TillasDesktop.UI.Vistas
         // Evento que se ejecuta al hacer clic en el botón "GUARDAR CLIENTE".
         private void BtnGuardar_Click(object sender, RoutedEventArgs e)
         {
-            // Valida si la propiedad es nula (significa que es un alta nueva y no una edición).
-            if (NuevoCliente == null)
+            // 1. Validar que ningún campo obligatorio esté vacío
+            if (string.IsNullOrWhiteSpace(txtNombre.Text) ||
+                string.IsNullOrWhiteSpace(txtApellido.Text) ||
+                string.IsNullOrWhiteSpace(txtDNI.Text) ||
+                string.IsNullOrWhiteSpace(txtCUIT.Text) ||
+                string.IsNullOrWhiteSpace(txtTelefono.Text) ||
+                string.IsNullOrWhiteSpace(txtEmail.Text))
             {
-                NuevoCliente = new ClienteViewModel(); // Instancia un nuevo objeto Cliente.
-
-                 // Buscamos la ventana principal activa para calcular el siguiente ID de forma dinámica
-                var mainWindow = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive);
+                MessageBox.Show("Todos los campos son obligatorios. Por favor, complete la información faltante.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
-            // Captura y asigna al objeto los valores actualizados que el usuario escribió en los TextBox.
+            // 2. Validar que el DNI contenga solo números y una longitud lógica
+            if (!txtDNI.Text.All(char.IsDigit) || txtDNI.Text.Length < 7)
+            {
+                MessageBox.Show("El DNI ingresado no es válido (debe contener al menos 7 números).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 3. Validar longitud mínima del teléfono
+            if (txtTelefono.Text.Trim().Length < 7)
+            {
+                MessageBox.Show("El teléfono ingresado es demasiado corto.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 4. Validar formato de correo electrónico
+            string patronEmail = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            if (!Regex.IsMatch(txtEmail.Text.Trim(), patronEmail))
+            {
+                MessageBox.Show("El formato del correo electrónico no es válido (ejemplo: usuario@dominio.com).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validar que Nombre y Apellido contengan solo letras y espacios
+            if (!txtNombre.Text.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)) ||
+                !txtApellido.Text.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
+            {
+                MessageBox.Show("El nombre y el apellido no deben contener números ni símbolos.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Si pasa las validaciones, continúa con la asignación normal...
+            if (NuevoCliente == null)
+            {
+                NuevoCliente = new ClienteViewModel();
+            }
+
             NuevoCliente.Nombre = txtNombre.Text;
             NuevoCliente.Apellido = txtApellido.Text;
             NuevoCliente.DNI = txtDNI.Text;
@@ -53,8 +94,24 @@ namespace TillasDesktop.UI.Vistas
             NuevoCliente.Telefono = txtTelefono.Text;
             NuevoCliente.Email = txtEmail.Text;
 
-            // Establece DialogResult en true para cerrar la ventana emergente e indicar a la vista principal que la acción fue exitosa.
             DialogResult = true;
+        }
+
+        private void SoloNumeros_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Expresión regular que solo permite dígitos numéricos
+            e.Handled = !e.Text.All(char.IsDigit);
+        }
+
+        private void Telefono_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !e.Text.All(c => char.IsDigit(c) || c == '+' || c == '-' || c == ' ');
+        }
+
+        private void SoloLetras_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Permite solo letras (incluyendo vocales con tilde y espacios)
+            e.Handled = !e.Text.All(c => char.IsLetter(c) || char.IsWhiteSpace(c));
         }
     }
 }

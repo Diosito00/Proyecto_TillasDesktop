@@ -22,24 +22,24 @@
         <StackPanel Grid.Row="1">
             
             <!-- Etiqueta y campo de texto para el Nombre -->
-            <TextBlock Text="Nombre:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
+            <TextBlock Text="Nombre:" PreviewTextInput="SoloLetras_PreviewTextInput" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
             <TextBox x:Name="txtNombre" Height="30" Padding="5" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el Apellido -->
-            <TextBlock Text="Apellido:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
+            <TextBlock Text="Apellido:" PreviewTextInput="SoloLetras_PreviewTextInput" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
             <TextBox x:Name="txtApellido" Height="30" Padding="5" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el DNI -->
             <TextBlock Text="DNI:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtDNI" Height="30" Padding="5" Margin="0,0,0,10"/>
+            <TextBox x:Name="txtDNI" PreviewTextInput="SoloNumeros_PreviewTextInput" Height="30" Padding="5" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el CUIT -->
             <TextBlock Text="CUIT:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtCUIT" Height="30" Padding="5" Margin="0,0,0,10"/>
+            <TextBox x:Name="txtCUIT" PreviewTextInput="SoloNumeros_PreviewTextInput" Height="30" Padding="5" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el Teléfono -->
             <TextBlock Text="Teléfono:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtTelefono" Height="30" Padding="5" Margin="0,0,0,10"/>
+            <TextBox x:Name="txtTelefono" PreviewTextInput="Telefono_PreviewTextInput" Height="30" Padding="5" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el Email -->
             <TextBlock Text="Email:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>

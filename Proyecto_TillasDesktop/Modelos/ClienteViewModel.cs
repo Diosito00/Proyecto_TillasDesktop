@@ -1,4 +1,6 @@
-﻿namespace TillasDesktop.UI.Modelos
+﻿using TillasDesktop.Entities.Usuarios;
+
+namespace TillasDesktop.UI.Modelos
 {
     // La clase Cliente representa la estructura de los datos de un cliente. 
     // Hereda de INotifyPropertyChanged para que la interfaz gráfica (WPF) se entere cuando sus valores cambian.
@@ -60,6 +62,11 @@
         {
             get => _email; // Retorna el email actual.
             set { _email = value; OnPropertyChanged(); } // Actualiza el email y avisa a la interfaz.
+        }
+
+        public static implicit operator ClienteViewModel(Cliente v)
+        {
+            throw new NotImplementedException();
         }
     }
 }
