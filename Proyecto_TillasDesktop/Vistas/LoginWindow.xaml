@@ -36,7 +36,7 @@
 
                 <!-- Campo de entrada para el Email o Nombre de Usuario -->
                 <TextBlock Text="Email / Usuario" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,5"/>
-                <TextBox x:Name="txtUsuario" Text="" Margin="0,0,0,15"/>
+                <TextBox x:Name="txtUsuario" Text="{Binding Usuario, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15"/>
 
                 <!-- Contenedor para el campo de Contraseña y su botón de alternancia -->
                 <TextBlock Text="Contraseña" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,5"/>

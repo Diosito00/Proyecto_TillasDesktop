@@ -18,9 +18,20 @@ namespace TillasDesktop.UI.Vistas
     /// </summary>
     public partial class MenuInicioView : Window
     {
-        public MenuInicioView()
+        public MenuInicioView(string rolUsuario)
         {
             InitializeComponent();
+            // Aplicación del Control de Acceso Basado en Roles (RBAC)
+            if (rolUsuario == "Vendedor")
+            {
+                btnInventario.Visibility = Visibility.Collapsed;
+                btnReportes.Visibility = Visibility.Collapsed; 
+            }
+            else if (rolUsuario == "Gerente")
+            {
+                btnPuntoVenta.Visibility = Visibility.Collapsed;
+                btnClientes.Visibility = Visibility.Collapsed; 
+            }
             AreaPrincipal.Content = new InicioView();
         }
 
