@@ -3,6 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="Vistas/LoginWindow.xaml">
     <Application.Resources>
-
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Estilos/Botones.xaml"/>
+                <ResourceDictionary Source="Estilos/Entradas.xaml"/>
+                <ResourceDictionary Source="Estilos/Colores.xaml"/>
+                <ResourceDictionary Source="Estilos/Contenedores.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

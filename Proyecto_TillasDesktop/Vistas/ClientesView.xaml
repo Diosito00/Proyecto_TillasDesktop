@@ -21,25 +21,16 @@
         <!-- Cabecera: Organiza el título a la izquierda y el buscador/botón a la derecha en una misma línea. -->
         <DockPanel Grid.Row="0" Margin="0,0,0,20" LastChildFill="False">
             <!-- Título de la sección visualizado en grande y negrita. -->
-            <TextBlock Text="GESTIÓN DE CLIENTES" FontSize="20" FontWeight="Bold" Foreground="#102A43" VerticalAlignment="Center"/>
+            <TextBlock Text="GESTIÓN DE CLIENTES" FontSize="20" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" VerticalAlignment="Center"/>
 
             <!-- Panel horizontal que agrupa el buscador y el botón de agregar a la derecha. -->
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                 <!-- Cuadro de texto (TextBox) destinado a filtrar o buscar clientes en la tabla. -->
-                <TextBox x:Name="txtBuscar" Width="200" Height="30" VerticalContentAlignment="Center" Margin="0,0,10,0" Padding="5" TextChanged="TxtBuscar_TextChanged"/>
+                <TextBox x:Name="txtBuscar" Width="200" Height="30" Margin="0,0,10,0" TextChanged="TxtBuscar_TextChanged"/>
 
                 <!-- Botón interactivo para abrir el formulario y registrar un nuevo cliente. -->
                 <Button x:Name="btnAgregarCliente" Content="AGREGAR CLIENTE" Width="150" Height="35" 
-                        Background="#102A43" Foreground="White" FontWeight="Bold" Cursor="Hand" Click="BtnAgregarCliente_Click">
-                    <!-- ControlTemplate personalizado para darle bordes redondeados (CornerRadius) al botón. -->
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}" CornerRadius="6">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
+                        Style="{StaticResource BotonSecundario}" Click="BtnAgregarCliente_Click"/>
             </StackPanel>
         </DockPanel>
 

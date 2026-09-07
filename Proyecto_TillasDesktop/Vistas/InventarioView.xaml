@@ -10,10 +10,8 @@
 
     <Grid Margin="20,20,20,20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <!-- Cabecera de controles -->
-            <RowDefinition Height="*"/>
-            <!-- Grilla de datos -->
+            <RowDefinition Height="Auto"/> <!-- Cabecera de controles -->
+            <RowDefinition Height="*"/> <!-- Grilla de datos -->
         </Grid.RowDefinitions>
 
         <!-- PANEL SUPERIOR: Buscador y Botones de Acción -->
@@ -29,31 +27,18 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Título -->
-                <TextBlock Text="CATÁLOGO E INVENTARIO" FontSize="18" FontWeight="ExtraBold" Foreground="#2d3748" VerticalAlignment="Center"/>
+                <TextBlock Text="CATÁLOGO E INVENTARIO" FontSize="18" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" VerticalAlignment="Center"/>
 
                 <!-- Buscador -->
-                <TextBox Grid.Column="1" Width="350" Height="40" Margin="30,0,0,0" Padding="10,8" HorizontalAlignment="Left"
-                         FontSize="14" Background="#edf2f7" BorderBrush="#cbd5e0" BorderThickness="1" 
+                <TextBox Grid.Column="1" Width="350" Height="40" Margin="30,0,0,0" HorizontalAlignment="Left"
                          Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <!-- Botones -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button Content="📦 INGRESAR STOCK" Height="40" Width="160" Command="{Binding IngresarStockCommand}"
-                            Margin="0,0,15,0" Background="#e2e8f0" Foreground="#4a5568" FontWeight="Bold" Cursor="Hand">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="6"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
-                    <Button Content="+ NUEVO MODELO" Height="40" Width="150" Command="{Binding NuevoModeloCommand}"
-                            Background="#3182ce" Foreground="White" FontWeight="Bold" Cursor="Hand">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="6"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
+                    <Button Content="📦 INGRESAR STOCK" Command="{Binding IngresarStockCommand}" Height="40" Width="160" Margin="0,0,15,0" 
+                            Style="{StaticResource BotonGris}"/>
+                    <Button Content="+ NUEVO MODELO" Command="{Binding NuevoModeloCommand}" Height="40" Width="150" 
+                            Style="{StaticResource BotonSecundario}"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -64,16 +49,15 @@
                 <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
             </Border.Effect>
             <DataGrid x:Name="dgInventario" AutoGenerateColumns="False" Background="White" ItemsSource="{Binding ListaProductos}"
-                      SelectedItem="{Binding ProductoSeleccionado}" RowBackground="#f7fafc" AlternatingRowBackground="White" 
+                      SelectedItem="{Binding ProductoSeleccionado}" RowBackground="{StaticResource BrushFondo}" AlternatingRowBackground="White" 
                       HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#e2e8f0" BorderThickness="0" FontSize="14">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="CÓDIGO" Width="130" Binding="{Binding Codigo_Modelo}"/>
-                    <DataGridTextColumn Header="NOMBRE DEL MODELO" Width="*" Binding="{Binding Nombre}"/>
-                    <DataGridTextColumn Header="MARCA" Width="120" Binding="{Binding Marca}"/>
-                    <DataGridTextColumn Header="CATEGORÍA" Width="120" Binding="{Binding Categoria}"/>
-                    <DataGridTextColumn Header="PRECIO VENTA" Width="130" Binding="{Binding Precio_Venta, StringFormat=C}"/>
-                    <!-- Stock_Actual será un sumatorio de la tabla Producto_Talles -->
-                    <DataGridTextColumn Header="STOCK TOTAL" Width="110" Binding="{Binding StockTotal}"/>
+                    <DataGridTextColumn Header="CÓDIGO" Width="130" Binding="{Binding Codigo_Modelo}" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                    <DataGridTextColumn Header="NOMBRE DEL MODELO" Width="*" Binding="{Binding Nombre}" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                    <DataGridTextColumn Header="MARCA" Width="120" Binding="{Binding Marca}" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                    <DataGridTextColumn Header="CATEGORÍA" Width="120" Binding="{Binding Categoria}" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                    <DataGridTextColumn Header="PRECIO VENTA" Width="130" Binding="{Binding Precio_Venta, StringFormat=C}" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                    <DataGridTextColumn Header="STOCK TOTAL" Width="110" Binding="{Binding StockTotal}" Foreground="{StaticResource BrushTextoPrincipal}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

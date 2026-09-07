@@ -16,9 +16,9 @@ namespace TillasDesktop.UI.Vistas
     /// <summary>
     /// Lógica de interacción para MenuInicio.xaml
     /// </summary>
-    public partial class MenuInicio : Window
+    public partial class MenuInicioView : Window
     {
-        public MenuInicio()
+        public MenuInicioView()
         {
             InitializeComponent();
             AreaPrincipal.Content = new InicioView();

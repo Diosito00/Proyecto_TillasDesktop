@@ -1,0 +1,97 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Estilo global y automático para todas las cajas de texto -->
+    <Style TargetType="TextBox">
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#cbd5e0"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="#2d3748"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <!-- El borde redondeado principal -->
+                    <Border x:Name="bordePrincipal" 
+                            Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            CornerRadius="6">
+
+                        <!-- PART_ContentHost es el motor interno obligatorio de WPF para renderizar el texto -->
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                    </Border>
+
+                    <!-- Triggers para la reactividad -->
+                    <ControlTemplate.Triggers>
+                        <!-- Efecto visual cuando el usuario hace clic o navega con TAB -->
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="bordePrincipal" Property="BorderBrush" Value="#3182ce"/>
+                            <Setter TargetName="bordePrincipal" Property="BorderThickness" Value="2"/>
+                        </Trigger>
+
+                        <!-- Efecto visual si la caja está deshabilitada (ej. Solo lectura) -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="bordePrincipal" Property="Background" Value="#edf2f7"/>
+                            <Setter Property="Foreground" Value="#a0aec0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Estilo base para ComboBox -->
+    <Style TargetType="ComboBox">
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#cbd5e0"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="#2d3748"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Estilo global y automático para las cajas de contraseña -->
+    <Style TargetType="PasswordBox">
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#cbd5e0"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="#2d3748"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <!-- Mismo borde redondeado -->
+                    <Border x:Name="bordePrincipal" 
+                            Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            CornerRadius="6">
+
+                        <!-- PART_ContentHost renderiza los asteriscos/puntos de la contraseña -->
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <!-- Mismo efecto de foco azulado -->
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="bordePrincipal" Property="BorderBrush" Value="#3182ce"/>
+                            <Setter TargetName="bordePrincipal" Property="BorderThickness" Value="2"/>
+                        </Trigger>
+
+                        <!-- Mismo efecto visual de deshabilitado -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="bordePrincipal" Property="Background" Value="#edf2f7"/>
+                            <Setter Property="Foreground" Value="#a0aec0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

@@ -70,7 +70,7 @@ namespace TillasDesktop.UI.Vistas
 
             // --- Validación exitosa ---
             // Instancia la ventana del menú principal del sistema
-            MenuInicio ventanaPrincipal = new MenuInicio();
+            MenuInicioView ventanaPrincipal = new MenuInicioView();
             // Muestra la ventana principal en pantalla
             ventanaPrincipal.Show();
 

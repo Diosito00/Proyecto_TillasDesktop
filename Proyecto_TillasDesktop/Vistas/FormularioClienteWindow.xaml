@@ -16,46 +16,38 @@
         </Grid.RowDefinitions>
 
         <!-- Título principal del formulario visualizado en la parte superior. -->
-        <TextBlock Text="NUEVO CLIENTE" FontSize="18" FontWeight="Bold" Foreground="#102A43" Margin="0,0,0,15"/>
+        <TextBlock Text="NUEVO CLIENTE" FontSize="18" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
 
         <!-- StackPanel ubicado en la fila 1 que apila verticalmente las etiquetas y los campos de entrada (TextBox). -->
         <StackPanel Grid.Row="1">
             
             <!-- Etiqueta y campo de texto para el Nombre -->
-            <TextBlock Text="Nombre:" PreviewTextInput="SoloLetras_PreviewTextInput" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtNombre" Height="30" Padding="5" Margin="0,0,0,10"/>
+            <TextBlock Text="Nombre:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtNombre" PreviewTextInput="SoloLetras_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el Apellido -->
-            <TextBlock Text="Apellido:" PreviewTextInput="SoloLetras_PreviewTextInput" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtApellido" Height="30" Padding="5" Margin="0,0,0,10"/>
+            <TextBlock Text="Apellido:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtApellido" PreviewTextInput="SoloLetras_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el DNI -->
-            <TextBlock Text="DNI:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtDNI" PreviewTextInput="SoloNumeros_PreviewTextInput" Height="30" Padding="5" Margin="0,0,0,10"/>
+            <TextBlock Text="DNI:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtDNI" PreviewTextInput="SoloNumeros_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el CUIT -->
-            <TextBlock Text="CUIT:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtCUIT" PreviewTextInput="SoloNumeros_PreviewTextInput" Height="30" Padding="5" Margin="0,0,0,10"/>
+            <TextBlock Text="CUIT:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtCUIT" PreviewTextInput="SoloNumeros_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el Teléfono -->
-            <TextBlock Text="Teléfono:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtTelefono" PreviewTextInput="Telefono_PreviewTextInput" Height="30" Padding="5" Margin="0,0,0,10"/>
+            <TextBlock Text="Teléfono:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtTelefono" PreviewTextInput="Telefono_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el Email -->
-            <TextBlock Text="Email:" FontWeight="Bold" Foreground="#334E68" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtEmail" Height="30" Padding="5"/>
+            <TextBlock Text="Email:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtEmail"/>
         </StackPanel>
 
         <!-- Botón de guardado ubicado en la fila 2 que ejecuta el método BtnGuardar_Click al presionarlo. -->
-        <Button Grid.Row="2" Content="GUARDAR CLIENTE" Height="40" Background="#102A43" Foreground="White" FontWeight="Bold" Cursor="Hand" Click="BtnGuardar_Click">
-            <!-- Plantilla personalizada (ControlTemplate) para redondear las esquinas del botón mediante un Border con CornerRadius. -->
-            <Button.Template>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" CornerRadius="6">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                </ControlTemplate>
-            </Button.Template>
-        </Button>
+        <Button Grid.Row="2" Content="GUARDAR CLIENTE" Height="40" Style="{StaticResource BotonSecundario}" Click="BtnGuardar_Click"/>
     </Grid>
 </Window>
+    

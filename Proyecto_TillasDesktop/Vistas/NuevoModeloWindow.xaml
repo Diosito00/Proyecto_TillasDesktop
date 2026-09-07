@@ -9,32 +9,24 @@
             <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
         </Border.Effect>
         <StackPanel>
-            <TextBlock Text="REGISTRAR NUEVO MODELO" FontSize="18" FontWeight="ExtraBold" Foreground="#2d3748" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+            <TextBlock Text="REGISTRAR NUEVO MODELO" FontSize="18" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-            <TextBlock Text="Código (SKU)" FontWeight="SemiBold" Foreground="#718096" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding CodigoModelo, UpdateSourceTrigger=PropertyChanged}" Height="35" Padding="5" Margin="0,0,0,15"/>
+            <TextBlock Text="Código (SKU)" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding CodigoModelo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15"/>
 
-            <TextBlock Text="Nombre del Modelo" FontWeight="SemiBold" Foreground="#718096" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" Height="35" Padding="5" Margin="0,0,0,15"/>
+            <TextBlock Text="Nombre del Modelo" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15"/>
 
-            <TextBlock Text="Marca" FontWeight="SemiBold" Foreground="#718096" Margin="0,0,0,5"/>
+            <TextBlock Text="Marca" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
             <ComboBox ItemsSource="{Binding MarcasDisponibles}" SelectedItem="{Binding MarcaSeleccionada}" DisplayMemberPath="Nombre" Height="35" Margin="0,0,0,15"/>
 
-            <TextBlock Text="Categoría" FontWeight="SemiBold" Foreground="#718096" Margin="0,0,0,5"/>
+            <TextBlock Text="Categoría" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
             <ComboBox ItemsSource="{Binding CategoriasDisponibles}" SelectedItem="{Binding CategoriaSeleccionada}" DisplayMemberPath="Nombre" Height="35" Margin="0,0,0,15"/>
 
-            <TextBlock Text="Precio de Venta ($)" FontWeight="SemiBold" Foreground="#718096" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding PrecioVenta, UpdateSourceTrigger=PropertyChanged}" Height="35" Padding="5" Margin="0,0,0,25"/>
+            <TextBlock Text="Precio de Venta ($)" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding PrecioVenta, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,25"/>
 
-            <Button Content="GUARDAR MODELO" Command="{Binding GuardarCommand}" Height="45" Foreground="White" FontWeight="Bold" Cursor="Hand">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="#3182ce" CornerRadius="6">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
+            <Button Content="GUARDAR MODELO" Command="{Binding GuardarCommand}" Height="45" Style="{StaticResource BotonSecundario}"/> 
         </StackPanel>
     </Border>
 </Window>

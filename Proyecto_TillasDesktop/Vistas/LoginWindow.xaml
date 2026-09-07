@@ -11,7 +11,7 @@
         <Canvas Background="#EAEFF5"/>
 
         <!-- Tarjeta Central Blanca flotante que contiene el formulario de inicio de sesión -->
-        <Border Background="White" Width="500" Height="530" CornerRadius="8" 
+        <Border Background="white" Width="500" Height="530" CornerRadius="8" 
                 VerticalAlignment="Center" HorizontalAlignment="Center">
             <!-- Efecto de sombra sutil alrededor de la tarjeta central -->
             <Border.Effect>
@@ -24,54 +24,42 @@
                 <!-- Sección del Logo e Identificador del Sistema -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,5">
                     <!-- Icono representativo de zapatilla -->
-                    <TextBlock Text="👟" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="👟" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{StaticResource BrushTextoPrincipal}"/>
                     <!-- Nombre principal de la aplicación -->
-                    <TextBlock Text="TILLAS DESKTOP" FontSize="22" FontWeight="Bold" Foreground="#102A43" VerticalAlignment="Center"/>
+                    <TextBlock Text="TILLAS DESKTOP" FontSize="22" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" VerticalAlignment="Center"/>
                 </StackPanel>
                 <!-- Subtítulo descriptivo del propósito del software -->
                 <TextBlock Text="Sistema de Gestión de Inventario y Ventas" FontSize="12" Foreground="#627D98" HorizontalAlignment="Center" Margin="0,0,0,25"/>
 
                 <!-- Mensaje de bienvenida para guiar al usuario -->
-                <TextBlock Text="Bienvenido. Por favor, identifíquese para acceder al sistema." FontSize="13" Foreground="#334E68" Margin="0,0,0,15"/>
+                <TextBlock Text="Bienvenido. Por favor, identifíquese para acceder al sistema." FontSize="13" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,15"/>
 
                 <!-- Campo de entrada para el Email o Nombre de Usuario -->
-                <TextBlock Text="Email / Usuario" FontSize="12" FontWeight="SemiBold" Foreground="#334E68" Margin="0,0,0,5"/>
-                <TextBox x:Name="txtUsuario" Text="" FontSize="13" Foreground="#102A43" 
-                         Padding="10,8" BorderBrush="#BCCCDC" BorderThickness="1" Margin="0,0,0,15"/>
+                <TextBlock Text="Email / Usuario" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,5"/>
+                <TextBox x:Name="txtUsuario" Text="" Margin="0,0,0,15"/>
 
                 <!-- Contenedor para el campo de Contraseña y su botón de alternancia -->
-                <TextBlock Text="Contraseña" FontSize="12" FontWeight="SemiBold" Foreground="#334E68" Margin="0,0,0,5"/>
+                <TextBlock Text="Contraseña" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,5"/>
                 <Grid Margin="0,0,0,10">
                     <!-- PasswordBox: Oculta los caracteres con asteriscos por seguridad -->
-                    <PasswordBox x:Name="txtPassword" FontSize="13" 
-                                 Padding="10,8,35,8" BorderBrush="#BCCCDC" BorderThickness="1"/>
+                    <PasswordBox x:Name="txtPassword"/>
 
                     <!-- TextBox alternativo: Permite visualizar la contraseña en texto plano cuando se activa el "ojito" -->
-                    <TextBox x:Name="txtPasswordVisible" FontSize="13" Foreground="#102A43"
-                             Padding="10,8,35,8" BorderBrush="#BCCCDC" BorderThickness="1" 
-                             Visibility="Collapsed"/>
+                    <TextBox x:Name="txtPasswordVisible" Visibility="Collapsed"/>
 
                     <!-- Botón interactivo con el icono del "ojito" para alternar la visibilidad de la contraseña -->
                     <Button x:Name="btnVerPassword" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"
                             Background="Transparent" BorderBrush="Transparent" Cursor="Hand" Click="BtnVerPassword_Click">
-                        <TextBlock x:Name="txtIconoOjo" Text="👁️" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="txtIconoOjo" Text="👁️" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource BrushTextoPrincipal}"/>
                     </Button>
                 </Grid>
 
                 <!-- Checkbox para la opción de recordar la sesión del usuario -->
-                <CheckBox x:Name="chkRecordarme" Content="Recordarme" FontSize="12" Foreground="#334E68" Margin="0,0,0,20"/>
+                <CheckBox x:Name="chkRecordarme" Content="Recordarme" FontSize="12" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,20"/>
 
                 <!-- Botón principal de acción para enviar las credenciales e iniciar sesión -->
-                <Button x:Name="btnIniciarSesion" Content="INICIAR SESIÓN" FontSize="14" FontWeight="Bold" Foreground="White"
-                        Background="#102A43" Height="40" Cursor="Hand" Click="BtnIniciarSesion_Click">
-                    <!-- Plantilla personalizada para redondear los bordes del botón -->
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}" CornerRadius="20">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
+                <Button x:Name="btnIniciarSesion" Content="INICIAR SESIÓN" Style="{StaticResource BotonSecundario}"
+                        Height="40" Click="BtnIniciarSesion_Click">
                 </Button>
 
                 <!-- Enlaces inferiores de asistencia y recuperación -->
