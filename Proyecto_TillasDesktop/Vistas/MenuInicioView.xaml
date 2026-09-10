@@ -15,7 +15,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- BARRA LATERAL -->
-        <Border Grid.Column="0" Background="#1a365d">
+        <Border Grid.Column="0" Background="{StaticResource BrushSecundario}">
             <StackPanel Margin="0,20,0,0">
                 <TextBlock Text="≡" Foreground="White" FontSize="28" Margin="20,0,0,20" Cursor="Hand"/>
 
@@ -24,7 +24,7 @@
                 <Button x:Name="btnInventario" Content="📦  INVENTARIO" Style="{StaticResource MenuButton}" Click="BtnInventario_Click"/>
                 <Button x:Name="btnClientes" Content="👥  CLIENTES" Style="{StaticResource MenuButton}" Click="BtnClientes_Click"/>
                 <Button x:Name="btnReportes" Content="📈  REPORTES" Style="{StaticResource MenuButton}" Click="BtnReportes_Click"/>
-                <Button x:Name="btnConfiguracion" Content="⚙  CONFIGURACIÓN" Style="{StaticResource MenuButton}" Click="BtnConfiguracion_Click"/>
+                <Button x:Name="btnBackup" Content="⚙  COPIA DE RESPALDO" Style="{StaticResource MenuButton}" Click="BtnBackup_Click"/>
             </StackPanel>
         </Border>
 

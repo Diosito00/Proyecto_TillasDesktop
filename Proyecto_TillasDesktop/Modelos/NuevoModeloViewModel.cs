@@ -28,7 +28,7 @@ namespace TillasDesktop.UI.Modelos
 
         public NuevoModeloViewModel()
         {
-            // Datos simulados hasta conectar MariaDB
+            // Datos simulados hasta conectar DB
             MarcasDisponibles = new ObservableCollection<Marca>
             {
                 new Marca { ID = 1, Nombre = "Nike" },

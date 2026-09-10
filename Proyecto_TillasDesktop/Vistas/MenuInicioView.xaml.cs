@@ -62,9 +62,9 @@ namespace TillasDesktop.UI.Vistas
             AreaPrincipal.Content = new InventarioView();
         }
 
-        private void BtnConfiguracion_Click(object sender, RoutedEventArgs e)
+        private void BtnBackup_Click(object sender, RoutedEventArgs e)
         {
-            // AreaPrincipal.Content = new VistaConfiguracion();
+            AreaPrincipal.Content = new BackupView();
         }
     }
 }
