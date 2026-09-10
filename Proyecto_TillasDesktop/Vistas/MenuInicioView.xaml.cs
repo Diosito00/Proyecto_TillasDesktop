@@ -35,6 +35,27 @@ namespace TillasDesktop.UI.Vistas
             AreaPrincipal.Content = new InicioView();
         }
 
+        // 1. Permite arrastrar la ventana al mantener el clic presionado sobre la barra
+        private void BarraSuperior_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
+        }
+
+        // 2. Botón de minimizar
+        private void BtnMinimizar_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+
+        // 3. Botón de cerrar
+        private void BtnCerrar_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
         private void BtnInicio_Click(object sender, RoutedEventArgs e)
         {
             AreaPrincipal.Content = new InicioView();

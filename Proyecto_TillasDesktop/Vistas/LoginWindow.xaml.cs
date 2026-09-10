@@ -1,6 +1,7 @@
 ﻿// Importación de las librerías necesarias de Windows Presentation Foundation (WPF) para la gestión de ventanas y controles
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using TillasDesktop.UI.Modelos;
 
 // Declaración del espacio de nombres que agrupa las vistas de la interfaz de usuario del proyecto
@@ -20,6 +21,27 @@ namespace TillasDesktop.UI.Vistas
             InitializeComponent();
             _viewModel = new LoginViewModel();
             this.DataContext = _viewModel;
+        }
+
+        // 1. Permite arrastrar la ventana al mantener el clic presionado sobre la barra
+        private void BarraSuperior_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
+        }
+
+        // 2. Botón de minimizar
+        private void BtnMinimizar_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+
+        // 3. Botón de cerrar
+        private void BtnCerrar_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
         }
 
         // Método que se ejecuta al hacer clic en el botón del "ojito" para alternar la visibilidad de la clave

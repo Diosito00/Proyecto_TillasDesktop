@@ -3,74 +3,108 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Tillas Desktop - Iniciar Sesión" Height="650" Width="850"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-        Background="#F0F4F8">
+        Background="#F0F4F8"
+        WindowStyle="None">
 
     <!-- Contenedor principal que abarca toda la ventana -->
     <Grid>
-        <!-- Canvas decorativo de fondo con un tono gris claro unificado -->
-        <Canvas Background="#EAEFF5"/>
+        <Grid.RowDefinitions>
+            <!-- Fila 0: barra superior (Ej. 35 píxeles de alto) -->
+            <RowDefinition Height="35"/>
+            <!-- Fila 1: El resto de la aplicación -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <!-- Tarjeta Central Blanca flotante que contiene el formulario de inicio de sesión -->
-        <Border Background="white" Width="500" Height="530" CornerRadius="8" 
-                VerticalAlignment="Center" HorizontalAlignment="Center">
-            <!-- Efecto de sombra sutil alrededor de la tarjeta central -->
-            <Border.Effect>
-                <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="5" BlurRadius="20" Opacity="0.3"/>
-            </Border.Effect>
+        <!-- === NUEVA BARRA SUPERIOR PERSONALIZADA === -->
+        <!-- El evento MouseLeftButtonDown es para poder arrastrar la ventana -->
+        <Grid Grid.Row="0" Background="{StaticResource BrushSecundario}" MouseLeftButtonDown="BarraSuperior_MouseLeftButtonDown">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-            <!-- Panel organizador vertical para distribuir los elementos internos con márgenes -->
-            <StackPanel Margin="40,30,40,30">
-
-                <!-- Sección del Logo e Identificador del Sistema -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,5">
-                    <!-- Icono representativo de zapatilla -->
-                    <TextBlock Text="👟" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{StaticResource BrushTextoPrincipal}"/>
-                    <!-- Nombre principal de la aplicación -->
-                    <TextBlock Text="TILLAS DESKTOP" FontSize="22" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" VerticalAlignment="Center"/>
-                </StackPanel>
-                <!-- Subtítulo descriptivo del propósito del software -->
-                <TextBlock Text="Sistema de Gestión de Inventario y Ventas" FontSize="12" Foreground="#627D98" HorizontalAlignment="Center" Margin="0,0,0,25"/>
-
-                <!-- Mensaje de bienvenida para guiar al usuario -->
-                <TextBlock Text="Bienvenido. Por favor, identifíquese para acceder al sistema." FontSize="13" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,15"/>
-
-                <!-- Campo de entrada para el Email o Nombre de Usuario -->
-                <TextBlock Text="Email / Usuario" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,5"/>
-                <TextBox x:Name="txtUsuario" Text="{Binding Usuario, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15"/>
-
-                <!-- Contenedor para el campo de Contraseña y su botón de alternancia -->
-                <TextBlock Text="Contraseña" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,5"/>
-                <Grid Margin="0,0,0,10">
-                    <!-- PasswordBox: Oculta los caracteres con asteriscos por seguridad -->
-                    <PasswordBox x:Name="txtPassword"/>
-
-                    <!-- TextBox alternativo: Permite visualizar la contraseña en texto plano cuando se activa el "ojito" -->
-                    <TextBox x:Name="txtPasswordVisible" Visibility="Collapsed"/>
-
-                    <!-- Botón interactivo con el icono del "ojito" para alternar la visibilidad de la contraseña -->
-                    <Button x:Name="btnVerPassword" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"
-                            Background="Transparent" BorderBrush="Transparent" Cursor="Hand" Click="BtnVerPassword_Click">
-                        <TextBlock x:Name="txtIconoOjo" Text="👁️" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource BrushTextoPrincipal}"/>
-                    </Button>
-                </Grid>
-
-                <!-- Checkbox para la opción de recordar la sesión del usuario -->
-                <CheckBox x:Name="chkRecordarme" Content="Recordarme" FontSize="12" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,20"/>
-
-                <!-- Botón principal de acción para enviar las credenciales e iniciar sesión -->
-                <Button x:Name="btnIniciarSesion" Content="INICIAR SESIÓN" Style="{StaticResource BotonSecundario}"
-                        Height="40" Click="BtnIniciarSesion_Click">
-                </Button>
-
-                <!-- Enlaces inferiores de asistencia y recuperación -->
-                <TextBlock Margin="0,20,0,5" HorizontalAlignment="Center">
-                    <Hyperlink Foreground="#1982C4" NavigateUri="#">¿Olvidó su contraseña?</Hyperlink>
-                </TextBlock>
-                <TextBlock HorizontalAlignment="Center">
-                    <Hyperlink Foreground="#1982C4" NavigateUri="#">Solicitar acceso de nuevo empleado</Hyperlink>
-                </TextBlock>
-
+            <!-- Icono y Título a la izquierda -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="10,0,0,0">
+                <TextBlock Text="👟" Margin="0,0,5,0" Foreground="White" FontSize="20"/>
+                <TextBlock Text="TILLAS DESKTOP" Foreground="White" FontWeight="Bold" VerticalAlignment="Center"/>
             </StackPanel>
-        </Border>
+
+            <!-- Botones de Minimizar y Cerrar a la derecha -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Content="—" Width="35" Background="Transparent" Foreground="White" BorderThickness="0" 
+            Cursor="Hand" Click="BtnMinimizar_Click"/>
+                <Button Content="✕" Width="35" Background="Transparent" Foreground="White" BorderThickness="0" 
+            Cursor="Hand" Click="BtnCerrar_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+                <!-- Canvas decorativo de fondo con un tono gris claro unificado -->
+            <Canvas Background="#EAEFF5"/>
+
+            <!-- Tarjeta Central Blanca flotante que contiene el formulario de inicio de sesión -->
+            <Border Background="white" Width="500" Height="530" CornerRadius="8" 
+                    VerticalAlignment="Center" HorizontalAlignment="Center">
+                <!-- Efecto de sombra sutil alrededor de la tarjeta central -->
+                <Border.Effect>
+                    <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="5" BlurRadius="20" Opacity="0.3"/>
+                </Border.Effect>
+
+                <!-- Panel organizador vertical para distribuir los elementos internos con márgenes -->
+                <StackPanel Margin="40,30,40,30">
+
+                    <!-- Sección del Logo e Identificador del Sistema -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,5">
+                        <!-- Icono representativo de zapatilla -->
+                        <TextBlock Text="👟" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                        <!-- Nombre principal de la aplicación -->
+                        <TextBlock Text="TILLAS DESKTOP" FontSize="22" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <!-- Subtítulo descriptivo del propósito del software -->
+                    <TextBlock Text="Sistema de Gestión de Inventario y Ventas" FontSize="12" Foreground="#627D98" HorizontalAlignment="Center" Margin="0,0,0,25"/>
+
+                    <!-- Mensaje de bienvenida para guiar al usuario -->
+                    <TextBlock Text="Bienvenido. Por favor, identifíquese para acceder al sistema." FontSize="13" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,15"/>
+
+                    <!-- Campo de entrada para el Email o Nombre de Usuario -->
+                    <TextBlock Text="Email / Usuario" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,5"/>
+                    <TextBox x:Name="txtUsuario" Text="{Binding Usuario, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15"/>
+
+                    <!-- Contenedor para el campo de Contraseña y su botón de alternancia -->
+                    <TextBlock Text="Contraseña" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,5"/>
+                    <Grid Margin="0,0,0,10">
+                        <!-- PasswordBox: Oculta los caracteres con asteriscos por seguridad -->
+                        <PasswordBox x:Name="txtPassword"/>
+
+                        <!-- TextBox alternativo: Permite visualizar la contraseña en texto plano cuando se activa el "ojito" -->
+                        <TextBox x:Name="txtPasswordVisible" Visibility="Collapsed"/>
+
+                        <!-- Botón interactivo con el icono del "ojito" para alternar la visibilidad de la contraseña -->
+                        <Button x:Name="btnVerPassword" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"
+                                Background="Transparent" BorderBrush="Transparent" Cursor="Hand" Click="BtnVerPassword_Click">
+                            <TextBlock x:Name="txtIconoOjo" Text="👁️" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- Checkbox para la opción de recordar la sesión del usuario -->
+                    <CheckBox x:Name="chkRecordarme" Content="Recordarme" FontSize="12" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,20"/>
+
+                    <!-- Botón principal de acción para enviar las credenciales e iniciar sesión -->
+                    <Button x:Name="btnIniciarSesion" Content="INICIAR SESIÓN" Style="{StaticResource BotonSecundario}"
+                            Height="40" Click="BtnIniciarSesion_Click">
+                    </Button>
+
+                    <!-- Enlaces inferiores de asistencia y recuperación -->
+                    <TextBlock Margin="0,20,0,5" HorizontalAlignment="Center">
+                        <Hyperlink Foreground="#1982C4" NavigateUri="#">¿Olvidó su contraseña?</Hyperlink>
+                    </TextBlock>
+                    <TextBlock HorizontalAlignment="Center">
+                        <Hyperlink Foreground="#1982C4" NavigateUri="#">Solicitar acceso de nuevo empleado</Hyperlink>
+                    </TextBlock>
+
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

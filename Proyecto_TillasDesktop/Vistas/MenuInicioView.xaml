@@ -6,30 +6,64 @@
         xmlns:local="clr-namespace:TillasDesktop.UI.Vistas"
         mc:Ignorable="d"
         Title="Tillas Desktop - Inicio" Height="768" Width="1100"
-        WindowState="Maximized">
+        WindowState="Maximized"
+        WindowStyle="None">
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="230"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <!-- Fila 0: barra superior (Ej. 35 píxeles de alto) -->
+            <RowDefinition Height="35"/>
+            <!-- Fila 1: El resto de la aplicación -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <!-- BARRA LATERAL -->
-        <Border Grid.Column="0" Background="{StaticResource BrushSecundario}">
-            <StackPanel Margin="0,20,0,0">
-                <TextBlock Text="≡" Foreground="White" FontSize="28" Margin="20,0,0,20" Cursor="Hand"/>
+        <!-- === NUEVA BARRA SUPERIOR PERSONALIZADA === -->
+        <!-- El evento MouseLeftButtonDown es para poder arrastrar la ventana -->
+        <Grid Grid.Row="0" Background="{StaticResource BrushSecundario}" MouseLeftButtonDown="BarraSuperior_MouseLeftButtonDown">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-                <Button x:Name="btnInicio" Content="🏠  INICIO" Style="{StaticResource MenuButton}" Click="BtnInicio_Click"/>
-                <Button x:Name="btnPuntoVenta" Content="🛒  PUNTO DE VENTA" Style="{StaticResource MenuButton}" Click="BtnPuntoVenta_Click"/>
-                <Button x:Name="btnInventario" Content="📦  INVENTARIO" Style="{StaticResource MenuButton}" Click="BtnInventario_Click"/>
-                <Button x:Name="btnClientes" Content="👥  CLIENTES" Style="{StaticResource MenuButton}" Click="BtnClientes_Click"/>
-                <Button x:Name="btnReportes" Content="📈  REPORTES" Style="{StaticResource MenuButton}" Click="BtnReportes_Click"/>
-                <Button x:Name="btnBackup" Content="⚙  COPIA DE RESPALDO" Style="{StaticResource MenuButton}" Click="BtnBackup_Click"/>
+            <!-- Icono y Título a la izquierda -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="10,0,0,0">
+                <TextBlock Text="👟" Foreground="White" Margin="0,0,5,0" FontSize="20"/>
+                <TextBlock Text="TILLAS DESKTOP" Foreground="White" FontWeight="Bold" VerticalAlignment="Center"/>
             </StackPanel>
-        </Border>
 
-        <Grid Grid.Column="1" Margin="20">
-            <ContentControl x:Name="AreaPrincipal"/>
+            <!-- Botones de Minimizar y Cerrar a la derecha -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Content="—" Width="35" Background="Transparent" Foreground="White" BorderThickness="0" 
+                    Cursor="Hand" Click="BtnMinimizar_Click"/>
+                <Button Content="✕" Width="35" Background="Transparent" Foreground="White" BorderThickness="0" 
+                    Cursor="Hand" Click="BtnCerrar_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="230"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- BARRA LATERAL -->
+            <Border Grid.Column="0" Background="{StaticResource BrushSecundario}">
+                <StackPanel Margin="0,20,0,0">
+                    <TextBlock Text="≡" Foreground="White" FontSize="28" Margin="20,0,0,20" Cursor="Hand"/>
+
+                    <Button x:Name="btnInicio" Content="🏠  INICIO" Style="{StaticResource MenuButton}" Click="BtnInicio_Click"/>
+                    <Button x:Name="btnPuntoVenta" Content="🛒  PUNTO DE VENTA" Style="{StaticResource MenuButton}" Click="BtnPuntoVenta_Click"/>
+                    <Button x:Name="btnInventario" Content="📦  INVENTARIO" Style="{StaticResource MenuButton}" Click="BtnInventario_Click"/>
+                    <Button x:Name="btnClientes" Content="👥  CLIENTES" Style="{StaticResource MenuButton}" Click="BtnClientes_Click"/>
+                    <Button x:Name="btnReportes" Content="📈  REPORTES" Style="{StaticResource MenuButton}" Click="BtnReportes_Click"/>
+                    <Button x:Name="btnBackup" Content="⚙  COPIA DE RESPALDO" Style="{StaticResource MenuButton}" Click="BtnBackup_Click"/>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Column="1" Margin="20">
+                <ContentControl x:Name="AreaPrincipal"/>
+            </Grid>
         </Grid>
     </Grid>
 </Window>
