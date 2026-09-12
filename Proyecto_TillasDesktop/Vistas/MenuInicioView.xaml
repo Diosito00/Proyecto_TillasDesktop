@@ -1,4 +1,6 @@
-﻿<Window x:Class="TillasDesktop.UI.Vistas.MenuInicioView"
+﻿<!-- Etiqueta raíz Window que define la ventana principal de la aplicación (MenuInicioView). 
+     Establece el título, tamaño predeterminado de alto y ancho, maximiza la ventana al iniciar y elimina el marco nativo de Windows (WindowStyle="None"). -->
+<Window x:Class="TillasDesktop.UI.Vistas.MenuInicioView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,16 +11,17 @@
         WindowState="Maximized"
         WindowStyle="None">
 
+    <!-- Contenedor principal Grid que divide la estructura verticalmente en la barra superior personalizada y el contenido de la aplicación. -->
     <Grid>
         <Grid.RowDefinitions>
-            <!-- Fila 0: barra superior (Ej. 35 píxeles de alto) -->
+            <!-- Fila 0: Asigna un alto fijo de 35 píxeles para la barra de título personalizada. -->
             <RowDefinition Height="35"/>
-            <!-- Fila 1: El resto de la aplicación -->
+            <!-- Fila 1: Ocupa todo el resto del espacio vertical disponible de la pantalla (*). -->
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- === NUEVA BARRA SUPERIOR PERSONALIZADA === -->
-        <!-- El evento MouseLeftButtonDown es para poder arrastrar la ventana -->
+        <!-- Panel superior ubicado en la fila 0, con color de fondo secundario y un evento para permitir arrastrar la ventana sin marco. -->
         <Grid Grid.Row="0" Background="{StaticResource BrushSecundario}" MouseLeftButtonDown="BarraSuperior_MouseLeftButtonDown">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -26,42 +29,50 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Icono y Título a la izquierda -->
+            <!-- Panel lateral izquierdo que agrupa el icono decorativo y el título en texto de la aplicación. -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="10,0,0,0">
                 <TextBlock Text="👟" Foreground="White" Margin="0,0,5,0" FontSize="20"/>
                 <TextBlock Text="TILLAS DESKTOP" Foreground="White" FontWeight="Bold" VerticalAlignment="Center"/>
             </StackPanel>
 
-            <!-- Botones de Minimizar y Cerrar a la derecha -->
+            <!-- Panel lateral derecho que contiene los botones funcionales para minimizar y cerrar la aplicación de forma personalizada. -->
             <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <!-- Botón de minimizar vinculado a su evento de clic respectivo. -->
                 <Button Content="—" Width="35" Background="Transparent" Foreground="White" BorderThickness="0" 
                     Cursor="Hand" Click="BtnMinimizar_Click"/>
+                <!-- Botón de cierre vinculado a su evento de clic respectivo. -->
                 <Button Content="✕" Width="35" Background="Transparent" Foreground="White" BorderThickness="0" 
                     Cursor="Hand" Click="BtnCerrar_Click"/>
             </StackPanel>
         </Grid>
 
+        <!-- Contenedor de la Fila 1 que divide la pantalla horizontalmente entre el menú de navegación lateral y el área de contenido dinámico. -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="230"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- BARRA LATERAL -->
+            <!-- BARRA LATERAL (Sidebar) ubicada en la primera columna con un ancho fijo de 230 píxeles. -->
             <Border Grid.Column="0" Background="{StaticResource BrushSecundario}">
                 <StackPanel Margin="0,20,0,0">
+                    <!-- Icono decorativo de menú desplegable o colapso. -->
                     <TextBlock Text="≡" Foreground="White" FontSize="28" Margin="20,0,0,20" Cursor="Hand"/>
 
+                    <!-- Botones de navegación del menú lateral asociados a sus respectivos estilos y eventos de clic. -->
                     <Button x:Name="btnInicio" Content="🏠  INICIO" Style="{StaticResource MenuButton}" Click="BtnInicio_Click"/>
                     <Button x:Name="btnPuntoVenta" Content="🛒  PUNTO DE VENTA" Style="{StaticResource MenuButton}" Click="BtnPuntoVenta_Click"/>
                     <Button x:Name="btnInventario" Content="📦  INVENTARIO" Style="{StaticResource MenuButton}" Click="BtnInventario_Click"/>
                     <Button x:Name="btnClientes" Content="👥  CLIENTES" Style="{StaticResource MenuButton}" Click="BtnClientes_Click"/>
                     <Button x:Name="btnReportes" Content="📈  REPORTES" Style="{StaticResource MenuButton}" Click="BtnReportes_Click"/>
+                    <Button x:Name="btnConfiguracion" Content="👤  USUARIOS Y ROLES" Style="{StaticResource MenuButton}" Click="BtnConfiguracion_Click"/>
                     <Button x:Name="btnBackup" Content="⚙  COPIA DE RESPALDO" Style="{StaticResource MenuButton}" Click="BtnBackup_Click"/>
                 </StackPanel>
             </Border>
 
+            <!-- Área de contenido principal situada en la segunda columna, con un margen alrededor para separar los componentes visuales. -->
             <Grid Grid.Column="1" Margin="20">
+                <!-- Control contenedor dinámico (ContentControl) que permite alternar y cargar las diferentes vistas o módulos según la opción del menú seleccionada. -->
                 <ContentControl x:Name="AreaPrincipal"/>
             </Grid>
         </Grid>

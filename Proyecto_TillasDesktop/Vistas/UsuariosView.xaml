@@ -1,0 +1,84 @@
+﻿<!-- Etiqueta raíz UserControl que define un control de usuario reutilizable para la vista de gestión de usuarios (UsuariosView). 
+     Establece el tamaño de diseño por defecto y un color de fondo gris claro general (#F0F4F8). -->
+<UserControl x:Class="TillasDesktop.UI.Vistas.UsuariosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="800" Background="#F0F4F8">
+
+    <!-- Contenedor principal Grid con un margen de 20 píxeles que divide la interfaz verticalmente en dos filas. -->
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <!-- Fila 0: Altura automática para adaptarse al contenido de la cabecera (título y botón de alta). -->
+            <RowDefinition Height="Auto"/>
+            <!-- Fila 1: Ocupa todo el espacio restante disponible (*) para alojar la tabla de datos. -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- === CABECERA === -->
+        <!-- Contenedor Border ubicado en la fila 0, estilizado como una tarjeta blanca con esquinas redondeadas, margen inferior y relleno interno. -->
+        <Border Grid.Row="0" Background="White" CornerRadius="10" Margin="0,0,0,15" Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <!-- Columna 0: Ocupa todo el espacio flexible necesario para el título del módulo. -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- Columna 1: Ancho automático ajustado al tamaño del botón de nuevo usuario. -->
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Título principal de la sección con tipografía grande y en negrita extra (ExtraBold). -->
+                <TextBlock Text="GESTIÓN DE USUARIOS Y ROLES" FontSize="18" FontWeight="ExtraBold" VerticalAlignment="Center"/>
+
+                <!-- Botón ubicado en la columna derecha para registrar un nuevo usuario, enlazado al comando NuevoUsuarioCommand del ViewModel. -->
+                <Button Grid.Column="1" Content="+ NUEVO USUARIO" Command="{Binding NuevoUsuarioCommand}" Height="40" Width="160" Style="{StaticResource BotonSecundario}"/>
+            </Grid>
+        </Border>
+
+        <!-- === TABLA (DATAGRID) === -->
+        <!-- Contenedor Border ubicado en la fila 1 para envolver la tabla con un diseño limpio de tarjeta blanca. -->
+        <Border Grid.Row="1" Background="White" CornerRadius="10" Padding="20">
+            <!-- Control DataGrid que enlaza su lista de elementos (ItemsSource) a ListaUsuarios y su elemento activo a UsuarioSeleccionado. 
+                 Configurado como solo lectura (IsReadOnly="True") para forzar el uso exclusivo de los botones de edición del formulario. -->
+            <DataGrid AutoGenerateColumns="False" Background="White" ItemsSource="{Binding ListaUsuarios}"
+          SelectedItem="{Binding UsuarioSeleccionado}" IsReadOnly="True" HeadersVisibility="Column" 
+          GridLinesVisibility="Horizontal" BorderThickness="0">
+                <DataGrid.Columns>
+                    <!-- Columna de texto para mostrar el ID único del usuario con un ancho fijo de 50 píxeles. -->
+                    <DataGridTextColumn Header="ID" Width="50" Binding="{Binding ID}"/>
+
+                    <!-- Columna de texto flexible (*) para mostrar el nombre completo del usuario. -->
+                    <DataGridTextColumn Header="NOMBRE" Width="*" Binding="{Binding Nombre}"/>
+
+                    <!-- Columna de texto con ancho fijo de 100 píxeles para mostrar el número de DNI. -->
+                    <DataGridTextColumn Header="DNI" Width="100" Binding="{Binding DNI}"/>
+
+                    <!-- Columna de texto flexible (*) para mostrar la dirección de correo electrónico. -->
+                    <DataGridTextColumn Header="EMAIL" Width="*" Binding="{Binding Email}"/>
+
+                    <!-- Columna de texto con ancho fijo de 120 píxeles para mostrar el rol asignado. -->
+                    <DataGridTextColumn Header="ROL" Width="120" Binding="{Binding Rol}"/>
+
+                    <!-- Columna de casilla de verificación (CheckBox) para indicar si el usuario está activo o no. -->
+                    <DataGridCheckBoxColumn Header="ACTIVO" Width="70" Binding="{Binding Activo}"/>
+
+                    <!-- Columna personalizada con botones de acción (Editar y Eliminar) para cada fila de la tabla. -->
+                    <DataGridTemplateColumn Header="ACCIONES" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <!-- Panel horizontal que contiene los botones interactivos de edición y eliminación. -->
+                                <StackPanel Orientation="Horizontal">
+                                    <!-- Botón de edición que ejecuta EditarCommand buscando el DataContext del DataGrid principal mediante RelativeSource. -->
+                                    <Button Content="✏️" Command="{Binding DataContext.EditarCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Width="30" Margin="0,0,5,0" Background="Transparent" BorderBrush="Transparent" Cursor="Hand"/>
+
+                                    <!-- Botón de eliminación que ejecuta EliminarCommand enlazado al DataContext principal de la vista. -->
+                                    <Button Content="🗑️" Command="{Binding DataContext.EliminarCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Width="30" Background="Transparent" BorderBrush="Transparent" Cursor="Hand"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

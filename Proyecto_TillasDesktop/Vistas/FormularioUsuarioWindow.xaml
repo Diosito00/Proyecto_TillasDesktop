@@ -1,0 +1,66 @@
+﻿<!-- Etiqueta raíz Window que define la ventana de la aplicación WPF. 
+     Asocia la clase con su archivo de código subyacente (FormularioUsuarioWindow), establece el título, tamaño, 
+     posición inicial centrada en pantalla, color de fondo general y evita que el usuario pueda redimensionarla. -->
+<Window x:Class="TillasDesktop.UI.Vistas.FormularioUsuarioWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Gestión de Usuario" Height="630" Width="400" 
+        WindowStartupLocation="CenterScreen" Background="#F0F4F8" ResizeMode="NoResize">
+
+    <!-- Contenedor visual Border que genera una tarjeta blanca con esquinas redondeadas y márgenes decorativos. -->
+    <Border Background="White" CornerRadius="10" Margin="20" Padding="20">
+
+        <!-- StackPanel que organiza verticalmente todos los elementos del formulario de forma secuencial. -->
+        <StackPanel>
+
+            <!-- Título principal de la ventana con tipografía grande, en negrita y centrado. -->
+            <TextBlock Text="DATOS DEL USUARIO" FontSize="18" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+
+            <!-- Etiqueta descriptiva para el campo de Nombre. -->
+            <TextBlock Text="Nombre" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+
+            <!-- Caja de texto para ingresar el nombre. 
+                 Tiene asignado un nombre lógico (txtNombre) y un evento (PreviewTextInput) para restringir caracteres en tiempo real. -->
+            <TextBox x:Name="txtNombre" Height="32" Margin="0,0,0,10" VerticalContentAlignment="Center" PreviewTextInput="SoloLetras_PreviewTextInput"/>
+
+            <!-- Etiqueta descriptiva para el campo de DNI. -->
+            <TextBlock Text="DNI" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+
+            <!-- Caja de texto para ingresar el DNI con restricción de entrada mediante el evento PreviewTextInput. -->
+            <TextBox x:Name="txtDNI" Height="32" Margin="0,0,0,10" VerticalContentAlignment="Center" PreviewTextInput="SoloNumeros_PreviewTextInput"/>
+
+            <!-- Etiqueta descriptiva para el campo de Email. -->
+            <TextBlock Text="Email" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+
+            <!-- Caja de texto estándar para ingresar la dirección de correo electrónico. -->
+            <TextBox x:Name="txtEmail" Height="32" Margin="0,0,0,10" VerticalContentAlignment="Center"/>
+
+            <!-- Etiqueta descriptiva para el campo de Contraseña. -->
+            <TextBlock Text="Contraseña" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+
+            <!-- Contenedor Grid que permite superponer controles para implementar la funcionalidad del "ojito" de visibilidad. -->
+            <Grid Margin="0,0,0,10">
+                <!-- Control PasswordBox seguro que oculta los caracteres con asteriscos por defecto. -->
+                <PasswordBox x:Name="txtPassword" Height="32" VerticalContentAlignment="Center"/>
+
+                <!-- Caja de texto normal que se muestra de forma oculta (Collapsed) cuando el usuario decide ver la contraseña en texto plano. -->
+                <TextBox x:Name="txtPasswordVisible" Height="32" VerticalContentAlignment="Center" Visibility="Collapsed"/>
+
+                <!-- Botón con icono interactivo posicionado a la derecha para alternar la visibilidad de la contraseña. -->
+                <Button x:Name="btnVerPassword" Content="👁" Click="BtnVerPassword_Click" Width="30" Height="30" HorizontalAlignment="Right" Margin="0,0,2,0" Background="Transparent" BorderBrush="Transparent" Cursor="Hand"/>
+            </Grid>
+
+            <!-- Etiqueta descriptiva para el selector de roles. -->
+            <TextBlock Text="Rol Asignado" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+
+            <!-- Menú desplegable (ComboBox) para seleccionar el rol del usuario dentro del sistema. -->
+            <ComboBox x:Name="cmbRol" Height="32" Margin="0,0,0,15"/>
+
+            <!-- Casilla de verificación (CheckBox) para indicar si el usuario se encuentra activo o inactivo (marcado por defecto en true). -->
+            <CheckBox x:Name="chkActivo" Content="Usuario Activo" IsChecked="True" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,20"/>
+
+            <!-- Botón principal de acción para guardar la información, vinculado al evento de clic y a un estilo visual predefinido. -->
+            <Button Content="GUARDAR" Click="BtnGuardar_Click" Height="40" Style="{StaticResource BotonSecundario}"/>
+        </StackPanel>
+    </Border>
+</Window>
