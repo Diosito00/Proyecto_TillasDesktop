@@ -1,7 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using TillasDesktop.Entities.Inventario;
+using TillasDesktop.BLL.Services;
 
 namespace TillasDesktop.UI.Modelos
 {
@@ -13,6 +15,8 @@ namespace TillasDesktop.UI.Modelos
         private Marca _marcaSeleccionada;
         private Categoria _categoriaSeleccionada;
 
+        private readonly InventarioService _inventarioService;
+
         public string CodigoModelo { get => _codigoModelo; set { _codigoModelo = value; OnPropertyChanged(); } }
         public string Nombre { get => _nombre; set { _nombre = value; OnPropertyChanged(); } }
         public decimal PrecioVenta { get => _precioVenta; set { _precioVenta = value; OnPropertyChanged(); } }
@@ -23,49 +27,62 @@ namespace TillasDesktop.UI.Modelos
         public ObservableCollection<Categoria> CategoriasDisponibles { get; set; }
 
         public ICommand GuardarCommand { get; }
-        public Action CerrarVentana { get; set; } // Acción para cerrar la ventana desde el ViewModel
-        public Action<ProductoViewModel> OnModeloGuardado { get; set; } // Una acción que recibirá el nuevo producto para enviarlo al inventario
+        public Action CerrarVentana { get; set; }
+        public Action<ProductoViewModel> OnModeloGuardado { get; set; }
 
         public NuevoModeloViewModel()
         {
-            // Datos simulados hasta conectar DB
-            MarcasDisponibles = new ObservableCollection<Marca>
-            {
-                new Marca { ID = 1, Nombre = "Nike" },
-                new Marca { ID = 2, Nombre = "Adidas" }
-            };
-            CategoriasDisponibles = new ObservableCollection<Categoria>
-            {
-                new Categoria { ID = 1, Nombre = "Sneakers" },
-                new Categoria { ID = 2, Nombre = "Deportivo" }
-            };
+            // Instanciamos el servicio de negocio
+            _inventarioService = new InventarioService();
+
+            // Llenamos las colecciones visuales delegando la consulta a la BLL
+            MarcasDisponibles = new ObservableCollection<Marca>(_inventarioService.ObtenerMarcasActivas());
+            CategoriasDisponibles = new ObservableCollection<Categoria>(_inventarioService.ObtenerCategoriasActivas());
 
             GuardarCommand = new RelayCommand(Guardar, PuedeGuardar);
         }
 
         private void Guardar(object parametro)
         {
-            // 1. Ensamblamos el nuevo objeto con los datos del formulario
-            var nuevoProducto = new ProductoViewModel
+            var nuevaEntidad = new Producto
             {
                 Codigo_Modelo = this.CodigoModelo,
                 Nombre = this.Nombre,
-                Marca = this.MarcaSeleccionada.Nombre,
-                Categoria = this.CategoriaSeleccionada.Nombre,
+                Marca_ID = this.MarcaSeleccionada.ID,
+                Categoria_ID = this.CategoriaSeleccionada.ID,
                 Precio_Venta = this.PrecioVenta,
-                StockTotal = 0 // Empieza sin stock hasta que se haga un ingreso
+                Activo = true
             };
 
-            // 2. Ejecutamos la acción para enviarlo de vuelta a la pantalla principal
-            OnModeloGuardado?.Invoke(nuevoProducto);
+            // La BLL toma la decisión final
+            bool exito = _inventarioService.RegistrarNuevoProducto(nuevaEntidad, out string mensajeRespuesta);
 
-            MessageBox.Show($"Modelo {Nombre} guardado con éxito.", "Éxito");
-            CerrarVentana?.Invoke();
+            if (exito)
+            {
+                var nuevoProductoVM = new ProductoViewModel(nuevaEntidad)
+                {
+                    NombreMarca = this.MarcaSeleccionada.Nombre,
+                    NombreCategoria = this.CategoriaSeleccionada.Nombre,
+                    StockTotal = 0
+                };
+
+                OnModeloGuardado?.Invoke(nuevoProductoVM);
+                MessageBox.Show(mensajeRespuesta, "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                CerrarVentana?.Invoke();
+            }
+            else
+            {
+                MessageBox.Show(mensajeRespuesta, "Error de Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private bool PuedeGuardar(object parametro)
         {
-            return !string.IsNullOrWhiteSpace(CodigoModelo) && !string.IsNullOrWhiteSpace(Nombre) && PrecioVenta > 0 && MarcaSeleccionada != null && CategoriaSeleccionada != null;
+            return !string.IsNullOrWhiteSpace(CodigoModelo) &&
+                   !string.IsNullOrWhiteSpace(Nombre) &&
+                   PrecioVenta > 0 &&
+                   MarcaSeleccionada != null &&
+                   CategoriaSeleccionada != null;
         }
     }
 }

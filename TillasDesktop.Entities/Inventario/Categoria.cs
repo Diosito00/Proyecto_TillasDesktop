@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TillasDesktop.Entities.Inventario
+﻿namespace TillasDesktop.Entities.Inventario
 {
     public class Categoria
     {
