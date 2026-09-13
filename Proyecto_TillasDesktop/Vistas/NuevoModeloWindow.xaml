@@ -26,7 +26,7 @@
             <TextBlock Text="Precio de Venta ($)" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
             <TextBox Text="{Binding PrecioVenta, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,25"/>
 
-            <Button Content="GUARDAR MODELO" Command="{Binding GuardarCommand}" Height="45" Style="{StaticResource BotonSecundario}"/> 
+            <Button Content="GUARDAR MODELO" Command="{Binding GuardarCommand}" IsDefault="True" Height="45" Style="{StaticResource BotonSecundario}"/> 
         </StackPanel>
     </Border>
 </Window>

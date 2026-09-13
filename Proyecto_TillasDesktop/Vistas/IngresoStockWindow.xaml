@@ -20,7 +20,7 @@
             <TextBlock Text="Cantidad a Ingresar" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
             <TextBox Text="{Binding Cantidad, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,25"/>
 
-            <Button Content="CONFIRMAR INGRESO" Command="{Binding GuardarCommand}" Height="45" Style="{StaticResource BotonPrimario}"/>
+            <Button Content="CONFIRMAR INGRESO" Command="{Binding GuardarCommand}" IsDefault="True" Height="45" Style="{StaticResource BotonPrimario}"/>
         </StackPanel>
     </Border>
 </Window>

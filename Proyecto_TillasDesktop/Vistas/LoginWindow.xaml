@@ -91,7 +91,7 @@
                     <CheckBox x:Name="chkRecordarme" Content="Recordarme" FontSize="12" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,20"/>
 
                     <!-- Botón principal de acción para enviar las credenciales e iniciar sesión -->
-                    <Button x:Name="btnIniciarSesion" Content="INICIAR SESIÓN" Style="{StaticResource BotonSecundario}"
+                    <Button x:Name="btnIniciarSesion" Content="INICIAR SESIÓN" IsDefault="True" Style="{StaticResource BotonSecundario}"
                             Height="40" Click="BtnIniciarSesion_Click">
                     </Button>
 
