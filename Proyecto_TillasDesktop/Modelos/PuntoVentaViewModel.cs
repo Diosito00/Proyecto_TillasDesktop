@@ -2,7 +2,9 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using TillasDesktop.BLL.Services;
 using TillasDesktop.Entities.Facturacion;
+using TillasDesktop.Entities.Inventario;
 
 namespace TillasDesktop.UI.Modelos
 {
@@ -10,11 +12,9 @@ namespace TillasDesktop.UI.Modelos
     {
         private decimal _totalCobrar;
         private string _codigoBusqueda;
+        private readonly VentasService _ventasService;
 
         public ObservableCollection<DetalleVentaViewModel> Carrito { get; set; }
-
-        // Catálogo simulado hasta conectar MariaDB
-        private ObservableCollection<ProductoViewModel> _catalogoPrueba;
 
         public string CodigoBusqueda
         {
@@ -34,15 +34,11 @@ namespace TillasDesktop.UI.Modelos
 
         public PuntoVentaViewModel()
         {
+            _ventasService = new VentasService();
             Carrito = new ObservableCollection<DetalleVentaViewModel>();
-            Carrito.CollectionChanged += (s, e) => RecalcularTotal();
 
-            // Llenamos el catálogo de prueba
-            _catalogoPrueba = new ObservableCollection<ProductoViewModel>
-            {
-                new ProductoViewModel { Codigo_Modelo = "779001", Nombre = "Air Force 1 - Talle 42", Precio_Venta = 125000 },
-                new ProductoViewModel { Codigo_Modelo = "779002", Nombre = "Samba OG - Talle 39", Precio_Venta = 110000 }
-            };
+            // Cada vez que la colección cambia, delegamos el cálculo matemático a la BLL, traducimos los ViewModels a Entidades y calculamos
+            var listaEntidades = Carrito.Select(c => c.ObtenerEntidadPura()).ToList();
 
             CobrarCommand = new RelayCommand(EjecutarCobro, PuedeCobrar);
             BuscarProductoCommand = new RelayCommand(BuscarYAgregarProducto);
@@ -51,57 +47,70 @@ namespace TillasDesktop.UI.Modelos
 
         private void BuscarYAgregarProducto(object parametro)
         {
-            if (string.IsNullOrWhiteSpace(CodigoBusqueda)) return;
+            // 1. Recibimos una Entidad pura de la BLL
+            Producto productoEntidad = _ventasService.ObtenerProductoPorCodigo(CodigoBusqueda);
 
-            var productoEncontrado = _catalogoPrueba.FirstOrDefault(p => p.Codigo_Modelo == CodigoBusqueda);
-
-            if (productoEncontrado != null)
+            if (productoEntidad != null)
             {
-                // Verificamos si ya está en el carrito para sumar la cantidad
-                var itemExistente = Carrito.FirstOrDefault(c => c.NombreProducto == productoEncontrado.Nombre);
-
+                var itemExistente = Carrito.FirstOrDefault(c => c.NombreProducto == productoEntidad.Nombre);
                 if (itemExistente != null)
                 {
                     itemExistente.Cantidad += 1;
-                    RecalcularTotal(); // Agrega esta línea para actualizar el total general de la caja
                 }
                 else
                 {
+                    // 2. Empaquetamos la entidad en un ViewModel para la UI
                     var nuevoDetalle = new DetalleVenta
                     {
-                        Precio_Unitario = productoEncontrado.Precio_Venta,
+                        Precio_Unitario = productoEntidad.Precio_Venta,
                         Cantidad = 1
                     };
-                    Carrito.Add(new DetalleVentaViewModel(nuevoDetalle, productoEncontrado.Nombre));
+                    Carrito.Add(new DetalleVentaViewModel(nuevoDetalle, productoEntidad.Nombre));
                 }
 
-                CodigoBusqueda = string.Empty; // Limpiamos el buscador
+                // 3. Para enviar datos a la BLL, desempaquetamos los ViewModels y enviamos Entidades
+                var listaEntidades = Carrito.Select(c => new DetalleVenta
+                {
+                    Precio_Unitario = c.PrecioUnitario,
+                    Cantidad = c.Cantidad
+                }).ToList();
+
+                TotalCobrar = _ventasService.CalcularTotalVenta(listaEntidades);
+                CodigoBusqueda = string.Empty;
             }
             else
             {
-                MessageBox.Show("Producto no encontrado. Verifique el código.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Producto no encontrado.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
         private void EliminarItem(object parametro)
         {
-            if (parametro is DetalleVentaViewModel itemAEliminar)
+            if (parametro is DetalleVentaViewModel item)
             {
-                Carrito.Remove(itemAEliminar);
+                Carrito.Remove(item);
             }
         }
 
         private void EjecutarCobro(object parametro)
         {
-            MessageBox.Show($"¡Venta procesada con éxito por un total de {TotalCobrar:C}!", "Cobro exitoso");
-            Carrito.Clear();
+            // Convertimos el carrito visual en entidades puras para la capa de negocio
+            var listaEntidades = Carrito.Select(c => new DetalleVenta
+            {
+                Precio_Unitario = c.PrecioUnitario,
+                Cantidad = c.Cantidad
+            }).ToList();
+
+            bool exito = _ventasService.RegistrarVenta(listaEntidades, out string mensaje);
+
+            if (exito)
+            {
+                MessageBox.Show($"{mensaje}\nTotal cobrado: {TotalCobrar:C}", "Éxito");
+                Carrito.Clear();
+                TotalCobrar = 0;
+            }
         }
 
         private bool PuedeCobrar(object parametro) => Carrito.Count > 0;
-
-        public void RecalcularTotal()
-        {
-            TotalCobrar = Carrito.Sum(item => item.Subtotal);
-        }
     }
 }

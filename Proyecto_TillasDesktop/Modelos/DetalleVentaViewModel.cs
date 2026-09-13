@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TillasDesktop.Entities;
-using TillasDesktop.Entities.Facturacion;
+﻿using TillasDesktop.Entities.Facturacion;
 
 namespace TillasDesktop.UI.Modelos
 {
     public class DetalleVentaViewModel : ViewModelBase
     {
-        private DetalleVenta _detallePuro;
+        private readonly DetalleVenta _detallePuro;
+
         private string _nombreProducto;
 
         public DetalleVentaViewModel(DetalleVenta detalle, string nombreProducto)
@@ -17,32 +14,45 @@ namespace TillasDesktop.UI.Modelos
             _nombreProducto = nombreProducto;
         }
 
-        // Propiedad exclusiva para la vista (no está en la tabla de la BD)
         public string NombreProducto
         {
-            get { return _nombreProducto; }
+            get => _nombreProducto;
             set { _nombreProducto = value; OnPropertyChanged(); }
         }
 
         public int Cantidad
         {
-            get { return _detallePuro.Cantidad; }
+            get => _detallePuro.Cantidad;
             set
             {
                 _detallePuro.Cantidad = value;
                 OnPropertyChanged();
-                // Si cambia la cantidad, avisamos a la vista que el Subtotal también cambió
+
+                // Al cambiar la cantidad, notificamos a WPF que repinte el texto del Subtotal
                 OnPropertyChanged(nameof(Subtotal));
             }
         }
 
         public decimal PrecioUnitario
         {
-            get { return _detallePuro.Precio_Unitario; }
-            set { _detallePuro.Precio_Unitario = value; OnPropertyChanged(); }
+            get => _detallePuro.Precio_Unitario;
+            set
+            {
+                _detallePuro.Precio_Unitario = value;
+                OnPropertyChanged();
+
+                // Agregado: Si el precio cambia (ej. descuento manual), el subtotal también debe repintarse.
+                OnPropertyChanged(nameof(Subtotal));
+            }
         }
 
-        // El subtotal se calcula automáticamente sin necesidad de una variable extra
+        // Propiedad de solo lectura para la vista. Al no tener "set", WPF sabe que solo debe leerla.
         public decimal Subtotal => Cantidad * PrecioUnitario;
+
+        // PUENTE A LA BLL: Método de utilidad para devolver la entidad pura fácilmente.
+        public DetalleVenta ObtenerEntidadPura()
+        {
+            return _detallePuro;
+        }
     }
 }

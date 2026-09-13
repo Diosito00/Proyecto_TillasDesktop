@@ -9,7 +9,10 @@
 
   <ItemGroup>
     <Folder Include="Validaciones\" />
-    <Folder Include="Servicios\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TillasDesktop.Entities\TillasDesktop.Entities.csproj" />
   </ItemGroup>
 
 </Project>
