@@ -96,13 +96,7 @@
                     </Button>
 
                     <!-- Enlaces inferiores de asistencia y recuperación -->
-                    <TextBlock Margin="0,20,0,5" HorizontalAlignment="Center">
-                        <Hyperlink Foreground="#1982C4" NavigateUri="#">¿Olvidó su contraseña?</Hyperlink>
-                    </TextBlock>
-                    <TextBlock HorizontalAlignment="Center">
-                        <Hyperlink Foreground="#1982C4" NavigateUri="#">Solicitar acceso de nuevo empleado</Hyperlink>
-                    </TextBlock>
-
+                    <TextBlock Text="¿Olvidó su contraseña?"  Foreground="#1E3A8A" Cursor="Hand" HorizontalAlignment="Center"  Margin="0,15,0,10"  MouseDown="OlvidoPassword_Click"/>
                 </StackPanel>
             </Border>
         </Grid>

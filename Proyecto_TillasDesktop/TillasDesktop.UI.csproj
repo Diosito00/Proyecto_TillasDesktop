@@ -22,4 +22,10 @@
     <ProjectReference Include="..\TillasDesktop.Entities\TillasDesktop.Entities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Vistas\RecuperarPasswordWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>

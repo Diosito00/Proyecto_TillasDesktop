@@ -111,5 +111,11 @@ namespace TillasDesktop.UI.Vistas
                 MessageBox.Show("Usuario o contraseña incorrectos. Intente con vendedor, gerente o admin (clave: 123).", "Error de Acceso", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private void OlvidoPassword_Click(object sender, MouseButtonEventArgs e)
+        {
+            RecuperarPasswordWindow ventana = new RecuperarPasswordWindow();
+            ventana.ShowDialog();
+        }
     }
 }
