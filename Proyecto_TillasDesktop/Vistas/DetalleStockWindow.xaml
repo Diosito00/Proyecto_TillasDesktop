@@ -29,9 +29,7 @@
                        Margin="0,0,0,20"/>
 
             <!-- === TABLA DE TALLES === -->
-            <DataGrid Grid.Row="1" ItemsSource="{Binding ListaTalles}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" HeadersVisibility="Column" 
-                      Background="White" RowBackground="{StaticResource BrushFondo}" AlternatingRowBackground="White" GridLinesVisibility="Horizontal" 
-                      HorizontalGridLinesBrush="#e2e8f0" FontSize="14" BorderThickness="0">
+            <DataGrid Grid.Row="1" ItemsSource="{Binding ListaTalles}" Style="{StaticResource DataGridTillas}">
                 <DataGrid.Columns>
                     <!-- La entidad ProductoTalle tiene las propiedades Talle y Stock_Actual -->
                     <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="*"/>
@@ -42,7 +40,7 @@
             <!-- === BOTONERA === -->
             <StackPanel Grid.Row="2">
                 <Button Content="+ INGRESAR STOCK" Command="{Binding IngresarNuevoStockCommand}" Width="200" Height="45" 
-                        Style="{StaticResource BotonSecundario}"/>    
+                        Style="{StaticResource BotonSecundario}" Margin="0,10,0,0"/>    
             </StackPanel>
         </Grid>
     </Border>

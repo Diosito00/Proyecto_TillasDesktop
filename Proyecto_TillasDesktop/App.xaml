@@ -9,6 +9,7 @@
                 <ResourceDictionary Source="Estilos/Entradas.xaml"/>
                 <ResourceDictionary Source="Estilos/Colores.xaml"/>
                 <ResourceDictionary Source="Estilos/Contenedores.xaml"/>
+                <ResourceDictionary Source="Componentes/DataGridComp.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

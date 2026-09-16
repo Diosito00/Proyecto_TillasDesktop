@@ -46,9 +46,8 @@
             <Border.Effect>
                 <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
             </Border.Effect>
-            <DataGrid x:Name="dgInventario" AutoGenerateColumns="False" Background="White" ItemsSource="{Binding ListaProductos}" IsReadOnly="True"
-                      SelectedItem="{Binding ProductoSeleccionado}" RowBackground="{StaticResource BrushFondo}" AlternatingRowBackground="White" 
-                      HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#e2e8f0" BorderThickness="0" FontSize="14">
+            <DataGrid ItemsSource="{Binding ListaProductos}" SelectedItem="{Binding ProductoSeleccionado}" 
+                      Style="{StaticResource DataGridTillas}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="CÓDIGO" Width="130" Binding="{Binding Codigo_Modelo}" Foreground="{StaticResource BrushTextoPrincipal}"/>
                     <DataGridTextColumn Header="NOMBRE DEL MODELO" Width="*" Binding="{Binding Nombre}" Foreground="{StaticResource BrushTextoPrincipal}"/>

@@ -32,7 +32,6 @@ namespace TillasDesktop.UI.Modelos
 
             TituloVentana = $"Stock detallado: {_productoPuro.Codigo_Modelo} - {_productoPuro.Nombre}";
 
-            // Simulamos datos temporales para que puedas ver la tabla armada
             ListaTalles = new ObservableCollection<ProductoTalle>
             {
                 new ProductoTalle { Talle = 39, Stock_Actual = 20 },
