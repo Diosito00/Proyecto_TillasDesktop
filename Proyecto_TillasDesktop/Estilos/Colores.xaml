@@ -5,12 +5,13 @@
     <Color x:Key="ColorPrimarioBase">#3182ce</Color> <!-- Azul Éxito -->
     <Color x:Key="ColorSecundarioBase">#102A43</Color> <!-- Negro Acción -->
     <Color x:Key="ColorRojoBase">#e53e3e</Color> <!-- Rojo Borrar/Error -->
-    <Color x:Key="ColorGrisBase">#e2e8f0</Color> <!-- Rojo Borrar/Error -->
+    <Color x:Key="ColorVerdeBase">#27AE60</Color> <!-- Verde -->   
 
     <!-- Pinceles (Brushes) para usar directamente en Background, Foreground, etc. -->
     <SolidColorBrush x:Key="BrushPrimario" Color="{StaticResource ColorPrimarioBase}"/>
     <SolidColorBrush x:Key="BrushSecundario" Color="{StaticResource ColorSecundarioBase}"/>
     <SolidColorBrush x:Key="BrushRojo" Color="{StaticResource ColorRojoBase}"/>
+    <SolidColorBrush x:Key="BrushVerde" Color="{StaticResource ColorVerdeBase}"/>
 
     <!-- Pinceles de Texto y Bordes -->
     <SolidColorBrush x:Key="BrushTextoPrincipal" Color="#2d3748"/>

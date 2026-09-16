@@ -8,89 +8,144 @@
              d:DesignHeight="450" d:DesignWidth="800"
              Background="#F0F4F8">
 
-    <Grid Margin="20,20,20,20">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="7*"/>
-            <ColumnDefinition Width="3*"/>
-        </Grid.ColumnDefinitions>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <!-- Fila 0: Barra de búsqueda superior -->
+            <RowDefinition Height="Auto"/>
+            <!-- Fila 1: Zona de Tablas (Inventario y Carrito) -->
+            <RowDefinition Height="*"/>
+            <!-- Fila 2: Resumen de Venta y Cobro (Abajo) -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-        <!-- PANEL IZQUIERDO: Buscador y Carrito -->
-        <Border Grid.Column="0" Background="White" CornerRadius="10" Padding="20" Margin="0,0,10,0">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
-            </Border.Effect>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+        <!-- === FILA 0: BUSCADOR === -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+            <TextBox Width="300" Text="{Binding BusquedaRapida, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Content="BUSCAR" Style="{StaticResource BotonSecundario}" Margin="10,0,0,0" Width="100"/>
+        </StackPanel>
 
-                <!-- Buscador de Código de Barras -->
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
-                    <TextBox Text="{Binding CodigoBusqueda, UpdateSourceTrigger=PropertyChanged}" 
-                             Width="383" Height="40" Padding="10,8" FontSize="16" Background="#edf2f7" BorderBrush="#cbd5e0" 
-                             BorderThickness="1" VerticalContentAlignment="Center"/>
-                    <Button Content="BUSCAR" Command="{Binding BuscarProductoCommand}" Margin="10,0,0,0" 
-                            Height="40" Width="100" Style="{StaticResource BotonSecundario}"/>
-                </StackPanel>
+        <!-- === FILA 1: LAS DOS TABLAS LADO A LADO === -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <!-- 50% de la pantalla para el Catálogo -->
+                <ColumnDefinition Width="*"/>
+                <!-- Espaciador central -->
+                <ColumnDefinition Width="20"/>
+                <!-- 50% de la pantalla para el Carrito -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                <!-- Tabla del Carrito -->
-                <DataGrid x:Name="dgCarrito" ItemsSource="{Binding Carrito}" Grid.Row="1" AutoGenerateColumns="False" Background="White"
-                          RowBackground="#f7fafc" AlternatingRowBackground="White" HeadersVisibility="Column" 
-                          GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#e2e8f0" BorderThickness="1" BorderBrush="#e2e8f0" FontSize="14">
+            <!-- Columna Izquierda: INVENTARIO -->
+            <GroupBox Grid.Column="0" Header="Catálogo Disponible">
+                <DataGrid ItemsSource="{Binding VistaFiltroCatalogo}" 
+                      Style="{StaticResource DataGridTillas}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="CANT" Width="60" Binding="{Binding Cantidad}"/>
-                        <DataGridTextColumn Header="MODELO" Width="*" Binding="{Binding NombreProducto}"/>
-                        <DataGridTextColumn Header="TALLE" Width="70" Binding="{Binding Talle}"/>
-                        <DataGridTextColumn Header="SUBTOTAL" Binding="{Binding PrecioUnitario, StringFormat={}{0:C}}" Width="120"/>
-                        <DataGridTextColumn Header="SUBTOTAL" Binding="{Binding Subtotal, StringFormat={}{0:C}}" Width="120"/>
-                        <DataGridTemplateColumn Width="80">
+                        <!-- Datos del producto disponible -->
+                        <DataGridTextColumn Header="MODELO" Binding="{Binding Nombre}" Width="2*"/>
+                        <DataGridTextColumn Header="MARCA" Binding="{Binding NombreMarca}" Width="*"/>
+                        <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="*"/>
+                        <DataGridTextColumn Header="STOCK" Binding="{Binding Stock_Actual}" Width="*"/>
+                        <DataGridTextColumn Header="PRECIO" Binding="{Binding Precio_Venta, StringFormat=C}" Width="*"/>
+
+                        <!-- Botón para enviar al carrito -->
+                        <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <!-- CommandParameter envía el ítem de esta fila exacta al ViewModel -->
-                                    <Button Content="X" Command="{Binding DataContext.EliminarItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                            CommandParameter="{Binding}" Background="#fc8181" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                                    <Button Content="➕" ToolTip="Agregar al carrito"
+                                            Command="{Binding DataContext.AgregarAlCarritoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Background="Transparent" BorderThickness="0" Cursor="Hand" Foreground="{StaticResource BrushVerde}" FontSize="16"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-            </Grid>
-        </Border>
+            </GroupBox>
 
-        <!-- PANEL DERECHO: Resumen y Cobro -->
-        <Border Grid.Column="1" Background="White" CornerRadius="10" Margin="10,0,0,0" Padding="20">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
-            </Border.Effect>
-            <StackPanel>
-                <TextBlock Text="RESUMEN DE VENTA" FontSize="16" FontWeight="Bold" Foreground="#4a5568" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+            <!-- Columna Derecha: CARRITO DE COMPRAS -->
+            <GroupBox Grid.Column="2" Header="Carrito de Compras">
+                <DataGrid ItemsSource="{Binding Carrito}" 
+                      Style="{StaticResource DataGridTillas}">
+                    <DataGrid.Columns>
+                        <!-- Detalles de la línea de venta -->
+                        <DataGridTextColumn Header="CANT" Binding="{Binding Cantidad}" Width="Auto"/>
+                        <DataGridTextColumn Header="MODELO" Binding="{Binding Nombre}" Width="2*"/>
+                        <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="*"/>
+                        <DataGridTextColumn Header="P. UNIT" Binding="{Binding PrecioUnitario, StringFormat=C}" Width="*"/>
+                        <DataGridTextColumn Header="SUBTOTAL" Binding="{Binding Subtotal, StringFormat=C}" Width="*"/>
 
-                <!-- Cliente -->
-                <TextBlock Text="Cliente (Opcional)" FontWeight="SemiBold" Foreground="#718096" Margin="0,0,0,5"/>
-                <ComboBox x:Name="cmbCliente" Height="38" Margin="0,0,0,20" IsEditable="True" Text="Consumidor Final" FontSize="14"/>
+                        <!-- Botón para eliminar del carrito -->
+                        <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="❌" ToolTip="Quitar del carrito"
+                                            Command="{Binding DataContext.QuitarDelCarritoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Background="Transparent" BorderThickness="0" Cursor="Hand" Foreground="{StaticResource BrushRojo}" FontSize="12"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
+        </Grid>
 
-                <!-- Método de Pago -->
-                <TextBlock Text="Método de Pago" FontWeight="SemiBold" Foreground="#718096" Margin="0,0,0,5"/>
-                <ComboBox x:Name="cmbMetodoPago" Height="38" Margin="0,0,0,30" SelectedIndex="0" FontSize="14">
-                    <ComboBoxItem Content="Efectivo"/>
-                    <ComboBoxItem Content="Tarjeta de Crédito/Débito"/>
-                    <ComboBoxItem Content="Transferencia"/>
-                </ComboBox>
+        <!-- === FILA 2: RESUMEN Y COBRO (Parte Inferior) === -->
+        <Border Grid.Row="2" Background="#F8F9FA" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Margin="0,20,0,0" Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <!-- Fila para Fecha y Vendedor -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Espaciador -->
+                    <RowDefinition Height="10"/>
+                    <!-- Fila para Controles de Cobro -->
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <!-- Total -->
-                <Border Background="#ebf8ff" CornerRadius="8" Padding="20" Margin="0,0,0,30">
-                    <StackPanel>
-                        <TextBlock Text="TOTAL A COBRAR" FontSize="14" FontWeight="Bold" Foreground="#3182ce" HorizontalAlignment="Center"/>
-                        <TextBlock x:Name="lblTotal" Text="{Binding TotalCobrar, StringFormat={}{0:C}}" FontSize="42" FontWeight="ExtraBold" 
-                                   Foreground="#2b6cb0" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                <!-- === METADATOS (Fecha y Usuario) === -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                    <TextBlock Text="{Binding FechaActual}" Foreground="{StaticResource BrushTextoSecundario}" FontWeight="SemiBold" Margin="0,0,20,0"/>
+                    <TextBlock Text="{Binding VendedorActual}" Foreground="{StaticResource BrushTextoSecundario}" FontWeight="SemiBold"/>
+                </StackPanel>
+
+                <!-- === CONTROLES DE COBRO === -->
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Lado Izquierdo: Selectores enlazados al ViewModel -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <StackPanel Margin="0,0,20,0">
+                            <TextBlock Text="Cliente" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+                            <ComboBox Width="200" 
+                              ItemsSource="{Binding ClientesTotales}" 
+                              SelectedItem="{Binding ClienteSeleccionado, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+
+                        <StackPanel>
+                            <TextBlock Text="Método de Pago" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+                            <ComboBox Width="200" 
+                              ItemsSource="{Binding MetodosPago}"
+                              SelectedItem="{Binding MetodoPagoSeleccionado, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
                     </StackPanel>
-                </Border>
 
-                <!-- Botón Cobrar -->
-                <Button Content="CONFIRMAR COBRO" Command="{Binding CobrarCommand}" Height="60" FontSize="18"
-                        Style="{StaticResource BotonPrimario}"/>
-            </StackPanel>
+                    <!-- Lado Derecho: Total y Botón -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,15,0,0">
+                        <TextBlock Text="TOTAL A COBRAR:" FontSize="16" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                        <TextBlock Text="{Binding TotalCobrar, StringFormat=C}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource BrushPrimario}" VerticalAlignment="Center" Margin="0,0,20,0"/>
+
+                        <Button Content="CONFIRMAR COBRO" 
+                        Command="{Binding CobrarCommand}" 
+                        IsDefault="True"
+                        Height="45" Width="180" 
+                        FontSize="14" Style="{StaticResource BotonPrimario}"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

@@ -1,116 +1,232 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.ComponentModel;
+using System.Windows.Data;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using TillasDesktop.BLL.Services;
 using TillasDesktop.Entities.Facturacion;
-using TillasDesktop.Entities.Inventario;
 
 namespace TillasDesktop.UI.Modelos
 {
     public class PuntoVentaViewModel : ViewModelBase
     {
-        private decimal _totalCobrar;
-        private string _codigoBusqueda;
         private readonly VentasService _ventasService;
 
-        public ObservableCollection<DetalleVentaViewModel> Carrito { get; set; }
-
-        public string CodigoBusqueda
+        // === COLECCIONES PARA LAS TABLAS ===
+        public ObservableCollection<ProductoDisponibleViewModel> ListaCatalogo { get; set; }
+        public ObservableCollection<LineaCarritoViewModel> Carrito { get; set; }
+        public ObservableCollection<string> ClientesTotales { get; set; }
+        public ICollectionView VistaFiltroCatalogo { get; set; }
+        private string _busquedaRapida;
+        public string BusquedaRapida
         {
-            get => _codigoBusqueda;
-            set { _codigoBusqueda = value; OnPropertyChanged(); }
+            get => _busquedaRapida;
+            set
+            {
+                _busquedaRapida = value;
+                OnPropertyChanged();
+                // Actualizamos la tabla cada vez que el usuario teclea una letra
+                VistaFiltroCatalogo?.Refresh();
+            }
         }
-
+        public string FechaActual { get; set; }
+        public string VendedorActual { get; set; }
+        private string _clienteSeleccionado;
+        public string ClienteSeleccionado
+        {
+            get => _clienteSeleccionado;
+            set { _clienteSeleccionado = value; OnPropertyChanged(); }
+        }
+        private string _metodoPagoSeleccionado;
+        public string MetodoPagoSeleccionado
+        {
+            get => _metodoPagoSeleccionado;
+            set { _metodoPagoSeleccionado = value; OnPropertyChanged(); }
+        }
+        public ObservableCollection<string> MetodosPago { get; set; }
+        private decimal _totalCobrar;
         public decimal TotalCobrar
         {
             get => _totalCobrar;
             set { _totalCobrar = value; OnPropertyChanged(); }
         }
 
+        // === COMANDOS ===
+        public ICommand AgregarAlCarritoCommand { get; }
+        public ICommand QuitarDelCarritoCommand { get; }
         public ICommand CobrarCommand { get; }
-        public ICommand BuscarProductoCommand { get; }
-        public ICommand EliminarItemCommand { get; }
 
         public PuntoVentaViewModel()
         {
             _ventasService = new VentasService();
-            Carrito = new ObservableCollection<DetalleVentaViewModel>();
 
-            // Cada vez que la colección cambia, delegamos el cálculo matemático a la BLL, traducimos los ViewModels a Entidades y calculamos
-            var listaEntidades = Carrito.Select(c => c.ObtenerEntidadPura()).ToList();
+            FechaActual = DateTime.Now.ToString("dd/MM/yyyy");
+            // FUTURO: Aquí leeremos el usuario que inició sesión. Por ahora lo simulamos.
+            VendedorActual = "Usuario: Admin";
 
-            CobrarCommand = new RelayCommand(EjecutarCobro, PuedeCobrar);
-            BuscarProductoCommand = new RelayCommand(BuscarYAgregarProducto);
-            EliminarItemCommand = new RelayCommand(EliminarItem);
+            MetodosPago = new ObservableCollection<string> { "Efectivo", "Tarjeta de Débito", "Tarjeta de Crédito", "Transferencia", "MercadoPago" };
+
+            ClienteSeleccionado = "Consumidor Final";
+
+            ListaCatalogo = new ObservableCollection<ProductoDisponibleViewModel>();
+            Carrito = new ObservableCollection<LineaCarritoViewModel>();
+
+            VistaFiltroCatalogo = CollectionViewSource.GetDefaultView(ListaCatalogo);
+            VistaFiltroCatalogo.Filter = FiltrarCatalogo;
+
+            ClientesTotales = new ObservableCollection<string> { "Consumidor Final", "Juan Pérez", "María Gómez" };
+
+            AgregarAlCarritoCommand = new RelayCommand(AgregarAlCarrito);
+            QuitarDelCarritoCommand = new RelayCommand(QuitarDelCarrito);
+            CobrarCommand = new RelayCommand(ConfirmarCobro);
+
+            CargarDatosDePrueba();
         }
 
-        private void BuscarYAgregarProducto(object parametro)
+        private bool FiltrarCatalogo(object obj)
         {
-            // 1. Recibimos una Entidad pura de la BLL
-            Producto productoEntidad = _ventasService.ObtenerProductoPorCodigo(CodigoBusqueda);
-
-            if (productoEntidad != null)
+            if (obj is ProductoDisponibleViewModel producto)
             {
-                var itemExistente = Carrito.FirstOrDefault(c => c.NombreProducto == productoEntidad.Nombre);
-                if (itemExistente != null)
+                // Si la barra está vacía, mostramos todo
+                if (string.IsNullOrWhiteSpace(BusquedaRapida)) return true;
+
+                string filtro = BusquedaRapida.ToLower();
+
+                // Buscamos coincidencias en Nombre, Código o Marca
+                return (producto.Nombre != null && producto.Nombre.ToLower().Contains(filtro)) ||
+                       (producto.Codigo_Modelo != null && producto.Codigo_Modelo.ToLower().Contains(filtro)) ||
+                       (producto.NombreMarca != null && producto.NombreMarca.ToLower().Contains(filtro));
+            }
+            return false;
+        }
+
+        // === LÓGICA DE CARRITO ===
+        private void AgregarAlCarrito(object parametro)
+        {
+            if (parametro is ProductoDisponibleViewModel productoCatalogo)
+            {
+                if (productoCatalogo.Stock_Actual <= 0)
                 {
-                    itemExistente.Cantidad += 1;
+                    MessageBox.Show("No hay stock suficiente de este talle.", "Sin Stock", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var itemEnCarrito = Carrito.FirstOrDefault(c => c.ProductoID == productoCatalogo.ProductoID && c.Talle == productoCatalogo.Talle);
+
+                if (itemEnCarrito != null)
+                {
+                    itemEnCarrito.Cantidad++;
                 }
                 else
                 {
-                    // 2. Empaquetamos la entidad en un ViewModel para la UI
-                    var nuevoDetalle = new DetalleVenta
+                    Carrito.Add(new LineaCarritoViewModel
                     {
-                        Precio_Unitario = productoEntidad.Precio_Venta,
+                        ProductoID = productoCatalogo.ProductoID,
+                        Nombre = productoCatalogo.Nombre,
+                        Talle = productoCatalogo.Talle,
+                        PrecioUnitario = productoCatalogo.Precio_Venta,
                         Cantidad = 1
-                    };
-                    Carrito.Add(new DetalleVentaViewModel(nuevoDetalle, productoEntidad.Nombre));
+                    });
                 }
 
-                // 3. Para enviar datos a la BLL, desempaquetamos los ViewModels y enviamos Entidades
-                var listaEntidades = Carrito.Select(c => new DetalleVenta
+                productoCatalogo.Stock_Actual--;
+                RecalcularTotal();
+            }
+        }
+
+        private void QuitarDelCarrito(object parametro)
+        {
+            if (parametro is LineaCarritoViewModel itemCarrito)
+            {
+                var productoCatalogo = ListaCatalogo.FirstOrDefault(p => p.ProductoID == itemCarrito.ProductoID && p.Talle == itemCarrito.Talle);
+
+                if (productoCatalogo != null)
                 {
-                    Precio_Unitario = c.PrecioUnitario,
-                    Cantidad = c.Cantidad
-                }).ToList();
+                    productoCatalogo.Stock_Actual++;
+                }
 
-                TotalCobrar = _ventasService.CalcularTotalVenta(listaEntidades);
-                CodigoBusqueda = string.Empty;
-            }
-            else
-            {
-                MessageBox.Show("Producto no encontrado.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
+                itemCarrito.Cantidad--;
 
-        private void EliminarItem(object parametro)
-        {
-            if (parametro is DetalleVentaViewModel item)
-            {
-                Carrito.Remove(item);
+                if (itemCarrito.Cantidad == 0)
+                {
+                    Carrito.Remove(itemCarrito);
+                }
+
+                RecalcularTotal();
             }
         }
 
-        private void EjecutarCobro(object parametro)
+        private void RecalcularTotal()
         {
-            // Convertimos el carrito visual en entidades puras para la capa de negocio
-            var listaEntidades = Carrito.Select(c => new DetalleVenta
+            var detallesVenta = Carrito.Select(c => new DetalleVenta
             {
-                Precio_Unitario = c.PrecioUnitario,
-                Cantidad = c.Cantidad
+                Producto_Talle_ID = c.ProductoID,
+                Cantidad = c.Cantidad,
+                Precio_Unitario = c.PrecioUnitario
+            });
+
+            TotalCobrar = _ventasService.CalcularTotalVenta(detallesVenta);
+        }
+
+        private void ConfirmarCobro(object parametro)
+        {
+            // Validación 1: Carrito vacío
+            if (!Carrito.Any())
+            {
+                MessageBox.Show("El carrito está vacío. Agrega productos antes de cobrar.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validación 2: Cliente vacío (por si el usuario borró el Consumidor Final sin querer)
+            if (string.IsNullOrWhiteSpace(ClienteSeleccionado))
+            {
+                MessageBox.Show("Debes seleccionar un cliente válido para la facturación.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validación 3: Método de pago sin seleccionar
+            if (string.IsNullOrWhiteSpace(MetodoPagoSeleccionado))
+            {
+                MessageBox.Show("Por favor, selecciona un método de pago antes de confirmar el cobro.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Si pasa todas las validaciones, procedemos a facturar
+            var detallesVenta = Carrito.Select(c => new DetalleVenta
+            {
+                Producto_Talle_ID = c.ProductoID,
+                Cantidad = c.Cantidad,
+                Precio_Unitario = c.PrecioUnitario
             }).ToList();
 
-            bool exito = _ventasService.RegistrarVenta(listaEntidades, out string mensaje);
+            bool exito = _ventasService.RegistrarVenta(detallesVenta, out string mensaje);
 
             if (exito)
             {
-                MessageBox.Show($"{mensaje}\nTotal cobrado: {TotalCobrar:C}", "Éxito");
+                MessageBox.Show($"Cobro por {TotalCobrar:C} procesado con éxito.\nCliente: {ClienteSeleccionado}\nPago: {MetodoPagoSeleccionado}\n\n{mensaje}",
+                                "Venta Registrada", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // Limpiamos la pantalla para el siguiente cliente y restauramos los valores por defecto
                 Carrito.Clear();
                 TotalCobrar = 0;
+                BusquedaRapida = string.Empty;
+                MetodoPagoSeleccionado = null;
+                ClienteSeleccionado = "Consumidor Final";
+            }
+            else
+            {
+                MessageBox.Show(mensaje, "Error al registrar la venta", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private bool PuedeCobrar(object parametro) => Carrito.Count > 0;
+        // === DATOS SIMULADOS PARA EL CATÁLOGO VISUAL ===
+        private void CargarDatosDePrueba()
+        {
+            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 1, Codigo_Modelo = "NK-AF1-01", Nombre = "Nike Air Force 1", NombreMarca = "Nike", Talle = 40, Stock_Actual = 5, Precio_Venta = 125000 });
+            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 1, Codigo_Modelo = "NK-AF1-01", Nombre = "Nike Air Force 1", NombreMarca = "Nike", Talle = 42, Stock_Actual = 2, Precio_Venta = 125000 });
+            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 2, Codigo_Modelo = "AD-SM-02", Nombre = "Adidas Samba OG", NombreMarca = "Adidas", Talle = 39, Stock_Actual = 1, Precio_Venta = 110000 });
+        }
     }
 }

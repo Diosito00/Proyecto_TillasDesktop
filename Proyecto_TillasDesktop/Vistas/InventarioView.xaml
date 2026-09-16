@@ -46,7 +46,7 @@
             <Border.Effect>
                 <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
             </Border.Effect>
-            <DataGrid ItemsSource="{Binding ListaProductos}" SelectedItem="{Binding ProductoSeleccionado}" 
+            <DataGrid ItemsSource="{Binding VistaFiltroProductos}" SelectedItem="{Binding ProductoSeleccionado}" 
                       Style="{StaticResource DataGridTillas}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="CÓDIGO" Width="130" Binding="{Binding Codigo_Modelo}" Foreground="{StaticResource BrushTextoPrincipal}"/>

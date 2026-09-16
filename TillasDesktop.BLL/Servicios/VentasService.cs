@@ -1,13 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using TillasDesktop.Entities.Inventario; // Usamos exclusivamente entidades
+﻿using TillasDesktop.Entities.Inventario;
 using TillasDesktop.Entities.Facturacion;
 
 namespace TillasDesktop.BLL.Services
 {
     public class VentasService
     {
-        // Usamos la entidad Producto, no ProductoViewModel
         private readonly List<Producto> _catalogoPrueba;
 
         public VentasService()
@@ -25,7 +22,6 @@ namespace TillasDesktop.BLL.Services
             return _catalogoPrueba.FirstOrDefault(p => p.Codigo_Modelo == codigo);
         }
 
-        // Recibe entidades DetalleVenta puras
         public decimal CalcularTotalVenta(IEnumerable<DetalleVenta> detalles)
         {
             return detalles.Sum(item => item.Precio_Unitario * item.Cantidad);
