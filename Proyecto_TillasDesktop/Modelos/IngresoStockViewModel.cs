@@ -9,16 +9,12 @@ namespace TillasDesktop.UI.Modelos
     public class IngresoStockViewModel : ViewModelBase
     {
         private string _productoResumen;
-
         private readonly Producto _productoPuro;
         private readonly InventarioService _inventarioService;
-
-        // 1. Instanciamos la entidad pura desde el principio para guardar los datos ahí
         private readonly ProductoTalle _nuevoMovimiento;
 
         public string ProductoResumen { get => _productoResumen; set { _productoResumen = value; OnPropertyChanged(); } }
 
-        // 2. Las propiedades de la UI leen y escriben directamente en la entidad pura
         public decimal Talle
         {
             get => _nuevoMovimiento.Talle;
@@ -33,14 +29,13 @@ namespace TillasDesktop.UI.Modelos
 
         public ICommand GuardarCommand { get; }
         public Action CerrarVentana { get; set; }
-        public Action<int> OnStockIngresado { get; set; }
+        public Action<ProductoTalle> OnStockIngresado { get; set; }
 
         public IngresoStockViewModel(ProductoViewModel productoVM)
         {
             _inventarioService = new InventarioService();
             _productoPuro = productoVM.ObtenerEntidadPura();
 
-            // 3. Preparamos la entidad con el ID correcto apenas se abre la ventana
             _nuevoMovimiento = new ProductoTalle
             {
                 Producto_ID = _productoPuro.ID
@@ -53,12 +48,11 @@ namespace TillasDesktop.UI.Modelos
 
         private void Guardar(object parametro)
         {
-            // 4. Como los datos ya se guardaron en _nuevoMovimiento al tipear, lo enviamos directo a la BLL
             bool exito = _inventarioService.RegistrarIngresoStock(_nuevoMovimiento, out string mensaje);
 
             if (exito)
             {
-                OnStockIngresado?.Invoke(Cantidad);
+                OnStockIngresado?.Invoke(_nuevoMovimiento);
                 MessageBox.Show(mensaje, "Stock Actualizado", MessageBoxButton.OK, MessageBoxImage.Information);
                 CerrarVentana?.Invoke();
             }

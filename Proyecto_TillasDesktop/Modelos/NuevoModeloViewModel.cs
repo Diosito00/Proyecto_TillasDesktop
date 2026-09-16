@@ -34,10 +34,8 @@ namespace TillasDesktop.UI.Modelos
 
         public NuevoModeloViewModel()
         {
-            // Instanciamos el servicio de negocio
             _inventarioService = new InventarioService();
 
-            // Llenamos las colecciones visuales delegando la consulta a la BLL
             MarcasDisponibles = new ObservableCollection<Marca>(_inventarioService.ObtenerMarcasActivas());
             CategoriasDisponibles = new ObservableCollection<Categoria>(_inventarioService.ObtenerCategoriasActivas());
 
@@ -49,12 +47,10 @@ namespace TillasDesktop.UI.Modelos
             _esEdicion = true;
             _productoAEditar = productoExistente.ObtenerEntidadPura();
 
-            // Precargamos los datos en la pantalla
             CodigoModelo = _productoAEditar.Codigo_Modelo;
             Nombre = _productoAEditar.Nombre;
             PrecioVenta = _productoAEditar.Precio_Venta;
 
-            // Aquí usamos LINQ para seleccionar la marca y categoría correctas en los ComboBox
             MarcaSeleccionada = MarcasDisponibles.FirstOrDefault(m => m.ID == _productoAEditar.Marca_ID);
             CategoriaSeleccionada = CategoriasDisponibles.FirstOrDefault(c => c.ID == _productoAEditar.Categoria_ID);
         }
@@ -63,7 +59,6 @@ namespace TillasDesktop.UI.Modelos
         {
             if (_esEdicion)
             {
-                // Actualizamos la entidad existente
                 _productoAEditar.Codigo_Modelo = this.CodigoModelo;
                 _productoAEditar.Nombre = this.Nombre;
                 _productoAEditar.Precio_Venta = this.PrecioVenta;
@@ -89,7 +84,6 @@ namespace TillasDesktop.UI.Modelos
                     Activo = true
                 };
 
-                // La BLL toma la decisión final
                 bool exito = _inventarioService.RegistrarNuevoProducto(nuevaEntidad, out string mensajeRespuesta);
 
                 if (exito)

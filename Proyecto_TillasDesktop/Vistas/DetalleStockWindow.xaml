@@ -29,16 +29,9 @@
                        Margin="0,0,0,20"/>
 
             <!-- === TABLA DE TALLES === -->
-            <DataGrid Grid.Row="1" 
-                      ItemsSource="{Binding ListaTalles}" 
-                      AutoGenerateColumns="False" 
-                      IsReadOnly="True" 
-                      CanUserAddRows="False"
-                      HeadersVisibility="Column" 
-                      Background="White" 
-                      RowHeight="35"
-                      BorderBrush="#E0E0E0"
-                      BorderThickness="1">
+            <DataGrid Grid.Row="1" ItemsSource="{Binding ListaTalles}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" HeadersVisibility="Column" 
+                      Background="White" RowBackground="{StaticResource BrushFondo}" AlternatingRowBackground="White" GridLinesVisibility="Horizontal" 
+                      HorizontalGridLinesBrush="#e2e8f0" FontSize="14" BorderThickness="0">
                 <DataGrid.Columns>
                     <!-- La entidad ProductoTalle tiene las propiedades Talle y Stock_Actual -->
                     <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="*"/>
@@ -47,17 +40,9 @@
             </DataGrid>
 
             <!-- === BOTONERA === -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                <Button Content="Cerrar" 
-                        IsCancel="True" 
-                        Style="{StaticResource BotonSecundario}"
-                        Width="140" Height="45"
-                        Margin="0,0,10,0"/>
-
-                <Button Content="+ INGRESAR STOCK" 
-                        Command="{Binding IngresarNuevoStockCommand}" 
-                        Width="140" Height="45" 
-                        Style="{StaticResource BotonPrimario}"/>
+            <StackPanel Grid.Row="2">
+                <Button Content="+ INGRESAR STOCK" Command="{Binding IngresarNuevoStockCommand}" Width="200" Height="45" 
+                        Style="{StaticResource BotonSecundario}"/>    
             </StackPanel>
         </Grid>
     </Border>

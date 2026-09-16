@@ -5,7 +5,6 @@ namespace TillasDesktop.BLL.Services
 {
     public class InventarioService
     {
-        // Proveedor de datos aislados (Próximamente conectados a DAL)
         public List<Marca> ObtenerMarcasActivas()
         {
             return new List<Marca>
@@ -47,9 +46,6 @@ namespace TillasDesktop.BLL.Services
                 return false;
             }
 
-            // FUTURO: Llamaremos a la capa de datos
-            // Ej: _stockRepository.InsertarOActualizarTalle(nuevoStock);
-
             mensajeRespuesta = $"Se ingresaron {nuevoStock.Stock_Actual} unidades del talle {nuevoStock.Talle} exitosamente.";
             return true;
         }
@@ -63,17 +59,12 @@ namespace TillasDesktop.BLL.Services
                 return false;
             }
 
-            // FUTURO: _productoRepository.Actualizar(productoActualizado);
             mensajeRespuesta = "Producto actualizado correctamente.";
             return true;
         }
 
         public bool EliminarProducto(int productoId, out string mensajeRespuesta)
         {
-            // FUTURO: _productoRepository.Eliminar(productoId);
-            // Nota: Aquí la BLL puede verificar primero si el producto tiene stock. 
-            // Si tiene stock > 0, puede rechazar la eliminación por seguridad.
-
             mensajeRespuesta = "Producto eliminado del sistema.";
             return true;
         }

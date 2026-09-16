@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using TillasDesktop.BLL.Services;
 using TillasDesktop.Entities.Inventario;
 
 namespace TillasDesktop.UI.Modelos
@@ -9,6 +10,8 @@ namespace TillasDesktop.UI.Modelos
     {
         private string _tituloVentana;
         private readonly Producto _productoPuro;
+        private readonly ProductoViewModel _productoVMOriginal; // Guardamos la referencia para actualizar la tabla principal
+        private readonly InventarioService _inventarioService;
 
         public string TituloVentana
         {
@@ -16,7 +19,6 @@ namespace TillasDesktop.UI.Modelos
             set { _tituloVentana = value; OnPropertyChanged(); }
         }
 
-        // Aquí cargaremos los talles desde la base de datos (Ej: Talle 40 -> 5 unidades)
         public ObservableCollection<ProductoTalle> ListaTalles { get; set; }
 
         public ICommand IngresarNuevoStockCommand { get; }
@@ -24,21 +26,59 @@ namespace TillasDesktop.UI.Modelos
 
         public DetalleStockViewModel(ProductoViewModel productoVM)
         {
+            _inventarioService = new InventarioService();
+            _productoVMOriginal = productoVM;
             _productoPuro = productoVM.ObtenerEntidadPura();
+
             TituloVentana = $"Stock detallado: {_productoPuro.Codigo_Modelo} - {_productoPuro.Nombre}";
 
-            ListaTalles = new ObservableCollection<ProductoTalle>();
+            // Simulamos datos temporales para que puedas ver la tabla armada
+            ListaTalles = new ObservableCollection<ProductoTalle>
+            {
+                new ProductoTalle { Talle = 39, Stock_Actual = 20 },
+                new ProductoTalle { Talle = 42, Stock_Actual = 25 }
+            };
 
-            // FUTURO: Llamaremos a la BLL para llenar la lista
-            // ListaTalles = new ObservableCollection<ProductoTalle>(_inventarioService.ObtenerTallesPorProducto(_productoPuro.ID));
-
-            // Desde aquí mismo podemos abrir la ventanita pequeña de ingreso de stock que programamos en el turno anterior
             IngresarNuevoStockCommand = new RelayCommand(AbrirVentanaIngreso);
         }
 
         private void AbrirVentanaIngreso(object parametro)
         {
-            // Lógica para abrir IngresoStockWindow...
+            var formViewModel = new IngresoStockViewModel(_productoVMOriginal);
+
+            formViewModel.OnStockIngresado = (movimientoStock) =>
+            {
+                _productoVMOriginal.StockTotal += movimientoStock.Stock_Actual;
+
+                var talleExistente = ListaTalles.FirstOrDefault(t => t.Talle == movimientoStock.Talle);
+
+                if (talleExistente != null)
+                {
+                    var talleActualizado = new ProductoTalle
+                    {
+                        Producto_ID = talleExistente.Producto_ID,
+                        Talle = talleExistente.Talle,
+                        Stock_Actual = talleExistente.Stock_Actual + movimientoStock.Stock_Actual
+                    };
+
+                    int index = ListaTalles.IndexOf(talleExistente);
+                    ListaTalles[index] = talleActualizado;
+                }
+                else
+                {
+                    ListaTalles.Add(new ProductoTalle
+                    {
+                        Producto_ID = movimientoStock.Producto_ID,
+                        Talle = movimientoStock.Talle,
+                        Stock_Actual = movimientoStock.Stock_Actual
+                    });
+                }
+            };
+
+            var ventana = new Vistas.IngresoStockWindow();
+            formViewModel.CerrarVentana = ventana.Close;
+            ventana.DataContext = formViewModel;
+            ventana.ShowDialog();
         }
     }
 }
