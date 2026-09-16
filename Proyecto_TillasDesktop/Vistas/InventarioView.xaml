@@ -35,8 +35,6 @@
 
                 <!-- Botones -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button Content="📦 INGRESAR STOCK" Command="{Binding IngresarStockCommand}" Height="40" Width="160" Margin="0,0,15,0" 
-                            Style="{StaticResource BotonGris}"/>
                     <Button Content="+ NUEVO MODELO" Command="{Binding NuevoModeloCommand}" Height="40" Width="150" 
                             Style="{StaticResource BotonSecundario}"/>
                 </StackPanel>
@@ -48,16 +46,42 @@
             <Border.Effect>
                 <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
             </Border.Effect>
-            <DataGrid x:Name="dgInventario" AutoGenerateColumns="False" Background="White" ItemsSource="{Binding ListaProductos}"
+            <DataGrid x:Name="dgInventario" AutoGenerateColumns="False" Background="White" ItemsSource="{Binding ListaProductos}" IsReadOnly="True"
                       SelectedItem="{Binding ProductoSeleccionado}" RowBackground="{StaticResource BrushFondo}" AlternatingRowBackground="White" 
                       HeadersVisibility="Column" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#e2e8f0" BorderThickness="0" FontSize="14">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="CÓDIGO" Width="130" Binding="{Binding Codigo_Modelo}" Foreground="{StaticResource BrushTextoPrincipal}"/>
                     <DataGridTextColumn Header="NOMBRE DEL MODELO" Width="*" Binding="{Binding Nombre}" Foreground="{StaticResource BrushTextoPrincipal}"/>
-                    <DataGridTextColumn Header="MARCA" Width="120" Binding="{Binding Marca}" Foreground="{StaticResource BrushTextoPrincipal}"/>
-                    <DataGridTextColumn Header="CATEGORÍA" Width="120" Binding="{Binding Categoria}" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                    <DataGridTextColumn Header="MARCA" Width="120" Binding="{Binding NombreMarca}" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                    <DataGridTextColumn Header="CATEGORÍA" Width="120" Binding="{Binding NombreCategoria}" Foreground="{StaticResource BrushTextoPrincipal}"/>
                     <DataGridTextColumn Header="PRECIO VENTA" Width="130" Binding="{Binding Precio_Venta, StringFormat=C}" Foreground="{StaticResource BrushTextoPrincipal}"/>
                     <DataGridTextColumn Header="STOCK TOTAL" Width="110" Binding="{Binding StockTotal}" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                    <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+
+                                    <!-- Botón de Talles/Stock (Icono de caja) -->
+                                    <Button Content="📦" ToolTip="Ver y gestionar talles"
+                                            Command="{Binding DataContext.VerDetalleStockCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Background="Transparent" BorderThickness="0" Cursor="Hand" Margin="0,0,10,0"/>
+
+                                    <!-- Botón de Modificar (Icono de lápiz) -->
+                                    <Button Content="✏️" ToolTip="Modificar modelo"
+                                            Command="{Binding DataContext.ModificarModeloCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Background="Transparent" BorderThickness="0" Cursor="Hand" Margin="0,0,10,0"/>
+
+                                    <!-- Botón de Eliminar (Icono de papelera) -->
+                                    <Button Content="🗑️" ToolTip="Eliminar modelo"
+                                            Command="{Binding DataContext.EliminarModeloCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Background="Transparent" BorderThickness="0" Cursor="Hand" Foreground="{StaticResource BrushRojo}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

@@ -19,7 +19,7 @@ namespace TillasDesktop.BLL.Services
         {
             return new List<Categoria>
             {
-                new Categoria { ID = 1, Nombre = "Sneakers" },
+                new Categoria { ID = 1, Nombre = "Urbano" },
                 new Categoria { ID = 2, Nombre = "Deportivo" }
             };
         }
@@ -51,6 +51,30 @@ namespace TillasDesktop.BLL.Services
             // Ej: _stockRepository.InsertarOActualizarTalle(nuevoStock);
 
             mensajeRespuesta = $"Se ingresaron {nuevoStock.Stock_Actual} unidades del talle {nuevoStock.Talle} exitosamente.";
+            return true;
+        }
+
+        // Agrega estos dos métodos a tu InventarioService en la BLL
+        public bool ActualizarProducto(Producto productoActualizado, out string mensajeRespuesta)
+        {
+            if (string.IsNullOrWhiteSpace(productoActualizado.Codigo_Modelo))
+            {
+                mensajeRespuesta = "El código no puede estar vacío.";
+                return false;
+            }
+
+            // FUTURO: _productoRepository.Actualizar(productoActualizado);
+            mensajeRespuesta = "Producto actualizado correctamente.";
+            return true;
+        }
+
+        public bool EliminarProducto(int productoId, out string mensajeRespuesta)
+        {
+            // FUTURO: _productoRepository.Eliminar(productoId);
+            // Nota: Aquí la BLL puede verificar primero si el producto tiene stock. 
+            // Si tiene stock > 0, puede rechazar la eliminación por seguridad.
+
+            mensajeRespuesta = "Producto eliminado del sistema.";
             return true;
         }
     }
