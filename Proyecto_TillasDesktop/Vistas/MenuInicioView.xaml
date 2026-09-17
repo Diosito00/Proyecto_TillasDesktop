@@ -46,33 +46,45 @@
             </StackPanel>
         </Grid>
 
-        <!-- Contenedor de la Fila 1 que divide la pantalla horizontalmente entre el menú de navegación lateral y el área de contenido dinámico. -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="230"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- BARRA LATERAL (Sidebar) ubicada en la primera columna con un ancho fijo de 230 píxeles. -->
             <Border Grid.Column="0" Background="{StaticResource BrushSecundario}">
-                <StackPanel Margin="0,20,0,0">
-                    <!-- Icono decorativo de menú desplegable o colapso. -->
-                    <TextBlock Text="≡" Foreground="White" FontSize="28" Margin="20,0,0,20" Cursor="Hand"/>
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Width" Value="230"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsChecked, ElementName=BtnMenuToggle}" Value="True">
+                                <Setter Property="Width" Value="60"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
 
-                    <!-- Botones de navegación del menú lateral asociados a sus respectivos estilos y eventos de clic. -->
-                    <Button x:Name="btnInicio" Content="🏠  INICIO" Style="{StaticResource MenuButton}" Click="BtnInicio_Click"/>
-                    <Button x:Name="btnPuntoVenta" Content="🛒  PUNTO DE VENTA" Style="{StaticResource MenuButton}" Click="BtnPuntoVenta_Click"/>
-                    <Button x:Name="btnInventario" Content="📦  INVENTARIO" Style="{StaticResource MenuButton}" Click="BtnInventario_Click"/>
-                    <Button x:Name="btnClientes" Content="👥  CLIENTES" Style="{StaticResource MenuButton}" Click="BtnClientes_Click"/>
-                    <Button x:Name="btnReportes" Content="📈  REPORTES" Style="{StaticResource MenuButton}" Click="BtnReportes_Click"/>
-                    <Button x:Name="btnConfiguracion" Content="👤  USUARIOS Y ROLES" Style="{StaticResource MenuButton}" Click="BtnConfiguracion_Click"/>
-                    <Button x:Name="btnBackup" Content="⚙  COPIA DE RESPALDO" Style="{StaticResource MenuButton}" Click="BtnBackup_Click"/>
-                </StackPanel>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <ToggleButton x:Name="BtnMenuToggle" Grid.Row="0" Content="≡" Width="40" Height="40" Background="Transparent" BorderThickness="0" 
+                                  Foreground="White" FontSize="24" Cursor="Hand" HorizontalAlignment="Left" Margin="10,10,0,10"/>
+                    <StackPanel Grid.Row="1" Margin="0,10,0,0">
+                        <Button x:Name="btnInicio" Content="🏠  INICIO" Style="{StaticResource MenuButton}" Click="BtnInicio_Click"/>
+                        <Button x:Name="btnPuntoVenta" Content="🛒  PUNTO DE VENTA" Style="{StaticResource MenuButton}" Click="BtnPuntoVenta_Click"/>
+                        <Button x:Name="btnInventario" Content="📦  INVENTARIO" Style="{StaticResource MenuButton}" Click="BtnInventario_Click"/>
+                        <Button x:Name="btnClientes" Content="👥  CLIENTES" Style="{StaticResource MenuButton}" Click="BtnClientes_Click"/>
+                        <Button x:Name="btnReportes" Content="📈  REPORTES" Style="{StaticResource MenuButton}" Click="BtnReportes_Click"/>
+                        <Button x:Name="btnConfiguracion" Content="👤  USUARIOS Y ROLES" Style="{StaticResource MenuButton}" Click="BtnConfiguracion_Click"/>
+                        <Button x:Name="btnBackup" Content="⚙  COPIA DE RESPALDO" Style="{StaticResource MenuButton}" Click="BtnBackup_Click"/>
+                    </StackPanel>
+                </Grid>
             </Border>
 
-            <!-- Área de contenido principal situada en la segunda columna, con un margen alrededor para separar los componentes visuales. -->
             <Grid Grid.Column="1" Margin="20">
-                <!-- Control contenedor dinámico (ContentControl) que permite alternar y cargar las diferentes vistas o módulos según la opción del menú seleccionada. -->
                 <ContentControl x:Name="AreaPrincipal"/>
             </Grid>
         </Grid>
