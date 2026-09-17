@@ -69,10 +69,10 @@
                                 <!-- Panel horizontal que contiene los botones interactivos de edición y eliminación. -->
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <!-- Botón de edición que ejecuta EditarCommand buscando el DataContext del DataGrid principal mediante RelativeSource. -->
-                                    <Button Content="✏️" Background="Transparent" BorderBrush="Transparent" Cursor="Hand" Command="{Binding DataContext.EditarCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Margin="0,0,8,0"/>
+                                    <Button Content="✏️" Background="Transparent" BorderThickness="0" Cursor="Hand" Foreground="{StaticResource BrushTextoPrincipal}" CommandParameter="{Binding}" Command="{Binding DataContext.EditarCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Margin="0,0,10,0"/>
 
                                     <!-- Botón de eliminación que ejecuta EliminarCommand enlazado al DataContext principal de la vista. -->
-                                    <Button Content="🗑️" Background="Transparent" BorderBrush="Transparent" Cursor="Hand" Command="{Binding DataContext.EliminarCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Margin="0,0,8,0"/>
+                                    <Button Content="🗑️" Background="Transparent" BorderThickness="0" Cursor="Hand" CommandParameter="{Binding}" Foreground="{StaticResource BrushRojo}" Command="{Binding DataContext.EliminarCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" Margin="0,0,8,0"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

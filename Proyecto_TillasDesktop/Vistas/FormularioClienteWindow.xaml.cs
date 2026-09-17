@@ -27,7 +27,6 @@ namespace TillasDesktop.UI.Vistas
             // Rellena los cuadros de texto del formulario con la información del cliente que se va a editar.
             txtNombre.Text = clienteAEditar.Nombre;
             txtApellido.Text = clienteAEditar.Apellido;
-            txtDNI.Text = clienteAEditar.DNI;
             txtCUIT.Text = clienteAEditar.CUIT;
             txtTelefono.Text = clienteAEditar.Telefono;
             txtEmail.Text = clienteAEditar.Email;
@@ -42,7 +41,6 @@ namespace TillasDesktop.UI.Vistas
             // 1. Validar que ningún campo obligatorio esté vacío
             if (string.IsNullOrWhiteSpace(txtNombre.Text) ||
                 string.IsNullOrWhiteSpace(txtApellido.Text) ||
-                string.IsNullOrWhiteSpace(txtDNI.Text) ||
                 string.IsNullOrWhiteSpace(txtCUIT.Text) ||
                 string.IsNullOrWhiteSpace(txtTelefono.Text) ||
                 string.IsNullOrWhiteSpace(txtEmail.Text))
@@ -51,14 +49,16 @@ namespace TillasDesktop.UI.Vistas
                 return;
             }
 
-            // 2. Validar que el DNI contenga solo números y una longitud lógica
-            // Limpiamos los puntos para contar solo los números reales
-            string dniLimpio = txtDNI.Text.Replace(".", "").Trim();
+            // Limpiamos el CUIT por si el usuario ingresó guiones (ej: 20-30405060-7 -> 20304050607)
+            string cuitLimpio = txtCUIT.Text.Replace("-", "").Trim();
 
-            if (dniLimpio.Length < 6 || !dniLimpio.All(char.IsDigit))
+            if (cuitLimpio.Length != 11 || !cuitLimpio.All(char.IsDigit))
             {
-                MessageBox.Show("El DNI ingresado no es válido (debe contener al menos 6 números).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                MessageBox.Show("El CUIT ingresado no es válido (debe contener exactamente 11 números).",
+                                "Validación de CUIT",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                return; // Detiene el guardado
             }
 
             // 3. Validar longitud mínima del teléfono
@@ -92,7 +92,6 @@ namespace TillasDesktop.UI.Vistas
 
             NuevoCliente.Nombre = txtNombre.Text;
             NuevoCliente.Apellido = txtApellido.Text;
-            NuevoCliente.DNI = txtDNI.Text;
             NuevoCliente.CUIT = txtCUIT.Text;
             NuevoCliente.Telefono = txtTelefono.Text;
             NuevoCliente.Email = txtEmail.Text;

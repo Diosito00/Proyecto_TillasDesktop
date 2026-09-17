@@ -29,10 +29,6 @@
             <TextBlock Text="Apellido:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
             <TextBox x:Name="txtApellido" PreviewTextInput="SoloLetras_PreviewTextInput" Margin="0,0,0,10"/>
 
-            <!-- Etiqueta y campo de texto para el DNI -->
-            <TextBlock Text="DNI:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtDNI" PreviewTextInput="SoloNumeros_PreviewTextInput" Margin="0,0,0,10"/>
-
             <!-- Etiqueta y campo de texto para el CUIT -->
             <TextBlock Text="CUIT:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
             <TextBox x:Name="txtCUIT" PreviewTextInput="SoloNumeros_PreviewTextInput" Margin="0,0,0,10"/>

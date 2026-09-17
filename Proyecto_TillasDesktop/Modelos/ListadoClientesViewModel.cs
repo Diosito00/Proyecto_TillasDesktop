@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -60,8 +61,8 @@ namespace TillasDesktop.UI.Modelos
         {
             ListaClientes = new ObservableCollection<ClienteViewModel>
             {
-                new ClienteViewModel { Id = 101, Nombre = "Carlos", Apellido = "Rodríguez", DNI = "15.223.102", CUIT = "27-22334455-8", Telefono = "+54 379 455-1122", Email = "carlos.rod@mail.com" },
-                new ClienteViewModel { Id = 102, Nombre = "María", Apellido = "Gómez", DNI = "15.223.103", CUIT = "27-22334455-8", Telefono = "+54 379 511-9988", Email = "maria.g@mail.com" }
+                new ClienteViewModel { Id = 101, Nombre = "Carlos", Apellido = "Rodríguez", CUIT = "23457268992", Telefono = "379 4551122", Email = "carlos.rod@mail.com" },
+                new ClienteViewModel { Id = 102, Nombre = "María", Apellido = "Gómez", CUIT = "27223344558", Telefono = "379 5119988", Email = "maria.g@mail.com" }
             };
         }
 
@@ -74,8 +75,8 @@ namespace TillasDesktop.UI.Modelos
                 string filtro = TextoBusqueda.ToLower();
                 return (cliente.Nombre != null && cliente.Nombre.ToLower().Contains(filtro)) ||
                        (cliente.Apellido != null && cliente.Apellido.ToLower().Contains(filtro)) ||
-                       (cliente.DNI != null && cliente.DNI.ToLower().Contains(filtro)) ||
-                       (cliente.Email != null && cliente.Email.ToLower().Contains(filtro));
+                       (cliente.Email != null && cliente.Email.ToLower().Contains(filtro)) ||
+                       (cliente.CUIT != null && cliente.CUIT.ToLower().Contains(filtro));
             }
             return false;
         }
@@ -110,10 +111,19 @@ namespace TillasDesktop.UI.Modelos
 
         private void EjecutarEliminar(object obj)
         {
-            if (ClienteSeleccionado != null)
+            if (obj is ClienteViewModel clienteFila)
             {
-                ListaClientes.Remove(ClienteSeleccionado);
-                VistaFiltroClientes.Refresh();
+                var respuesta = MessageBox.Show($"¿Estás seguro de que deseas eliminar permanentemente el cliente '{clienteFila.Nombre} {clienteFila.Apellido}'?",
+                                                "Confirmar Eliminación",
+                                                MessageBoxButton.YesNo,
+                                                MessageBoxImage.Warning);
+
+                if (respuesta == MessageBoxResult.Yes)
+                {
+                    
+                    ListaClientes.Remove(clienteFila);
+                    VistaFiltroClientes.Refresh();
+                }
             }
         }
 

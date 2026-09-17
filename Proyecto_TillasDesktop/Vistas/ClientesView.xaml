@@ -61,8 +61,7 @@
                     <!-- Columna que muestra el Apellido; el ancho '*' hace que ocupe el espacio flexible restante. -->
                     <DataGridTextColumn Header="APELLIDO" Binding="{Binding Apellido}" Width="*"/>
 
-                    <!-- Columna para el documento (DNI). -->
-                    <DataGridTextColumn Header="DNI" Binding="{Binding DNI}" Width="150"/>
+                    
                     <!-- Columna para el CUIT. -->
                     <DataGridTextColumn Header="CUIT" Binding="{Binding CUIT}" Width="*"/>
 
@@ -78,11 +77,11 @@
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <!-- Botón con icono de lápiz para editar el cliente seleccionado. -->
-                                    <Button Content="✏️" Background="Transparent" BorderBrush="Transparent" Cursor="Hand" Command="{Binding DataContext.EditarCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                            Margin="0,0,8,0"/> 
+                                    <Button Content="✏️" Background="Transparent" BorderThickness="0" Cursor="Hand" Foreground="{StaticResource BrushTextoPrincipal}" CommandParameter="{Binding}" Command="{Binding DataContext.EditarCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                            Margin="0,0,10,0"/> 
                                     <!-- Botón con icono de tacho de basura para eliminar el cliente seleccionado. -->
-                                    <Button Content="🗑️" Background="Transparent" BorderBrush="Transparent" Cursor="Hand" Command="{Binding DataContext.EliminarCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                            Margin="0,0,8,0"/> 
+                                    <Button Content="🗑️" Background="Transparent" BorderThickness="0" Cursor="Hand" Foreground="{StaticResource BrushRojo}" CommandParameter="{Binding}" Command="{Binding DataContext.EliminarCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                            Margin="0,0,10,0"/> 
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

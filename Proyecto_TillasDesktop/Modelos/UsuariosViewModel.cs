@@ -1,12 +1,13 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection.Metadata;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using TillasDesktop.Entities;
 using TillasDesktop.Entities.Usuarios;
 using TillasDesktop.UI.Vistas;
-using System.Linq;
-using System.Windows.Data;
-using System.ComponentModel;
 
 namespace TillasDesktop.UI.Modelos
 {
@@ -150,12 +151,18 @@ namespace TillasDesktop.UI.Modelos
         // Método que se ejecuta al activar el comando para eliminar un usuario.
         private void EjecutarEliminar(object obj)
         {
-            // Valida que el usuario seleccionado no sea nulo antes de intentar removerlo.
-            if (UsuarioSeleccionado != null)
+            if (obj is Usuario usuarioFila)
             {
-                // Remueve el objeto seleccionado de la colección, eliminando la fila visualmente de la tabla.
-                ListaUsuarios.Remove(UsuarioSeleccionado);
-                VistaFiltroUsuarios.Refresh();
+                var respuesta = MessageBox.Show($"¿Estás seguro de que deseas eliminar permanentemente el usuario '{usuarioFila.Nombre}'?",
+                                                "Confirmar Eliminación",
+                                                MessageBoxButton.YesNo,
+                                                MessageBoxImage.Warning);
+
+                if (respuesta == MessageBoxResult.Yes)
+                {
+                    ListaUsuarios.Remove(usuarioFila);
+                    VistaFiltroUsuarios.Refresh();
+                }
             }
         }
 

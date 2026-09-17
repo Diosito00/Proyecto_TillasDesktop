@@ -11,7 +11,6 @@ namespace TillasDesktop.UI.Modelos
         private int _id;
         private string _apellido = string.Empty;
         private string _nombre = string.Empty;
-        private string _dni = string.Empty;
         private string _cuit = string.Empty;
         private string _telefono = string.Empty;
         private string _email = string.Empty;
@@ -37,12 +36,7 @@ namespace TillasDesktop.UI.Modelos
             set { _nombre = value; OnPropertyChanged(); } // Actualiza el nombre y avisa a la interfaz.
         }
 
-        // Propiedad pública para el Documento (DNI / CUIT) del cliente.
-        public string DNI
-        {
-            get => _dni; // Retorna el documento actual.
-            set { _dni = value; OnPropertyChanged(); } // Actualiza el documento y avisa a la interfaz.
-        }
+       
 
         // Propiedad pública para el CUIT del cliente.
         public string CUIT
