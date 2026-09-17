@@ -16,6 +16,7 @@
     <Style TargetType="DataGridCell">
         <Setter Property="Padding" Value="10,0"/>
         <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="#555555"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridCell">
@@ -28,7 +29,7 @@
         <Style.Triggers>
             <Trigger Property="IsSelected" Value="True">
                 <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="Black"/>
+                <Setter Property="Foreground" Value="#555555"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -42,7 +43,7 @@
             </Trigger>
             <Trigger Property="IsSelected" Value="True">
                 <Setter Property="Background" Value="#E3F2FD"/>
-                <Setter Property="Foreground" Value="Black"/>
+                <Setter Property="Foreground" Value="#2C3E50"/>
             </Trigger>
         </Style.Triggers>
     </Style>

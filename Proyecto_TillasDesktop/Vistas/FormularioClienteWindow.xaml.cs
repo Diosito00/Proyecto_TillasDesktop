@@ -52,9 +52,12 @@ namespace TillasDesktop.UI.Vistas
             }
 
             // 2. Validar que el DNI contenga solo números y una longitud lógica
-            if (!txtDNI.Text.All(char.IsDigit) || txtDNI.Text.Length < 7)
+            // Limpiamos los puntos para contar solo los números reales
+            string dniLimpio = txtDNI.Text.Replace(".", "").Trim();
+
+            if (dniLimpio.Length < 6 || !dniLimpio.All(char.IsDigit))
             {
-                MessageBox.Show("El DNI ingresado no es válido (debe contener al menos 7 números).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("El DNI ingresado no es válido (debe contener al menos 6 números).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 

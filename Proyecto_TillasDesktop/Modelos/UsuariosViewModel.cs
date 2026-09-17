@@ -4,6 +4,9 @@ using System.Windows.Input;
 using TillasDesktop.Entities;
 using TillasDesktop.Entities.Usuarios;
 using TillasDesktop.UI.Vistas;
+using System.Linq;
+using System.Windows.Data;
+using System.ComponentModel;
 
 namespace TillasDesktop.UI.Modelos
 {
@@ -32,6 +35,22 @@ namespace TillasDesktop.UI.Modelos
             set { _usuarioSeleccionado = value; OnPropertyChanged(); }
         }
 
+        private string _textoBusqueda = string.Empty;
+        public string TextoBusqueda
+        {
+            get => _textoBusqueda;
+            set
+            {
+                _textoBusqueda = value;
+                OnPropertyChanged();
+                VistaFiltroUsuarios?.Refresh();
+            }
+        }
+
+        public ICollectionView VistaFiltroUsuarios { get; set; }
+
+
+
         // Comando público para gestionar la acción de crear o agregar un nuevo usuario.
         public ICommand NuevoUsuarioCommand { get; }
 
@@ -46,6 +65,10 @@ namespace TillasDesktop.UI.Modelos
         {
             // Llama al método para poblar la lista con los datos iniciales.
             CargarDatos();
+
+            // Configuración del filtro de búsqueda
+            VistaFiltroUsuarios = CollectionViewSource.GetDefaultView(ListaUsuarios);
+            VistaFiltroUsuarios.Filter = FiltrarCriteriosUsuarios;
 
             // Inicializa los comandos vinculándolos a sus métodos correspondientes y a sus reglas de validación (canExecute).
             NuevoUsuarioCommand = new RelayCommand(EjecutarNuevo);
@@ -62,6 +85,20 @@ namespace TillasDesktop.UI.Modelos
                new Usuario { ID = 1, Nombre = "Juan Perez", DNI = "12345678", Email = "admin@tillas.com", Password = "123", Rol = "Admin", Activo = true },
                 new Usuario { ID = 2, Nombre = "María García", DNI = "87654321", Email = "gerente@tillas.com", Password = "123", Rol = "Gerente", Activo = true }
             };
+        }
+
+        private bool FiltrarCriteriosUsuarios(object obj)
+        {
+            if (obj is Usuario usuario)
+            {
+                if (string.IsNullOrWhiteSpace(TextoBusqueda)) return true;
+
+                string filtro = TextoBusqueda.ToLower();
+                return (usuario.Nombre != null && usuario.Nombre.ToLower().Contains(filtro)) ||
+                       (usuario.Email != null && usuario.Email.ToLower().Contains(filtro)) ||
+                       (usuario.DNI != null && usuario.DNI.ToLower().Contains(filtro));
+            }
+            return false;
         }
 
         // Método que se ejecuta al activar el comando de un nuevo usuario (botón "+ NUEVO USUARIO").
@@ -82,6 +119,7 @@ namespace TillasDesktop.UI.Modelos
 
                     // Agrega el nuevo usuario a la colección observable, haciendo que aparezca inmediatamente en el DataGrid.
                     ListaUsuarios.Add(ventana.NuevoUsuario);
+                    VistaFiltroUsuarios.Refresh();
                 }
             }
         }
@@ -103,6 +141,7 @@ namespace TillasDesktop.UI.Modelos
                 {
                     // Reemplaza el elemento antiguo por el nuevo en esa misma posición, forzando al DataGrid a refrescar la fila.
                     ListaUsuarios[index] = ventana.NuevoUsuario;
+                    VistaFiltroUsuarios.Refresh();
                 }
             }
 
@@ -116,6 +155,7 @@ namespace TillasDesktop.UI.Modelos
             {
                 // Remueve el objeto seleccionado de la colección, eliminando la fila visualmente de la tabla.
                 ListaUsuarios.Remove(UsuarioSeleccionado);
+                VistaFiltroUsuarios.Refresh();
             }
         }
 

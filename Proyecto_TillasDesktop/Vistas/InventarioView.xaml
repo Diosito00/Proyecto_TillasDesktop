@@ -8,43 +8,35 @@
              d:DesignHeight="450" d:DesignWidth="800"
              Background="#F0F4F8">
 
-    <Grid Margin="20,20,20,20">
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> <!-- Cabecera de controles -->
             <RowDefinition Height="*"/> <!-- Grilla de datos -->
         </Grid.RowDefinitions>
 
         <!-- PANEL SUPERIOR: Buscador y Botones de Acción -->
-        <Border Grid.Row="0" Background="White" CornerRadius="10" Margin="0,0,0,15" Padding="20">
+        <Border Grid.Row="0" Background="White" CornerRadius="8" Margin="0,0,0,20" Padding="15">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
+                <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
             </Border.Effect>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
 
-                <!-- Título -->
-                <TextBlock Text="CATÁLOGO E INVENTARIO" FontSize="18" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" VerticalAlignment="Center"/>
+            <DockPanel LastChildFill="False">
+                <!-- Título Estandarizado -->
+                <TextBlock Text="CATÁLOGO E INVENTARIO" FontSize="20" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" VerticalAlignment="Center"/>
 
-                <!-- Buscador -->
-                <TextBox Grid.Column="1" Width="350" Height="40" Margin="30,0,0,0" HorizontalAlignment="Left"
-                         Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <!-- Botones -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <Button Content="+ NUEVO MODELO" Command="{Binding NuevoModeloCommand}" Height="40" Width="150" 
-                            Style="{StaticResource BotonSecundario}"/>
+                <!-- Buscador y Botón alineados a la derecha -->
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                    <TextBox Width="350" Height="40" Margin="0,0,10,0" VerticalContentAlignment="Center"
+                             Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Content="+ NUEVO MODELO" Command="{Binding NuevoModeloCommand}" Height="35" Width="150" Style="{StaticResource BotonSecundario}"/>
                 </StackPanel>
-            </Grid>
+            </DockPanel>
         </Border>
 
         <!-- PANEL INFERIOR: Tabla Principal (DataGrid) -->
-        <Border Grid.Row="1" Background="White" CornerRadius="10" Padding="20">
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="15">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
+                <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
             </Border.Effect>
             <DataGrid ItemsSource="{Binding VistaFiltroProductos}" SelectedItem="{Binding ProductoSeleccionado}" 
                       Style="{StaticResource DataGridTillas}">

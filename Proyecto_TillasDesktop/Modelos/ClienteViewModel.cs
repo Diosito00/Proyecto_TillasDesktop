@@ -1,5 +1,6 @@
 ﻿using TillasDesktop.Entities.Usuarios;
 
+
 namespace TillasDesktop.UI.Modelos
 {
     // La clase Cliente representa la estructura de los datos de un cliente. 
@@ -64,9 +65,6 @@ namespace TillasDesktop.UI.Modelos
             set { _email = value; OnPropertyChanged(); } // Actualiza el email y avisa a la interfaz.
         }
 
-        public static implicit operator ClienteViewModel(Cliente v)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }
