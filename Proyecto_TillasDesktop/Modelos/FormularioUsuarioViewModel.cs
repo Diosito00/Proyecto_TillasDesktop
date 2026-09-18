@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Input;
+using System;
 using TillasDesktop.Entities.Usuarios;
 
 namespace TillasDesktop.UI.Modelos
@@ -10,7 +12,7 @@ namespace TillasDesktop.UI.Modelos
     public class FormularioUsuarioViewModel : ViewModelBase
     {
         // Campo privado _nombre que almacena internamente el valor escrito en el campo de nombre.
-        private string _nombre;
+        private string _nombre = string.Empty;
 
         // Propiedad pública Nombre vinculada al campo de texto correspondiente en la interfaz gráfica.
         // Al cambiar su valor, notifica a la interfaz y también revisa si el formulario ya está completo.
@@ -20,8 +22,15 @@ namespace TillasDesktop.UI.Modelos
             set { _nombre = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormularioValido)); }
         }
 
+        private string _apellido = string.Empty;
+        public string Apellido
+        {
+            get => _apellido;
+            set { _apellido = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormularioValido)); }
+        }
+
         // Campo privado _dni que almacena internamente el número de documento del usuario.
-        private string _dni;
+        private string _dni = string.Empty;
 
         // Propiedad pública para el DNI. Avisa si cambia y vuelve a revisar si el formulario está listo.
         public string Dni
@@ -31,7 +40,7 @@ namespace TillasDesktop.UI.Modelos
         }
 
         // Campo privado _email que almacena el correo electrónico ingresado.
-        private string _email;
+        private string _email = string.Empty;
 
         // Propiedad pública para el correo. Controla cambios y revisa la validez general.
         public string Email
@@ -40,8 +49,16 @@ namespace TillasDesktop.UI.Modelos
             set { _email = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormularioValido)); }
         }
 
+        private string _nombreUsuario = string.Empty;
+        public string NombreUsuario
+        {
+            get => _nombreUsuario;
+            set { _nombreUsuario = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormularioValido)); }
+        }
+
+
         // Campo privado _password que almacena la contraseña ingresada.
-        private string _password;
+        private string _password = string.Empty;
 
         // Propiedad pública Password vinculada al control de contraseña en la interfaz.
         public string Password
@@ -49,6 +66,14 @@ namespace TillasDesktop.UI.Modelos
             get => _password;
             set { _password = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormularioValido)); }
         }
+
+        private DateTime _fechaNacimiento = DateTime.Today;
+        public DateTime FechaNacimiento
+        {
+            get => _fechaNacimiento;
+            set { _fechaNacimiento = value; OnPropertyChanged(); }
+        }
+
 
         // Campo privado _rolSeleccionado que almacena el rol elegido dentro de las opciones disponibles.
         private string _rolSeleccionado;
@@ -78,10 +103,17 @@ namespace TillasDesktop.UI.Modelos
             {
                 // Si alguno de los campos esenciales está vacío, nulo o compuesto solo por espacios, el formulario no es válido.
                 if (string.IsNullOrWhiteSpace(Nombre) ||
+                    string.IsNullOrWhiteSpace(Apellido) ||
                     string.IsNullOrWhiteSpace(Dni) ||
                     string.IsNullOrWhiteSpace(Email) ||
                     string.IsNullOrWhiteSpace(Password) ||
                     string.IsNullOrWhiteSpace(RolSeleccionado))
+                {
+                    return false;
+                }
+
+                // DNI numérico y de longitud mínima lógica (ej. 7 dígitos)
+                if (Dni.Length < 7 || !Regex.IsMatch(Dni, @"^\d+$"))
                 {
                     return false;
                 }
@@ -101,8 +133,12 @@ namespace TillasDesktop.UI.Modelos
         // Comando público que maneja la acción de guardar los datos del formulario.
         public ICommand GuardarCommand { get; }
 
+        public ICommand VerPasswordCommand { get; }
+
         // Acción (del tipo Action) que se invoca para ordenar el cierre de la ventana.
-        public Action CerrarVentanaAccion { get; set; }
+        public Action<bool?> CerrarVentanaAccion { get; set; }
+
+        
 
         // Constructor de la clase: Se ejecuta al inicializar el ViewModel del formulario.
         public FormularioUsuarioViewModel()
@@ -111,31 +147,93 @@ namespace TillasDesktop.UI.Modelos
             RolesDisponibles = new ObservableCollection<string> { "Admin", "Gerente", "Vendedor" };
 
             // Configura el comando de guardado vinculándolo a su método de ejecución y a su regla de habilitación (CanEjecutarGuardar).
-            GuardarCommand = new RelayCommand(EjecutarGuardar, CanEjecutarGuardar);
+            GuardarCommand = new RelayCommand(EjecutarGuardar);
+
+           
+        }
+
+        // Constructor para EDITAR
+        public FormularioUsuarioViewModel(Usuario usuarioAEditar) : this()
+        {
+            if (usuarioAEditar != null)
+            {
+                UsuarioResultado = usuarioAEditar;
+                Nombre = usuarioAEditar.Nombre;
+                Apellido = usuarioAEditar.Apellido;
+                Dni = usuarioAEditar.DNI;
+                Email = usuarioAEditar.Email;
+                NombreUsuario = usuarioAEditar.Nombre_Usuario;
+                Password = usuarioAEditar.Password;
+                FechaNacimiento = usuarioAEditar.FechaNacimiento == default ? DateTime.Today : usuarioAEditar.FechaNacimiento;
+                RolSeleccionado = usuarioAEditar.Rol;
+                Activo = usuarioAEditar.Activo;
+            }
         }
 
         // Método de validación del comando:// Esta regla decide si el botón de guardar se puede presionar (devuelve true solo si el formulario está completamente válido).
-        private bool CanEjecutarGuardar(object obj)
-        {
-            return FormularioValido;
-        }
+        private bool CanEjecutarGuardar(object obj) => FormularioValido;
+
 
         // Método que se ejecuta al presionar el botón de guardar cuando el comando está habilitado.
         private void EjecutarGuardar(object obj)
         {
-            // Instancia un nuevo objeto de tipo Usuario y le asigna las propiedades recopiladas en los campos del formulario.
-            UsuarioResultado = new Usuario
+
+
+            // Validación general unificada para todos los campos obligatorios
+            if (string.IsNullOrWhiteSpace(Nombre) ||
+                string.IsNullOrWhiteSpace(Apellido) ||
+                string.IsNullOrWhiteSpace(Dni) ||
+                string.IsNullOrWhiteSpace(Email) ||
+                string.IsNullOrWhiteSpace(NombreUsuario) ||
+                string.IsNullOrWhiteSpace(Password) ||
+                string.IsNullOrWhiteSpace(RolSeleccionado))
             {
-                Nombre = this.Nombre,
-                DNI = this.Dni,
-                Email = this.Email,
-                Password = this.Password,
-                Rol = this.RolSeleccionado,
-                Activo = this.Activo
-            };
+                MessageBox.Show("Todos los campos son obligatorios. Por favor, complete la información faltante.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!Dni.All(char.IsDigit) || Dni.Length < 7)
+            {
+                MessageBox.Show("El DNI ingresado no es válido (debe contener al menos 7 números).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            string patronEmail = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            if (!Regex.IsMatch(Email.Trim(), patronEmail))
+            {
+                MessageBox.Show("El formato del correo electrónico no es válido (ejemplo: usuario@dominio.com).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!Nombre.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)) || !Apellido.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
+            {
+                MessageBox.Show("El nombre y el apellido no deben contener números ni símbolos.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            if (UsuarioResultado == null)
+            {
+                UsuarioResultado = new Usuario();
+            }
+
+            // Instancia un nuevo objeto de tipo Usuario y le asigna las propiedades recopiladas en los campos del formulario.
+
+            UsuarioResultado.Nombre = Nombre.Trim();
+            UsuarioResultado.Apellido = Apellido.Trim();
+            UsuarioResultado.DNI = Dni.Trim();
+            UsuarioResultado.Email = Email.Trim();
+            UsuarioResultado.Nombre_Usuario = NombreUsuario.Trim();
+            UsuarioResultado.Password = Password;
+            UsuarioResultado.FechaNacimiento = FechaNacimiento;
+            UsuarioResultado.Rol = RolSeleccionado;
+            UsuarioResultado.Activo = Activo;
 
             // Ejecuta la acción asignada externamente para cerrar la ventana.
-            CerrarVentanaAccion?.Invoke();
+            CerrarVentanaAccion?.Invoke(true);
         }
+
+
+
+
     }
+
 }
