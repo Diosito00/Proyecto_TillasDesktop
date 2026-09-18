@@ -10,13 +10,19 @@ namespace TillasDesktop.UI.Vistas
     // Clase parcial que maneja la lógica de la ventana emergente para registrar o editar un cliente.
     public partial class FormularioClienteWindow : Window
     {
-        // Propiedad pública que almacena el cliente creado o editado para ser devuelto a la ventana principal.
-        public ClienteViewModel? NuevoCliente { get; set; }
+        // Instancia del ViewModel que contiene las reglas de negocio, validaciones y datos del formulario.
+        private FormularioClienteViewModel _viewModel;
+
+        /// Propiedad pública que expone el cliente resultante (creado o modificado) para ser recuperado
+        /// por la ventana padre una vez que se confirma la operación de guardado.
+        public ClienteViewModel? NuevoCliente => _viewModel?.ClienteResultado;
 
         // Constructor vacío: se utiliza cuando se quiere dar de alta/crear un nuevo cliente desde cero.
         public FormularioClienteWindow()
         {
             InitializeComponent(); // Carga y dibuja los componentes visuales definidos en el archivo XAML.
+            _viewModel = new FormularioClienteViewModel(); // Inicializa el ViewModel en blanco.
+            ConfigurarViewModel(); // Enlaza el contexto de datos y las acciones de cierre de la ventana.
         }
 
         // Constructor con parámetros: se utiliza cuando se quiere editar un cliente existente, recibiendo sus datos actuales.
@@ -24,81 +30,26 @@ namespace TillasDesktop.UI.Vistas
         {
             InitializeComponent(); // Inicializa los componentes de la interfaz.
 
-            // Rellena los cuadros de texto del formulario con la información del cliente que se va a editar.
-            txtNombre.Text = clienteAEditar.Nombre;
-            txtApellido.Text = clienteAEditar.Apellido;
-            txtCUIT.Text = clienteAEditar.CUIT;
-            txtTelefono.Text = clienteAEditar.Telefono;
-            txtEmail.Text = clienteAEditar.Email;
-
-            // Asigna la referencia del cliente existente para modificarlo directamente al guardar.
-            NuevoCliente = clienteAEditar;
+            _viewModel = new FormularioClienteViewModel(clienteAEditar); // Inicializa el ViewModel inyectando los datos existentes.
+            ConfigurarViewModel(); // Enlaza el contexto de datos y las acciones de cierre de la ventana.
         }
 
-        // Evento que se ejecuta al hacer clic en el botón "GUARDAR CLIENTE".
-        private void BtnGuardar_Click(object sender, RoutedEventArgs e)
+        /// Configura el enlace de datos (DataContext) de la ventana con el ViewModel y define la acción
+        /// que cerrará la interfaz de manera controlada cuando la validación y el guardado sean exitosos.
+        private void ConfigurarViewModel()
         {
-            // 1. Validar que ningún campo obligatorio esté vacío
-            if (string.IsNullOrWhiteSpace(txtNombre.Text) ||
-                string.IsNullOrWhiteSpace(txtApellido.Text) ||
-                string.IsNullOrWhiteSpace(txtCUIT.Text) ||
-                string.IsNullOrWhiteSpace(txtTelefono.Text) ||
-                string.IsNullOrWhiteSpace(txtEmail.Text))
+            DataContext = _viewModel; // Conecta la pantalla visual con el "cerebro" (ViewModel).
+
+            // Define la acción (delegado) que ejecutará el ViewModel para cerrar la ventana,
+            // devolviendo el resultado booleano (DialogResult = true si se guardó con éxito).
+            _viewModel.CerrarVentanaAccion = (resultado) =>
             {
-                MessageBox.Show("Todos los campos son obligatorios. Por favor, complete la información faltante.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            // Limpiamos el CUIT por si el usuario ingresó guiones (ej: 20-30405060-7 -> 20304050607)
-            string cuitLimpio = txtCUIT.Text.Replace("-", "").Trim();
-
-            if (cuitLimpio.Length != 11 || !cuitLimpio.All(char.IsDigit))
-            {
-                MessageBox.Show("El CUIT ingresado no es válido (debe contener exactamente 11 números).",
-                                "Validación de CUIT",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
-                return; // Detiene el guardado
-            }
-
-            // 3. Validar longitud mínima del teléfono
-            if (txtTelefono.Text.Trim().Length < 7)
-            {
-                MessageBox.Show("El teléfono ingresado es demasiado corto.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            // 4. Validar formato de correo electrónico
-            string patronEmail = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-            if (!Regex.IsMatch(txtEmail.Text.Trim(), patronEmail))
-            {
-                MessageBox.Show("El formato del correo electrónico no es válido (ejemplo: usuario@dominio.com).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            // Validar que Nombre y Apellido contengan solo letras y espacios
-            if (!txtNombre.Text.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)) ||
-                !txtApellido.Text.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
-            {
-                MessageBox.Show("El nombre y el apellido no deben contener números ni símbolos.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            // Si pasa las validaciones, continúa con la asignación normal...
-            if (NuevoCliente == null)
-            {
-                NuevoCliente = new ClienteViewModel();
-            }
-
-            NuevoCliente.Nombre = txtNombre.Text;
-            NuevoCliente.Apellido = txtApellido.Text;
-            NuevoCliente.CUIT = txtCUIT.Text;
-            NuevoCliente.Telefono = txtTelefono.Text;
-            NuevoCliente.Email = txtEmail.Text;
-
-            DialogResult = true;
+                DialogResult = resultado;
+                Close();
+            };
         }
 
+        
         private void SoloNumeros_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             // Expresión regular que solo permite dígitos numéricos
