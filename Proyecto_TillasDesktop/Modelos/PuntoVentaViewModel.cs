@@ -54,6 +54,7 @@ namespace TillasDesktop.UI.Modelos
         }
 
         // === COMANDOS ===
+        public ICommand LimpiarBusquedaCommand { get; }
         public ICommand AgregarAlCarritoCommand { get; }
         public ICommand QuitarDelCarritoCommand { get; }
         public ICommand CobrarCommand { get; }
@@ -78,11 +79,18 @@ namespace TillasDesktop.UI.Modelos
 
             ClientesTotales = new ObservableCollection<string> { "Consumidor Final", "Juan Pérez", "María Gómez" };
 
+            LimpiarBusquedaCommand = new RelayCommand(LimpiarBusqueda);
             AgregarAlCarritoCommand = new RelayCommand(AgregarAlCarrito);
             QuitarDelCarritoCommand = new RelayCommand(QuitarDelCarrito);
             CobrarCommand = new RelayCommand(ConfirmarCobro);
 
             CargarDatosDePrueba();
+        }
+
+        private void LimpiarBusqueda(object parametro)
+        {
+            // Al vaciar la variable, el XAML se actualiza y la tabla vuelve a mostrar todo el catálogo
+            BusquedaRapida = string.Empty;
         }
 
         private bool FiltrarCatalogo(object obj)

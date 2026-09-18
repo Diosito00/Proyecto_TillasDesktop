@@ -19,10 +19,20 @@
         </Grid.RowDefinitions>
 
         <!-- === FILA 0: BUSCADOR === -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
-            <TextBox Width="300" Text="{Binding BusquedaRapida, UpdateSourceTrigger=PropertyChanged}"/>
-            <Button Content="BUSCAR" Style="{StaticResource BotonSecundario}" Margin="10,0,0,0" Width="100"/>
-        </StackPanel>
+        <Border Grid.Row="0" Background="White" CornerRadius="8" Margin="0,0,0,20" Padding="15">
+            <Border.Effect>
+                <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+            </Border.Effect>
+            <DockPanel LastChildFill="False">
+                <TextBlock Text="PUNTO DE VENTA" FontSize="20" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                    <TextBox Width="350" Height="40" Margin="0,0,10,0" VerticalContentAlignment="Center" 
+                             Text="{Binding BusquedaRapida, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Content="LIMPIAR" Command="{Binding LimpiarBusquedaCommand}" Height="35" Width="150" 
+                            Style="{StaticResource BotonSecundario}"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
 
         <!-- === FILA 1: LAS DOS TABLAS LADO A LADO === -->
         <Grid Grid.Row="1">
@@ -36,58 +46,72 @@
             </Grid.ColumnDefinitions>
 
             <!-- Columna Izquierda: INVENTARIO -->
-            <GroupBox Grid.Column="0" Header="Catálogo Disponible">
-                <DataGrid ItemsSource="{Binding VistaFiltroCatalogo}" 
-                      Style="{StaticResource DataGridTillas}">
-                    <DataGrid.Columns>
-                        <!-- Datos del producto disponible -->
-                        <DataGridTextColumn Header="MODELO" Binding="{Binding Nombre}" Width="2*"/>
-                        <DataGridTextColumn Header="MARCA" Binding="{Binding NombreMarca}" Width="*"/>
-                        <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="*"/>
-                        <DataGridTextColumn Header="STOCK" Binding="{Binding Stock_Actual}" Width="*"/>
-                        <DataGridTextColumn Header="PRECIO" Binding="{Binding Precio_Venta, StringFormat=C}" Width="*"/>
+            <Border Grid.Column="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                        <!-- Botón para enviar al carrito -->
-                        <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content="➕" ToolTip="Agregar al carrito"
+                    <TextBlock Grid.Row="0" Text="CATÁLOGO DISPONIBLE" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding VistaFiltroCatalogo}" 
+                          Style="{StaticResource DataGridTillas}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="MODELO" Binding="{Binding Nombre}" Width="2*"/>
+                            <DataGridTextColumn Header="MARCA" Binding="{Binding NombreMarca}" Width="*"/>
+                            <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="*"/>
+                            <DataGridTextColumn Header="STOCK" Binding="{Binding Stock_Actual}" Width="*"/>
+                            <DataGridTextColumn Header="PRECIO" Binding="{Binding Precio_Venta, StringFormat=C}" Width="*"/>
+
+                            <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="➕" ToolTip="Agregar al carrito"
                                             Command="{Binding DataContext.AgregarAlCarritoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                             CommandParameter="{Binding}"
                                             Background="Transparent" BorderThickness="0" Cursor="Hand" Foreground="{StaticResource BrushVerde}" FontSize="16"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </GroupBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
 
             <!-- Columna Derecha: CARRITO DE COMPRAS -->
-            <GroupBox Grid.Column="2" Header="Carrito de Compras">
-                <DataGrid ItemsSource="{Binding Carrito}" 
-                      Style="{StaticResource DataGridTillas}">
-                    <DataGrid.Columns>
-                        <!-- Detalles de la línea de venta -->
-                        <DataGridTextColumn Header="CANT" Binding="{Binding Cantidad}" Width="Auto"/>
-                        <DataGridTextColumn Header="MODELO" Binding="{Binding Nombre}" Width="2*"/>
-                        <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="*"/>
-                        <DataGridTextColumn Header="P. UNIT" Binding="{Binding PrecioUnitario, StringFormat=C}" Width="*"/>
-                        <DataGridTextColumn Header="SUBTOTAL" Binding="{Binding Subtotal, StringFormat=C}" Width="*"/>
+            <Border Grid.Column="2" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                        <!-- Botón para eliminar del carrito -->
-                        <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content="❌" ToolTip="Quitar del carrito"
+                    <TextBlock Grid.Row="0" Text="CARRITO DE COMPRAS" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding Carrito}" 
+                          Style="{StaticResource DataGridTillas}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="CANT" Binding="{Binding Cantidad}" Width="Auto"/>
+                            <DataGridTextColumn Header="MODELO" Binding="{Binding Nombre}" Width="2*"/>
+                            <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="*"/>
+                            <DataGridTextColumn Header="P. UNIT" Binding="{Binding PrecioUnitario, StringFormat=C}" Width="*"/>
+                            <DataGridTextColumn Header="SUBTOTAL" Binding="{Binding Subtotal, StringFormat=C}" Width="*"/>
+
+                            <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="❌" ToolTip="Quitar del carrito"
                                             Command="{Binding DataContext.QuitarDelCarritoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                             CommandParameter="{Binding}"
                                             Background="Transparent" BorderThickness="0" Cursor="Hand" Foreground="{StaticResource BrushRojo}" FontSize="12"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </GroupBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
         </Grid>
 
         <!-- === FILA 2: RESUMEN Y COBRO (Parte Inferior) === -->
