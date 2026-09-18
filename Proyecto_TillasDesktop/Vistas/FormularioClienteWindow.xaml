@@ -2,48 +2,43 @@
 <Window x:Class="TillasDesktop.UI.Vistas.FormularioClienteWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Registrar Cliente" Height="550" Width="400" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Background="#F0F4F8">
+        Title="Gestión de Cliente" Height="630" Width="400"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
+        Background="#F0F4F8">
 
-    <!-- Grid principal que organiza los elementos de la ventana en filas con un margen interno de 20 píxeles. -->
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <!-- Fila 0: Se adapta automáticamente al espacio del título. -->
-            <RowDefinition Height="*"/>
-            <!-- Fila 1: Ocupa todo el espacio intermedio disponible para los campos de texto. -->
-            <RowDefinition Height="Auto"/>
-            <!-- Fila 2: Se adapta automáticamente al tamaño del botón inferior. -->
-        </Grid.RowDefinitions>
-
-        <!-- Título principal del formulario visualizado en la parte superior. -->
-        <TextBlock Text="NUEVO CLIENTE" FontSize="18" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
+    <!-- Contenedor visual Border que genera una tarjeta blanca con esquinas redondeadas y márgenes decorativos. -->
+    <Border Background="White" CornerRadius="10" Margin="20" Padding="20">
 
         <!-- StackPanel ubicado en la fila 1 que apila verticalmente las etiquetas y los campos de entrada (TextBox). -->
-        <StackPanel Grid.Row="1">
-            
+        <StackPanel>
+
+            <!-- Título principal del formulario visualizado en la parte superior. -->
+            <TextBlock Text="NUEVO CLIENTE" FontSize="18" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,15"/>
             <!-- Etiqueta y campo de texto para el Nombre -->
-            <TextBlock Text="Nombre:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtNombre" PreviewTextInput="SoloLetras_PreviewTextInput" Margin="0,0,0,10"/>
+            <TextBlock Text="Nombre:" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtNombre" Height="32" VerticalContentAlignment="Center" PreviewTextInput="SoloLetras_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el Apellido -->
-            <TextBlock Text="Apellido:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtApellido" PreviewTextInput="SoloLetras_PreviewTextInput" Margin="0,0,0,10"/>
+            <TextBlock Text="Apellido:" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtApellido" Height="32" VerticalContentAlignment="Center" PreviewTextInput="SoloLetras_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el CUIT -->
             <TextBlock Text="CUIT:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtCUIT" PreviewTextInput="SoloNumeros_PreviewTextInput" Margin="0,0,0,10"/>
+            <TextBox x:Name="txtCUIT" Height="32" VerticalContentAlignment="Center" PreviewTextInput="SoloNumeros_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el Teléfono -->
             <TextBlock Text="Teléfono:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtTelefono" PreviewTextInput="Telefono_PreviewTextInput" Margin="0,0,0,10"/>
+            <TextBox x:Name="txtTelefono" Height="32" VerticalContentAlignment="Center" PreviewTextInput="Telefono_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el Email -->
             <TextBlock Text="Email:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtEmail"/>
-        </StackPanel>
+            <TextBox x:Name="txtEmail" Height="32" VerticalContentAlignment="Center"/>
 
-        <!-- Botón de guardado ubicado en la fila 2 que ejecuta el método BtnGuardar_Click al presionarlo. -->
-        <Button Grid.Row="2" Content="GUARDAR CLIENTE" Height="40" Style="{StaticResource BotonSecundario}" Click="BtnGuardar_Click"/>
-    </Grid>
+            <!-- Botón de guardado ubicado en la fila 2 que ejecuta el método BtnGuardar_Click al presionarlo. -->
+            <Button Grid.Row="2" Content="GUARDAR CLIENTE" Margin="0,40,0,0" Height="40" Style="{StaticResource BotonSecundario}" Click="BtnGuardar_Click"/>
+
+        </StackPanel>
+    </Border>
 </Window>
+    
     
