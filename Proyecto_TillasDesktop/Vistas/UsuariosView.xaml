@@ -49,12 +49,20 @@
 
                     <!-- Columna de texto flexible (*) para mostrar el nombre completo del usuario. -->
                     <DataGridTextColumn Header="NOMBRE" Width="*" Binding="{Binding Nombre}"/>
+                    
+                    <DataGridTextColumn Header="APELLIDO" Width="*" Binding="{Binding Apellido}"/>
 
                     <!-- Columna de texto con ancho fijo de 100 píxeles para mostrar el número de DNI. -->
                     <DataGridTextColumn Header="DNI" Width="100" Binding="{Binding DNI}"/>
 
                     <!-- Columna de texto flexible (*) para mostrar la dirección de correo electrónico. -->
                     <DataGridTextColumn Header="EMAIL" Width="*" Binding="{Binding Email}"/>
+
+                    <!-- Columna de texto con ancho fijo para mostrar el nombre de usuario (username). -->
+                    <DataGridTextColumn Header="USUARIO" Width="120" Binding="{Binding Nombre_Usuario}"/>
+                    
+                    <!-- Columna de texto con ancho fijo para mostrar la fecha de nacimiento formateada. -->
+                    <DataGridTextColumn Header="NACIMIENTO" Width="110" Binding="{Binding FechaNacimiento, StringFormat=dd/MM/yyyy}"/>
 
                     <!-- Columna de texto con ancho fijo de 120 píxeles para mostrar el rol asignado. -->
                     <DataGridTextColumn Header="ROL" Width="120" Binding="{Binding Rol}"/>

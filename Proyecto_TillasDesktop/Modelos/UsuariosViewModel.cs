@@ -83,8 +83,8 @@ namespace TillasDesktop.UI.Modelos
             // Instancia una nueva ObservableCollection asignándole dos usuarios iniciales con sus respectivas propiedades.
             ListaUsuarios = new ObservableCollection<Usuario>
             {
-               new Usuario { ID = 1, Nombre = "Juan Perez", DNI = "12345678", Email = "admin@tillas.com", Password = "123", Rol = "Admin", Activo = true },
-                new Usuario { ID = 2, Nombre = "María García", DNI = "87654321", Email = "gerente@tillas.com", Password = "123", Rol = "Gerente", Activo = true }
+               new Usuario { ID = 1, Nombre = "Juan", Apellido = "Perez", DNI = "12345678", Email = "admin@tillas.com", Nombre_Usuario = "jperez", Password = "123", FechaNacimiento = new System.DateTime(1990, 5, 15), Rol = "Admin", Activo = true },
+                new Usuario { ID = 2, Nombre = "María", Apellido = "García", DNI = "87654321", Email = "gerente@tillas.com", Nombre_Usuario = "mgarcia", Password = "123", FechaNacimiento = new System.DateTime(1985, 8, 20), Rol = "Gerente", Activo = true }
             };
         }
 
@@ -96,6 +96,8 @@ namespace TillasDesktop.UI.Modelos
 
                 string filtro = TextoBusqueda.ToLower();
                 return (usuario.Nombre != null && usuario.Nombre.ToLower().Contains(filtro)) ||
+                       (usuario.Apellido != null && usuario.Apellido.ToLower().Contains(filtro)) ||
+                       (usuario.Nombre_Usuario != null && usuario.Nombre_Usuario.ToLower().Contains(filtro)) ||
                        (usuario.Email != null && usuario.Email.ToLower().Contains(filtro)) ||
                        (usuario.DNI != null && usuario.DNI.ToLower().Contains(filtro));
             }
@@ -153,7 +155,7 @@ namespace TillasDesktop.UI.Modelos
         {
             if (obj is Usuario usuarioFila)
             {
-                var respuesta = MessageBox.Show($"¿Estás seguro de que deseas eliminar permanentemente el usuario '{usuarioFila.Nombre}'?",
+                var respuesta = MessageBox.Show($"¿Estás seguro de que deseas eliminar permanentemente el usuario '{usuarioFila.Nombre} {usuarioFila.Apellido}'?",
                                                 "Confirmar Eliminación",
                                                 MessageBoxButton.YesNo,
                                                 MessageBoxImage.Warning);
