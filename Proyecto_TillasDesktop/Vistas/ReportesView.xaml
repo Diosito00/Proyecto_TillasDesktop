@@ -134,7 +134,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="ÚLTIMAS VENTAS REALIZADAS" FontWeight="Bold" Foreground="#2C3E50" Margin="0,0,0,15"/>
+                <TextBlock Grid.Row="0" Text="ÚLTIMAS VENTAS REALIZADAS" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
                 
                 <DataGrid Grid.Row="1" ItemsSource="{Binding HistorialVentas}" Style="{StaticResource DataGridTillas}">
                     <DataGrid.Columns>
@@ -149,7 +149,8 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Content="👁️" ToolTip="Ver Detalle de Venta"
-                                        Background="Transparent" BorderThickness="0" Cursor="Hand" FontSize="14"/>
+                                            Command="{Binding DataContext.VerDetalleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}"
+                                            Background="Transparent" BorderThickness="0" Cursor="Hand" FontSize="14"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

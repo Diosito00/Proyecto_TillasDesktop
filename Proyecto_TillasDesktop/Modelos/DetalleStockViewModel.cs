@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 using TillasDesktop.BLL.Services;
 using TillasDesktop.Entities.Inventario;
+using TillasDesktop.UI.Vistas;
 
 namespace TillasDesktop.UI.Modelos
 {
@@ -22,6 +24,8 @@ namespace TillasDesktop.UI.Modelos
         public ObservableCollection<ProductoTalle> ListaTalles { get; set; }
 
         public ICommand IngresarNuevoStockCommand { get; }
+        public ICommand EditarTalleCommand { get; }
+        public ICommand EliminarTalleCommand { get; }
         public Action CerrarVentana { get; set; }
 
         public DetalleStockViewModel(ProductoViewModel productoVM)
@@ -39,6 +43,8 @@ namespace TillasDesktop.UI.Modelos
             };
 
             IngresarNuevoStockCommand = new RelayCommand(AbrirVentanaIngreso);
+            EditarTalleCommand = new RelayCommand(EditarTalle);
+            EliminarTalleCommand = new RelayCommand(EliminarTalle);
         }
 
         private void AbrirVentanaIngreso(object parametro)
@@ -78,6 +84,47 @@ namespace TillasDesktop.UI.Modelos
             formViewModel.CerrarVentana = ventana.Close;
             ventana.DataContext = formViewModel;
             ventana.ShowDialog();
+        }
+
+        private void EditarTalle(object parametro)
+        {
+            // Verificamos que el parámetro que llega del XAML sea de tu clase ProductoTalle
+            if (parametro is ProductoTalle talleSeleccionado)
+            {
+                var ventanaEdicion = new IngresoStockWindow();
+
+                var viewModelEdicion = new IngresoStockViewModel(_productoVMOriginal, talleSeleccionado);
+
+                viewModelEdicion.CerrarVentana = () => ventanaEdicion.Close();
+
+                viewModelEdicion.OnStockIngresado = (talleActualizado) =>
+                {
+                    int index = ListaTalles.IndexOf(talleSeleccionado);
+
+                    if (index >= 0)
+                    {
+                        ListaTalles[index] = talleActualizado;
+                    }
+                };
+
+                ventanaEdicion.DataContext = viewModelEdicion;
+                ventanaEdicion.ShowDialog();
+            }
+        }
+
+        private void EliminarTalle(object parametro)
+        {
+            if (parametro is ProductoTalle talleSeleccionado)
+            {
+                // Validamos si realmente desea eliminarlo
+                var respuesta = MessageBox.Show($"¿Estás seguro de que deseas eliminar el talle {talleSeleccionado.Talle}?",
+                                                "Confirmar Eliminación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (respuesta == MessageBoxResult.Yes)
+                {
+                    ListaTalles.Remove(talleSeleccionado);
+                }
+            }
         }
     }
 }

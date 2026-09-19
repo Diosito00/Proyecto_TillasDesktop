@@ -41,6 +41,7 @@ namespace TillasDesktop.UI.Modelos
         // === COMANDOS ===
         public ICommand GenerarReporteCommand { get; }
         public ICommand ExportarCommand { get; }
+        public ICommand VerDetalleCommand { get; }
 
         public ReportesViewModel()
         {
@@ -54,6 +55,7 @@ namespace TillasDesktop.UI.Modelos
             CargarHistorialSimulado();
             GenerarReporteCommand = new RelayCommand(GenerarReporte);
             ExportarCommand = new RelayCommand(ExportarReporte);
+            VerDetalleCommand = new RelayCommand(VerDetalle);
         }
 
         // === LÓGICA DE BOTONES ===
@@ -98,6 +100,19 @@ namespace TillasDesktop.UI.Modelos
                     FechaInicio = hoy.AddMonths(-3).Date;
                     FechaFin = hoy.Date;
                     break;
+            }
+        }
+
+        private void VerDetalle(object parametro)
+        {
+            if (parametro is VentaResumenDTO ventaSeleccionada)
+            {
+                // Creamos la ventana y le inyectamos su ViewModel con la venta específica
+                var ventanaDetalle = new Vistas.DetalleVentaView();
+                ventanaDetalle.DataContext = new DetalleVentaViewModel(ventaSeleccionada);
+
+                // ShowDialog oscurece la pantalla de atrás y obliga al usuario a cerrar el ticket
+                ventanaDetalle.ShowDialog();
             }
         }
 

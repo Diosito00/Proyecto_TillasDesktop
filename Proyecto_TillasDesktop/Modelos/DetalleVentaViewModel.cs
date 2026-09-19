@@ -1,58 +1,38 @@
-﻿using TillasDesktop.Entities.Facturacion;
+﻿using System.Collections.ObjectModel;
+using TillasDesktop.Entities.Reportes;
 
 namespace TillasDesktop.UI.Modelos
 {
     public class DetalleVentaViewModel : ViewModelBase
     {
-        private readonly DetalleVenta _detallePuro;
+        // El encabezado del ticket
+        public VentaResumenDTO VentaGeneral { get; set; }
 
-        private string _nombreProducto;
+        // La lista de productos comprados
+        public ObservableCollection<LineaDetalleVentaDTO> Lineas { get; set; }
 
-        public DetalleVentaViewModel(DetalleVenta detalle, string nombreProducto)
+        public DetalleVentaViewModel(VentaResumenDTO ventaSeleccionada)
         {
-            _detallePuro = detalle;
-            _nombreProducto = nombreProducto;
+            VentaGeneral = ventaSeleccionada;
+            Lineas = new ObservableCollection<LineaDetalleVentaDTO>();
+
+            CargarDetallesSimulados();
         }
 
-        public string NombreProducto
+        private void CargarDetallesSimulados()
         {
-            get => _nombreProducto;
-            set { _nombreProducto = value; OnPropertyChanged(); }
-        }
+            // En el futuro, aquí llamarás a: _reportesService.ObtenerLineasPorTicket(VentaGeneral.ID);
 
-        public int Cantidad
-        {
-            get => _detallePuro.Cantidad;
-            set
+            // Simulamos un par de zapatillas para este ticket
+            Lineas.Add(new LineaDetalleVentaDTO
             {
-                _detallePuro.Cantidad = value;
-                OnPropertyChanged();
-
-                // Al cambiar la cantidad, notificamos a WPF que repinte el texto del Subtotal
-                OnPropertyChanged(nameof(Subtotal));
-            }
-        }
-
-        public decimal PrecioUnitario
-        {
-            get => _detallePuro.Precio_Unitario;
-            set
-            {
-                _detallePuro.Precio_Unitario = value;
-                OnPropertyChanged();
-
-                // Agregado: Si el precio cambia (ej. descuento manual), el subtotal también debe repintarse.
-                OnPropertyChanged(nameof(Subtotal));
-            }
-        }
-
-        // Propiedad de solo lectura para la vista. Al no tener "set", WPF sabe que solo debe leerla.
-        public decimal Subtotal => Cantidad * PrecioUnitario;
-
-        // PUENTE A LA BLL: Método de utilidad para devolver la entidad pura fácilmente.
-        public DetalleVenta ObtenerEntidadPura()
-        {
-            return _detallePuro;
+                CodigoModelo = "NK-AF1-01",
+                NombreProducto = "Nike Air Force 1",
+                Marca = "Nike",
+                Talle = 42m,
+                Cantidad = 1,
+                PrecioUnitario = 125000m
+            });
         }
     }
 }

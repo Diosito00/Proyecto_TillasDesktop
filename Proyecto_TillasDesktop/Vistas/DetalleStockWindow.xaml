@@ -34,6 +34,24 @@
                     <!-- La entidad ProductoTalle tiene las propiedades Talle y Stock_Actual -->
                     <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="*"/>
                     <DataGridTextColumn Header="STOCK DISPONIBLE" Binding="{Binding Stock_Actual}" Width="*"/>
+                    <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <!-- Botón Editar -->
+                                    <Button Content="✏️" ToolTip="Editar Talle/Stock"
+                                            Command="{Binding DataContext.EditarTalleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Cursor="Hand" 
+                                            FontSize="14" Margin="0,0,10,0"/>
+                                    <!-- Botón Eliminar -->
+                                    <Button Content="🗑️" ToolTip="Eliminar Talle"
+                                            Command="{Binding DataContext.EliminarTalleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}" Background="Transparent" BorderThickness="0"  Foreground="{StaticResource BrushRojo}"
+                                            Cursor="Hand" FontSize="14"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
 

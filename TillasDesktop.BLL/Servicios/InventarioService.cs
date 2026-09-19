@@ -50,6 +50,18 @@ namespace TillasDesktop.BLL.Services
             return true;
         }
 
+        public bool ActualizarStockTalle(ProductoTalle talleActualizado, out string mensajeRespuesta)
+        {
+            if (talleActualizado.Talle <= 0 || talleActualizado.Stock_Actual < 0)
+            {
+                mensajeRespuesta = "El talle debe ser válido y el stock no puede ser negativo.";
+                return false;
+            }
+
+            mensajeRespuesta = $"Stock del talle {talleActualizado.Talle} actualizado correctamente a {talleActualizado.Stock_Actual} unidades.";
+            return true;
+        }
+
         // Agrega estos dos métodos a tu InventarioService en la BLL
         public bool ActualizarProducto(Producto productoActualizado, out string mensajeRespuesta)
         {
