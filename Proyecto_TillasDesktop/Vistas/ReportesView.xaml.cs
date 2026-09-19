@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TillasDesktop.UI.Modelos;
 
 namespace TillasDesktop.UI.Vistas
 {
@@ -17,6 +18,7 @@ namespace TillasDesktop.UI.Vistas
         public ReportesView()
         {
             InitializeComponent();
+            this.DataContext = new ReportesViewModel();
         }
     }
 }

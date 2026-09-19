@@ -11,157 +11,145 @@
     <!-- Grid principal que organiza la interfaz en filas independientes para estructurar los elementos verticalmente. -->
     <Grid Margin="20">
         <Grid.RowDefinitions>
+            <!-- Fila 0: Panel superior (Título y Filtros) -->
             <RowDefinition Height="Auto"/>
-            <!--  Fila 0: Se ajusta al espacio del título y los controles desplegables de filtrado. Título y Filtros -->
+            <!-- Fila 1: Tarjetas de Resumen (KPIs) -->
             <RowDefinition Height="Auto"/>
-            <!-- Fila 1: Se adapta al tamaño de las tarjetas con métricas principales (KPIs). -->
-            <RowDefinition Height="180"/>
-            <!-- Fila 2: Altura fija reservada exclusivamente para el gráfico estadístico de LiveCharts. -->
+            <!-- Fila 2: Gráfico y Tabla -->
             <RowDefinition Height="*"/>
-            <!-- Fila 3: Ocupa todo el espacio restante disponible para la tabla de reportes recientes. -->
         </Grid.RowDefinitions>
 
-        <!-- SECCIÓN 0: TÍTULO Y FILTROS -->
-        <Grid Grid.Row="0" Margin="0,0,0,15">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <StackPanel>
-                <!-- Título principal de la sección de reportes -->
-                <TextBlock Text="REPORTES Y ESTADÍSTICAS" FontSize="20" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}"/>
-                <!-- Panel horizontal que agrupa los campos y selectores de filtrado -->
-                <WrapPanel Orientation="Horizontal" Margin="0,10,0,0">
-                    <!-- Filtro por Período -->
-                    <StackPanel Margin="0,0,15,0">
-                        <TextBlock Text="PERÍODO" FontSize="11" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
-                        <ComboBox Width="130" Height="30" Margin="0,5,0,0" SelectedIndex="0">
-                            <ComboBoxItem Content="Último Trimestre"/>
-                            <ComboBoxItem Content="Este Mes"/>
-                            <ComboBoxItem Content="Personalizado"/>
-                        </ComboBox>
-                    </StackPanel>
-
-                    <!-- Filtro por Tipo de Reporte -->
-                    <StackPanel Margin="0,0,15,0">
-                        <TextBlock Text="TIPO DE REPORTE" FontSize="11" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
-                        <ComboBox Width="180" Height="30" Margin="0,5,0,0" SelectedIndex="0">
-                            <ComboBoxItem Content="Ventas y Resumen Comercial"/>
-                            <ComboBoxItem Content="Stock e Inventario"/>
-                        </ComboBox>
-                    </StackPanel>
-
-                    <!-- Campo de texto para Fecha de Inicio -->
-                    <StackPanel Margin="0,0,15,0">
-                        <TextBlock Text="FECHA INICIO" FontSize="11" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
-                        <TextBox Width="100" Height="30" Text="01/04/2026" VerticalContentAlignment="Center" Margin="0,5,0,0" Padding="5"/>
-                    </StackPanel>
-
-                    <!-- Campo de texto para Fecha de Fin -->
-                    <StackPanel Margin="0,0,15,0">
-                        <TextBlock Text="FECHA FIN" FontSize="11" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
-                        <TextBox Width="100" Height="30" Text="30/06/2026" VerticalContentAlignment="Center" Margin="0,5,0,0" Padding="5"/>
-                    </StackPanel>
-                </WrapPanel>
-            </StackPanel>
-
-            <!-- Panel derecho para las acciones principales de generación y exportación -->
-            <StackPanel Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                <!-- Botón de acción para procesar y generar el reporte -->
-                <Button Content="GENERAR REPORTE" Width="150" Height="38" Style="{StaticResource BotonSecundario}" Margin="0,0,0,5"/>
-                <TextBlock Text="📄 EXPORTAR PDF/EXCEL" FontSize="11" Foreground="{StaticResource BrushTextoPrincipal}" FontWeight="Bold" Cursor="Hand" HorizontalAlignment="Right"/>
-            </StackPanel>
-        </Grid>
-
-
-        <!-- SECCIÓN 1: TARJETAS KPI (INDICADORES CLAVE DE RENDIMIENTO) -->
-        <Grid Grid.Row="1" Margin="0,0,0,15">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="1.5*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Tarjeta 1: Ingresos Totales con indicador de crecimiento porcentual -->
-            <Border Grid.Column="0" Background="White" CornerRadius="8" Padding="15" Margin="0,0,10,0" BorderBrush="#E4E7EB" BorderThickness="1">
-                <StackPanel>
-                    <TextBlock Text="INGRESOS TOTALES (TRIMESTRE)" FontSize="11" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                        <TextBlock Text="$320,500" FontSize="22" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}"/>
-                        <Border Background="#E1F5FE" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="📈 +8.4%" FontSize="11" FontWeight="Bold" Foreground="#0288D1"/>
-                        </Border>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-
-            <!-- Tarjeta 2: Cantidad total de ventas realizadas -->
-            <Border Grid.Column="1" Background="White" CornerRadius="8" Padding="15" Margin="0,0,10,0" BorderBrush="#E4E7EB" BorderThickness="1">
-                <StackPanel>
-                    <TextBlock Text="VENTAS REALIZADAS" FontSize="11" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
-                    <TextBlock Text="1,250" FontSize="22" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,8,0,0"/>
-                </StackPanel>
-            </Border>
-
-            <!-- Tarjeta 3: Producto con mayor volumen de salida -->
-            <Border Grid.Column="2" Background="White" CornerRadius="8" Padding="15" BorderBrush="#E4E7EB" BorderThickness="1">
-                <StackPanel>
-                    <TextBlock Text="PRODUCTO ESTRELLA" FontSize="11" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
-                    <TextBlock Text="Sneaker Modelo X" FontSize="16" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,5,0,2"/>
-                    <TextBlock Text="480 pares" FontSize="12" Foreground="{StaticResource BrushTextoSecundario}"/>
-                </StackPanel>
-            </Border>
-        </Grid>
-
-        <!-- SECCIÓN 2: GRÁFICO ESTADÍSTICO (LIVECHARTS) -->
-        <Border Grid.Row="2" Background="White" CornerRadius="8" Padding="15" Margin="0,0,0,15" BorderBrush="#E4E7EB" BorderThickness="1">
+        <!-- ========================================== -->
+        <!-- FILA 0: ENCABEZADO Y FILTROS               -->
+        <!-- ========================================== -->
+        <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="20" Margin="0,0,0,15">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <!-- Título -->
+                    <RowDefinition Height="15"/>
+                    <!-- Espaciador -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Controles -->
                 </Grid.RowDefinitions>
-                <TextBlock Text="RESUMEN VENTAS TRIMESTRALES" FontSize="12" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}"/>
-                <!-- Componente de LiveCharts configurado con una serie de líneas para mostrar la evolución temporal -->
-                <lvc:CartesianChart Grid.Row="1" Margin="0,5,0,0" DisableAnimations="True">
-                    <lvc:CartesianChart.Series>
-                        <lvc:LineSeries Title="Ventas" Values="8200, 21300, 44500, 12300, 55500, 32500" Stroke="#102A43" PointGeometrySize="8"/>
-                    </lvc:CartesianChart.Series>
-                    <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Labels="Abr 2026, , May 2026, , Jun 2026"/>
-                    </lvc:CartesianChart.AxisX>
-                </lvc:CartesianChart>
+
+                <!-- Título unificado -->
+                <TextBlock Grid.Row="0" Text="REPORTES Y ESTADÍSTICAS" FontSize="20" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}"/>
+
+                <!-- Contenedor de Filtros -->
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Periodo -->
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Desde -->
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Hasta -->
+                        <ColumnDefinition Width="*"/>
+                        <!-- Espacio flexible que empuja el botón a la derecha -->
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Botones -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Filtro: Período -->
+                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                        <TextBlock Text="PERÍODO" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <ComboBox Width="150" ItemsSource="{Binding OpcionesPeriodo}" SelectedItem="{Binding PeriodoSeleccionado, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <!-- Filtro: Fecha Inicio -->
+                    <StackPanel Grid.Column="1" Margin="0,0,20,0">
+                        <TextBlock Text="FECHA INICIO" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <DatePicker SelectedDate="{Binding FechaInicio, UpdateSourceTrigger=PropertyChanged}" Width="150" Height="30" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Filtro: Fecha Fin -->
+                    <StackPanel Grid.Column="2" Margin="0,0,20,0">
+                        <TextBlock Text="FECHA FIN" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <DatePicker SelectedDate="{Binding FechaFin, UpdateSourceTrigger=PropertyChanged}" Width="150" Height="30" VerticalContentAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Panel de Botones (Alineado a la derecha) -->
+                    <StackPanel Grid.Column="5" VerticalAlignment="Bottom">
+                        <Button Content="GENERAR REPORTE" Command="{Binding GenerarReporteCommand}" Style="{StaticResource BotonSecundario}"
+                            Height="35" Width="150"/>
+
+                        <Button Content="📄 EXPORTAR PDF / EXCEL" Command="{Binding ExportarCommand}"
+                            Background="Transparent" Foreground="{StaticResource BrushPrimario}" BorderThickness="0" 
+                            Cursor="Hand" FontSize="10" FontWeight="SemiBold" 
+                            Margin="0,5,0,0" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
             </Grid>
         </Border>
 
-        <!-- SECCIÓN 3: TABLA DE HISTORIAL DE REPORTES RECIENTES -->
-        <Border Grid.Row="3" Background="White" CornerRadius="8" Padding="15" BorderBrush="#E4E7EB" BorderThickness="1">
+        <!-- ========================================== -->
+        <!-- FILA 1: TARJETAS DE MÉTRICAS (KPIs)        -->
+        <!-- ========================================== -->
+        <Grid Grid.Row="1" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="15"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="15"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Tarjeta 1: Ingresos -->
+            <Border Grid.Column="0" Background="White" CornerRadius="8" Padding="20">
+                <StackPanel>
+                    <TextBlock Text="INGRESOS TOTALES (TRIMESTRE)" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Bottom">
+                        <TextBlock Text="$320,500" FontSize="24" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                        <TextBlock Text="📈 +8.4%" Foreground="{StaticResource BrushVerde}" FontSize="12" FontWeight="Bold" Margin="10,0,0,4" VerticalAlignment="Bottom"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Tarjeta 2: Ventas -->
+            <Border Grid.Column="2" Background="White" CornerRadius="8" Padding="20">
+                <StackPanel>
+                    <TextBlock Text="VENTAS REALIZADAS" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold"/>
+                    <TextBlock Text="1,250" FontSize="24" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,5,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Tarjeta 3: Producto Estrella -->
+            <Border Grid.Column="4" Background="White" CornerRadius="8" Padding="20">
+                <StackPanel>
+                    <TextBlock Text="PRODUCTO ESTRELLA" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold"/>
+                    <TextBlock Text="Sneaker Modelo X" FontSize="16" FontWeight="Bold" Foreground="{StaticResource BrushPrimario}" Margin="0,5,0,0"/>
+                    <TextBlock Text="480 pares vendidos" FontSize="12" Foreground="{StaticResource BrushTextoSecundario}"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ========================================== -->
+        <!-- FILA 2: DATAGRID DE HISTORIAL DE VENTAS    -->
+        <!-- ========================================== -->
+        <Border Grid.Row="2" Background="White" CornerRadius="8" Padding="15">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="REPORTES GENERADOS RECIENTEMENTE" FontSize="12" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,10"/>
 
-                <!-- DataGrid para listar el historial de documentos generados previamente -->
-                <DataGrid Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" Background="White" BorderBrush="#E4E7EB" RowHeight="30">
+                <TextBlock Grid.Row="0" Text="ÚLTIMAS VENTAS REALIZADAS" FontWeight="Bold" Foreground="#2C3E50" Margin="0,0,0,15"/>
+                
+                <DataGrid Grid.Row="1" ItemsSource="{Binding HistorialVentas}" Style="{StaticResource DataGridTillas}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID REPORTE" Binding="{Binding Id}" Width="90"/>
-                        <DataGridTextColumn Header="FECHA GENERACIÓN" Binding="{Binding Fecha}" Width="*"/>
-                        <DataGridTextColumn Header="TIPO" Binding="{Binding Tipo}" Width="*"/>
-                        <DataGridTextColumn Header="PERÍODO" Binding="{Binding Periodo}" Width="*"/>
-                        <DataGridTextColumn Header="GENERADO POR" Binding="{Binding GeneradoPor}" Width="*"/>
-                        <DataGridTextColumn Header="TAMAÑO" Binding="{Binding Tamano}" Width="80"/>
-
-                        <!-- Columna personalizada con opciones para descargar o visualizar cada reporte -->
-                        <DataGridTemplateColumn Header="ACCIONES" Width="90">
+                        <DataGridTextColumn Header="N° TICKET" Binding="{Binding ID}" Width="*"/>
+                        <!-- El StringFormat=g formatea la fecha y hora de manera legible -->
+                        <DataGridTextColumn Header="FECHA Y HORA" Binding="{Binding Fecha_Hora, StringFormat=g}" Width="2*"/>
+                        <DataGridTextColumn Header="CAJERO" Binding="{Binding NombreVendedor}" Width="2*"/>
+                        <DataGridTextColumn Header="CLIENTE" Binding="{Binding NombreCliente}" Width="2*"/>
+                        <DataGridTextColumn Header="MÉTODO PAGO" Binding="{Binding MetodoPago}" Width="2*"/>
+                        <DataGridTextColumn Header="TOTAL" Binding="{Binding Total, StringFormat=C}" Width="*"/>
+                        <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <TextBlock Text="🔴" Cursor="Hand" Margin="2" ToolTip="PDF"/>
-                                        <TextBlock Text="🟢" Cursor="Hand" Margin="2" ToolTip="Excel"/>
-                                        <TextBlock Text="👁️" Cursor="Hand" Margin="2" ToolTip="Ver"/>
-                                    </StackPanel>
+                                    <Button Content="👁️" ToolTip="Ver Detalle de Venta"
+                                        Background="Transparent" BorderThickness="0" Cursor="Hand" FontSize="14"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -169,5 +157,6 @@
                 </DataGrid>
             </Grid>
         </Border>
+
     </Grid>
 </UserControl>
