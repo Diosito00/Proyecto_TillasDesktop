@@ -16,26 +16,26 @@
             <TextBlock Text="NUEVO CLIENTE" FontSize="18" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,15"/>
             <!-- Etiqueta y campo de texto para el Nombre -->
             <TextBlock Text="Nombre:" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtNombre" Height="32" VerticalContentAlignment="Center" PreviewTextInput="SoloLetras_PreviewTextInput" Margin="0,0,0,10"/>
+            <TextBox Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" Height="32" VerticalContentAlignment="Center" PreviewTextInput="SoloLetras_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el Apellido -->
             <TextBlock Text="Apellido:" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtApellido" Height="32" VerticalContentAlignment="Center" PreviewTextInput="SoloLetras_PreviewTextInput" Margin="0,0,0,10"/>
+            <TextBox Text="{Binding Apellido, UpdateSourceTrigger=PropertyChanged}" Height="32" VerticalContentAlignment="Center" PreviewTextInput="SoloLetras_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el CUIT -->
             <TextBlock Text="CUIT:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtCUIT" Height="32" VerticalContentAlignment="Center" PreviewTextInput="SoloNumeros_PreviewTextInput" Margin="0,0,0,10"/>
+            <TextBox Text="{Binding Cuit, UpdateSourceTrigger=PropertyChanged}" Height="32" VerticalContentAlignment="Center" PreviewTextInput="SoloNumeros_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el Teléfono -->
             <TextBlock Text="Teléfono:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtTelefono" Height="32" VerticalContentAlignment="Center" PreviewTextInput="Telefono_PreviewTextInput" Margin="0,0,0,10"/>
+            <TextBox Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}" Height="32" VerticalContentAlignment="Center" PreviewTextInput="Telefono_PreviewTextInput" Margin="0,0,0,10"/>
 
             <!-- Etiqueta y campo de texto para el Email -->
             <TextBlock Text="Email:" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox x:Name="txtEmail" Height="32" VerticalContentAlignment="Center"/>
+            <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Height="32" VerticalContentAlignment="Center"/>
 
             <!-- Botón de guardado ubicado en la fila 2 que ejecuta el método BtnGuardar_Click al presionarlo. -->
-            <Button Grid.Row="2" Content="GUARDAR CLIENTE" Margin="0,40,0,0" Height="40" Style="{StaticResource BotonSecundario}" Click="BtnGuardar_Click"/>
+            <Button Grid.Row="2" Content="GUARDAR CLIENTE" Margin="0,40,0,0" Height="40" Style="{StaticResource BotonSecundario}" Command="{Binding GuardarCommand}"/>
 
         </StackPanel>
     </Border>
