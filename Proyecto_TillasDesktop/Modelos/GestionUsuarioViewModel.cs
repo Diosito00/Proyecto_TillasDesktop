@@ -53,8 +53,8 @@ namespace TillasDesktop.UI.Modelos
             ListaUsuarios = new ObservableCollection<UsuarioViewModel>();
 
             // Simulamos la carga envolviendo las entidades puras
-            var user1 = new Usuario { Id_Usuario = 1, Nombre = "Juan", Apellido = "Perez", Dni = "12345678", Email = "admin@tillas.com", Nombre_Usuario = "jperez", Password = "123", Rol = "Admin", Activo = true };
-            var user2 = new Usuario { Id_Usuario = 2, Nombre = "María", Apellido = "García", Dni = "87654321", Email = "gerente@tillas.com", Nombre_Usuario = "mgarcia", Password = "123", Rol = "Gerente", Activo = true };
+            var user1 = new Usuario { Id_Usuario = 1, Nombre = "Juan", Apellido = "Perez", Dni = "12345678", Email = "admin@tillas.com", Nombre_Usuario = "jperez", Password = "123", Fecha_Nacimiento = new System.DateTime(1990, 5, 15), Rol = "Admin", Activo = true };
+            var user2 = new Usuario { Id_Usuario = 2, Nombre = "María", Apellido = "García", Dni = "87654321", Email = "gerente@tillas.com", Nombre_Usuario = "mgarcia", Password = "123", Fecha_Nacimiento = new System.DateTime(1995, 8, 25), Rol = "Gerente", Activo = true };
 
             ListaUsuarios.Add(new UsuarioViewModel(user1));
             ListaUsuarios.Add(new UsuarioViewModel(user2));

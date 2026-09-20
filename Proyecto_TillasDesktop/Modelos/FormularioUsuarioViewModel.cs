@@ -13,11 +13,6 @@ namespace TillasDesktop.UI.Modelos
         public string MensajePassword { get; set; }
         public List<string> ListaRoles { get; set; }
         private string _mensajeError;
-        public string MensajeError
-        {
-            get => _mensajeError;
-            set { _mensajeError = value; OnPropertyChanged(); }
-        }
 
         // === EL ENVOLTORIO REACTIVO ===
         public UsuarioViewModel UsuarioActual { get; set; }
@@ -76,7 +71,7 @@ namespace TillasDesktop.UI.Modelos
         {
             ListaRoles = new List<string> { "Admin", "Gerente", "Vendedor" };
             NuevaPassword = string.Empty; // Siempre en blanco al abrir la ventana
-            GuardarCommand = new RelayCommand(Guardar, PuedeGuardar);
+            GuardarCommand = new RelayCommand(Guardar);
         }
 
         // === LÓGICA DE GUARDADO ===
@@ -85,32 +80,15 @@ namespace TillasDesktop.UI.Modelos
             // Extraemos la entidad pura del envoltorio
             Usuario entidadParaGuardar = UsuarioActual.ObtenerEntidadPura();
 
-            // Solo tocamos la contraseña de la entidad si escribieron una nueva
-            if (!string.IsNullOrWhiteSpace(NuevaPassword))
-            {
-                // NOTA: Aquí tu BLL debería hashear la contraseña antes del UPDATE/INSERT
-                entidadParaGuardar.Password = NuevaPassword;
-            }
-
-            // Aquí llamarías a: _usuariosService.GuardarUsuario(entidadParaGuardar);
-
-            MessageBox.Show(EsModoEdicion ? "Usuario actualizado correctamente." : "Usuario creado correctamente.",
-                            "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            OnUsuarioGuardado?.Invoke();
-            CerrarVentana?.Invoke();
-        }
-
-        private bool PuedeGuardar(object parametro)
-        {
             // 1. Validar que los campos de texto normales no estén vacíos
             if (string.IsNullOrWhiteSpace(UsuarioActual.Nombre) ||
                 string.IsNullOrWhiteSpace(UsuarioActual.Apellido) ||
                 string.IsNullOrWhiteSpace(UsuarioActual.Nombre_Usuario) ||
-                string.IsNullOrWhiteSpace(UsuarioActual.Rol))
+                string.IsNullOrWhiteSpace(UsuarioActual.Rol)
+                )
             {
-                MensajeError = "Completa los campos obligatorios.";
-                return false;
+                MessageBox.Show("Todos los campos son obligatorios. Por favor, complete la información faltante.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
             // 2. Validar DNI: Exactamente 8 caracteres numéricos
@@ -118,29 +96,54 @@ namespace TillasDesktop.UI.Modelos
                 UsuarioActual.Dni.Length != 8 ||
                 !Regex.IsMatch(UsuarioActual.Dni, @"^\d{8}$"))
             {
-                MensajeError = "El DNI debe tener exactamente 8 números.";
-                return false;
+                MessageBox.Show("El DNI ingresado no es válido (debe contener al menos 7 números).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
             // 3. Validar Email: Formato estándar (texto @ texto . texto)
             if (string.IsNullOrWhiteSpace(UsuarioActual.Email) ||
                 !Regex.IsMatch(UsuarioActual.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
-                MensajeError = "Ingresa un correo electrónico válido.";
-                return false;
+                MessageBox.Show("El formato del correo electrónico no es válido (ejemplo: usuario@dominio.com).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
-            // 4. Validar Contraseña: Obligatoria en creación, opcional en edición
+            // 4. Validar Fecha de Nacimiento (No futura y mayor de 18 años)
+            if (UsuarioActual.Fecha_Nacimiento.Date == DateTime.MinValue.Date)
+            {
+                MessageBox.Show("La fecha de nacimiento es obligatoria.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            if (UsuarioActual.Fecha_Nacimiento.Date > DateTime.Today)
+            {
+                MessageBox.Show("La fecha de nacimiento no puede ser mayor a la fecha actual.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (UsuarioActual.Fecha_Nacimiento.Date > DateTime.Today.AddYears(-18))
+            {
+                MessageBox.Show("El usuario debe tener al menos 18 años.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 5. Validar Contraseña: Obligatoria en creación, opcional en edición
             if (!EsModoEdicion && string.IsNullOrWhiteSpace(NuevaPassword))
             {
-                MensajeError = "La contraseña es obligatoria para nuevos usuarios.";
-                return false;
+                MessageBox.Show("La contraseña es obligatoria para nuevos usuarios.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
-            // El botón GUARDAR se habilitará SOLO si las 4 condiciones son verdaderas
-            // Si pasa todas las validaciones, borramos el mensaje de error y habilitamos el botón
-            MensajeError = string.Empty;
-            return true;
+            // Solo tocamos la contraseña de la entidad si escribieron una nueva
+            if (!string.IsNullOrWhiteSpace(NuevaPassword))
+            {
+                entidadParaGuardar.Password = NuevaPassword;
+            }
+
+            MessageBox.Show(EsModoEdicion ? "Usuario actualizado correctamente." : "Usuario creado correctamente.",
+                            "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            OnUsuarioGuardado?.Invoke();
+            CerrarVentana?.Invoke();
         }
     }
 }
