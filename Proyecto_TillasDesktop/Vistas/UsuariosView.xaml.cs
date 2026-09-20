@@ -14,7 +14,7 @@ namespace TillasDesktop.UI.Vistas
 
             // Asigna una nueva instancia de UsuariosViewModel al DataContext de la vista.
             // Esto establece el enlace de datos (Data Binding) permitiendo que la interfaz se comunique con la lógica y los comandos del ViewModel.
-            this.DataContext = new UsuariosViewModel();
+            this.DataContext = new GestionUsuarioViewModel();
         }
     }
 }

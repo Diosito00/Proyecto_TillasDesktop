@@ -1,5 +1,6 @@
 ﻿
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using TillasDesktop.Entities.Usuarios;
 using TillasDesktop.UI.Modelos;
@@ -10,80 +11,84 @@ namespace TillasDesktop.UI.Vistas
     // Funciona como la vista emergente para dar de alta un usuario nuevo o modificar uno existente.
     public partial class FormularioUsuarioWindow : Window
     {
-        private FormularioUsuarioViewModel _viewModel;
-        public Usuario? NuevoUsuario => _viewModel?.UsuarioResultado;
+        // Esta variable evita un bucle infinito cuando una caja actualiza a la otra
+        private bool _estaSincronizando = false;
 
-        // Constructor vacío: Se ejecuta cuando la ventana se abre para CREAR un usuario desde cero.
         public FormularioUsuarioWindow()
         {
-            InitializeComponent(); // Carga y dibuja los componentes visuales definidos en el archivo XAML.
-            _viewModel = new FormularioUsuarioViewModel();
-            ConfigurarViewModel();
-
+            InitializeComponent();
         }
 
-        // Constructor con parámetros: Se ejecuta cuando la ventana se abre para EDITAR un usuario, recibiendo los datos actuales.
-        public FormularioUsuarioWindow(Usuario usuarioAEditar)
-        {
-            InitializeComponent(); // Inicializa los controles visuales de la interfaz.
-            _viewModel = new FormularioUsuarioViewModel(usuarioAEditar);
-            ConfigurarViewModel();
-
-            // Asignación explícita inicial para el control de contraseña seguro
-            if (usuarioAEditar != null)
-            {
-                txtPassword.Password = usuarioAEditar.Password;
-            }
-        }
-
-        private void ConfigurarViewModel()
-        {
-            DataContext = _viewModel;
-            // Vinculamos la acción de cierre para que el ViewModel ordene cerrar la ventana con éxito
-            _viewModel.CerrarVentanaAccion = (resultado) =>
-            {
-                DialogResult = resultado;
-                Close();
-            };
-        }
-
-        private bool esPasswordVisible = false;
-
+        // =======================================================
+        // 1. ALTERNAR VISIBILIDAD (BOTÓN DEL OJO)
+        // =======================================================
         private void BtnVerPassword_Click(object sender, RoutedEventArgs e)
         {
-            esPasswordVisible = !esPasswordVisible;
-
-            if (esPasswordVisible)
+            if (txtPassword.Visibility == Visibility.Visible)
             {
-                txtPasswordVisible.Text = txtPassword.Password;
-                txtPasswordVisible.Visibility = Visibility.Visible;
+                // Cambiar a texto visible
                 txtPassword.Visibility = Visibility.Collapsed;
+                txtPasswordVisible.Visibility = Visibility.Visible;
                 btnVerPassword.Content = "👁️‍🗨️";
+
+                // Mover el cursor al final de la caja de texto
+                txtPasswordVisible.Focus();
+                txtPasswordVisible.CaretIndex = txtPasswordVisible.Text.Length;
             }
             else
             {
-                txtPassword.Password = txtPasswordVisible.Text;
-                txtPassword.Visibility = Visibility.Visible;
+                // Cambiar a asteriscos
                 txtPasswordVisible.Visibility = Visibility.Collapsed;
+                txtPassword.Visibility = Visibility.Visible;
                 btnVerPassword.Content = "👁️";
+
+                txtPassword.Focus();
             }
         }
 
-        // Se dispara cuando escribes con el PasswordBox oculto
+        // =======================================================
+        // 2. CUANDO EL USUARIO ESCRIBE EN LOS ASTERISCOS
+        // =======================================================
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            if (_viewModel != null)
-            {
-                _viewModel.Password = txtPassword.Password;
-            }
+            if (_estaSincronizando) return;
+            _estaSincronizando = true;
+
+            // Copiamos el texto al TextBox oculto
+            txtPasswordVisible.Text = txtPassword.Password;
+
+            // Lo enviamos a nuestro ViewModel (MVVM)
+            ActualizarViewModel(txtPassword.Password);
+
+            _estaSincronizando = false;
         }
 
-        // Se dispara cuando escribes con el TextBox visible (cuando el ojito está abierto)
-        private void TxtPasswordVisible_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        // =======================================================
+        // 3. CUANDO EL USUARIO ESCRIBE EN EL TEXTO VISIBLE
+        // =======================================================
+        private void TxtPasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (_viewModel != null)
+            if (_estaSincronizando) return;
+            _estaSincronizando = true;
+
+            // Copiamos el texto al PasswordBox oculto
+            txtPassword.Password = txtPasswordVisible.Text;
+
+            // Lo enviamos a nuestro ViewModel (MVVM)
+            ActualizarViewModel(txtPasswordVisible.Text);
+
+            _estaSincronizando = false;
+        }
+
+        // =======================================================
+        // 4. PUENTE HACIA EL VIEWMODEL
+        // =======================================================
+        private void ActualizarViewModel(string claveActual)
+        {
+            // Verificamos si la ventana ya tiene cargado nuestro UsuarioFormViewModel
+            if (this.DataContext is FormularioUsuarioViewModel viewModel)
             {
-                _viewModel.Password = txtPasswordVisible.Text;
+                viewModel.NuevaPassword = claveActual;
             }
         }
 

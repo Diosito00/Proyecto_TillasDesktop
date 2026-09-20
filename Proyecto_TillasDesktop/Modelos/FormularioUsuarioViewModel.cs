@@ -1,239 +1,111 @@
-﻿using System.Collections.ObjectModel;
-using System.Text.RegularExpressions;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
-using System;
 using TillasDesktop.Entities.Usuarios;
 
 namespace TillasDesktop.UI.Modelos
 {
-    // Declaración de la clase FormularioUsuarioViewModel, la cual hereda de ViewModelBase.
-    // Actúa como el ViewModel dedicado exclusivamente a gestionar la lógica de datos y validaciones del formulario de usuario.
     public class FormularioUsuarioViewModel : ViewModelBase
     {
-        // Campo privado _nombre que almacena internamente el valor escrito en el campo de nombre.
-        private string _nombre = string.Empty;
+        // === PROPIEDADES DE LA INTERFAZ ===
+        public string TituloFormulario { get; set; }
+        public bool EsModoEdicion { get; set; }
+        public string MensajePassword { get; set; }
+        public List<string> ListaRoles { get; set; }
 
-        // Propiedad pública Nombre vinculada al campo de texto correspondiente en la interfaz gráfica.
-        // Al cambiar su valor, notifica a la interfaz y también revisa si el formulario ya está completo.
-        public string Nombre
+        // === EL ENVOLTORIO REACTIVO ===
+        public UsuarioViewModel UsuarioActual { get; set; }
+
+        private string _nuevaPassword;
+        public string NuevaPassword
         {
-            get => _nombre;
-            set { _nombre = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormularioValido)); }
+            get => _nuevaPassword;
+            set { _nuevaPassword = value; OnPropertyChanged(); }
         }
 
-        private string _apellido = string.Empty;
-        public string Apellido
-        {
-            get => _apellido;
-            set { _apellido = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormularioValido)); }
-        }
+        // === COMANDOS ===
+        public ICommand GuardarCommand { get; private set; }
+        public Action CerrarVentana { get; set; }
+        public Action OnUsuarioGuardado { get; set; }
 
-        // Campo privado _dni que almacena internamente el número de documento del usuario.
-        private string _dni = string.Empty;
-
-        // Propiedad pública para el DNI. Avisa si cambia y vuelve a revisar si el formulario está listo.
-        public string Dni
-        {
-            get => _dni;
-            set { _dni = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormularioValido)); }
-        }
-
-        // Campo privado _email que almacena el correo electrónico ingresado.
-        private string _email = string.Empty;
-
-        // Propiedad pública para el correo. Controla cambios y revisa la validez general.
-        public string Email
-        {
-            get => _email;
-            set { _email = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormularioValido)); }
-        }
-
-        private string _nombreUsuario = string.Empty;
-        public string NombreUsuario
-        {
-            get => _nombreUsuario;
-            set { _nombreUsuario = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormularioValido)); }
-        }
-
-
-        // Campo privado _password que almacena la contraseña ingresada.
-        private string _password = string.Empty;
-
-        // Propiedad pública Password vinculada al control de contraseña en la interfaz.
-        public string Password
-        {
-            get => _password;
-            set { _password = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormularioValido)); }
-        }
-
-        private DateTime _fechaNacimiento = DateTime.Today;
-        public DateTime FechaNacimiento
-        {
-            get => _fechaNacimiento;
-            set { _fechaNacimiento = value; OnPropertyChanged(); }
-        }
-
-
-        // Campo privado _rolSeleccionado que almacena el rol elegido dentro de las opciones disponibles.
-        private string _rolSeleccionado;
-
-        // Propiedad pública RolSeleccionado vinculada al ComboBox de roles en la interfaz.
-        public string RolSeleccionado
-        {
-            get => _rolSeleccionado;
-            set { _rolSeleccionado = value; OnPropertyChanged(); OnPropertyChanged(nameof(FormularioValido)); }
-        }
-
-        // Campo privado _activo que almacena el estado booleano de activación del usuario (por defecto true).
-        private bool _activo = true;
-
-        // Propiedad pública Activo vinculada al CheckBox que define si el usuario está activo o inactivo.
-        public bool Activo
-        {
-            get => _activo;
-            set { _activo = value; OnPropertyChanged(); }
-        }
-
-        // Propiedad FormularioValido: Evalúa en tiempo real si todos los campos obligatorios están completos 
-        // y si el correo electrónico cumple estrictamente con el formato definido por una expresión regular (Regex).
-        public bool FormularioValido
-        {
-            get
-            {
-                // Si alguno de los campos esenciales está vacío, nulo o compuesto solo por espacios, el formulario no es válido.
-                if (string.IsNullOrWhiteSpace(Nombre) ||
-                    string.IsNullOrWhiteSpace(Apellido) ||
-                    string.IsNullOrWhiteSpace(Dni) ||
-                    string.IsNullOrWhiteSpace(Email) ||
-                    string.IsNullOrWhiteSpace(Password) ||
-                    string.IsNullOrWhiteSpace(RolSeleccionado))
-                {
-                    return false;
-                }
-
-                // DNI numérico y de longitud mínima lógica (ej. 7 dígitos)
-                if (Dni.Length < 7 || !Regex.IsMatch(Dni, @"^\d+$"))
-                {
-                    return false;
-                }
-
-                // Expresión regular estándar para verificar una estructura de correo válida (ejemplo: texto@texto.texto).
-                string patronEmail = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-                return Regex.IsMatch(Email, patronEmail);
-            }
-        }
-
-        // Propiedad de solo lectura externa que almacenará el objeto Usuario ya construido una vez superadas las validaciones.
-        public Usuario UsuarioResultado { get; private set; }
-
-        // Una lista con las opciones de roles ("Admin", "Gerente", "Vendedor") que se muestran en el menú desplegable.
-        public ObservableCollection<string> RolesDisponibles { get; set; }
-
-        // Comando público que maneja la acción de guardar los datos del formulario.
-        public ICommand GuardarCommand { get; }
-
-        public ICommand VerPasswordCommand { get; }
-
-        // Acción (del tipo Action) que se invoca para ordenar el cierre de la ventana.
-        public Action<bool?> CerrarVentanaAccion { get; set; }
-
-        
-
-        // Constructor de la clase: Se ejecuta al inicializar el ViewModel del formulario.
+        // ====================================================================
+        // CONSTRUCTOR 1: NUEVO USUARIO
+        // ====================================================================
         public FormularioUsuarioViewModel()
         {
-            // Inicializa la lista de opciones que aparecerán en el menú desplegable de roles.
-            RolesDisponibles = new ObservableCollection<string> { "Admin", "Gerente", "Vendedor" };
+            EsModoEdicion = false;
+            TituloFormulario = "DATOS DEL USUARIO (NUEVO)";
+            MensajePassword = "* Obligatorio para usuarios nuevos.";
 
-            // Configura el comando de guardado vinculándolo a su método de ejecución y a su regla de habilitación (CanEjecutarGuardar).
-            GuardarCommand = new RelayCommand(EjecutarGuardar);
+            // Creamos una entidad en blanco con valores por defecto
+            var entidadNueva = new Usuario
+            {
+                Fecha_Nacimiento = DateTime.Now.AddYears(-20),
+                Activo = true,
+                Rol = "Vendedor"
+            };
 
-           
+            // La envolvemos para la vista
+            UsuarioActual = new UsuarioViewModel(entidadNueva);
+
+            Inicializar();
         }
 
-        // Constructor para EDITAR
-        public FormularioUsuarioViewModel(Usuario usuarioAEditar) : this()
+        // ====================================================================
+        // CONSTRUCTOR 2: EDITAR USUARIO
+        // ====================================================================
+        public FormularioUsuarioViewModel(Usuario usuarioExistente)
         {
-            if (usuarioAEditar != null)
-            {
-                UsuarioResultado = usuarioAEditar;
-                Nombre = usuarioAEditar.Nombre;
-                Apellido = usuarioAEditar.Apellido;
-                Dni = usuarioAEditar.DNI;
-                Email = usuarioAEditar.Email;
-                NombreUsuario = usuarioAEditar.Nombre_Usuario;
-                Password = usuarioAEditar.Password;
-                FechaNacimiento = usuarioAEditar.FechaNacimiento == default ? DateTime.Today : usuarioAEditar.FechaNacimiento;
-                RolSeleccionado = usuarioAEditar.Rol;
-                Activo = usuarioAEditar.Activo;
-            }
+            EsModoEdicion = true;
+            TituloFormulario = "DATOS DEL USUARIO (EDICIÓN)";
+            MensajePassword = "* Dejar en blanco para mantener la contraseña actual.";
+
+            // Envolvemos la entidad que vino de la base de datos
+            UsuarioActual = new UsuarioViewModel(usuarioExistente);
+
+            Inicializar();
         }
 
-        // Método de validación del comando:// Esta regla decide si el botón de guardar se puede presionar (devuelve true solo si el formulario está completamente válido).
-        private bool CanEjecutarGuardar(object obj) => FormularioValido;
-
-
-        // Método que se ejecuta al presionar el botón de guardar cuando el comando está habilitado.
-        private void EjecutarGuardar(object obj)
+        private void Inicializar()
         {
-
-
-            // Validación general unificada para todos los campos obligatorios
-            if (string.IsNullOrWhiteSpace(Nombre) ||
-                string.IsNullOrWhiteSpace(Apellido) ||
-                string.IsNullOrWhiteSpace(Dni) ||
-                string.IsNullOrWhiteSpace(Email) ||
-                string.IsNullOrWhiteSpace(NombreUsuario) ||
-                string.IsNullOrWhiteSpace(Password) ||
-                string.IsNullOrWhiteSpace(RolSeleccionado))
-            {
-                MessageBox.Show("Todos los campos son obligatorios. Por favor, complete la información faltante.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (!Dni.All(char.IsDigit) || Dni.Length < 7)
-            {
-                MessageBox.Show("El DNI ingresado no es válido (debe contener al menos 7 números).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            string patronEmail = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-            if (!Regex.IsMatch(Email.Trim(), patronEmail))
-            {
-                MessageBox.Show("El formato del correo electrónico no es válido (ejemplo: usuario@dominio.com).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (!Nombre.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)) || !Apellido.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
-            {
-                MessageBox.Show("El nombre y el apellido no deben contener números ni símbolos.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            if (UsuarioResultado == null)
-            {
-                UsuarioResultado = new Usuario();
-            }
-
-            // Instancia un nuevo objeto de tipo Usuario y le asigna las propiedades recopiladas en los campos del formulario.
-
-            UsuarioResultado.Nombre = Nombre.Trim();
-            UsuarioResultado.Apellido = Apellido.Trim();
-            UsuarioResultado.DNI = Dni.Trim();
-            UsuarioResultado.Email = Email.Trim();
-            UsuarioResultado.Nombre_Usuario = NombreUsuario.Trim();
-            UsuarioResultado.Password = Password;
-            UsuarioResultado.FechaNacimiento = FechaNacimiento;
-            UsuarioResultado.Rol = RolSeleccionado;
-            UsuarioResultado.Activo = Activo;
-
-            // Ejecuta la acción asignada externamente para cerrar la ventana.
-            CerrarVentanaAccion?.Invoke(true);
+            ListaRoles = new List<string> { "Admin", "Gerente", "Vendedor" };
+            NuevaPassword = string.Empty; // Siempre en blanco al abrir la ventana
+            GuardarCommand = new RelayCommand(Guardar, PuedeGuardar);
         }
 
+        // === LÓGICA DE GUARDADO ===
+        private void Guardar(object parametro)
+        {
+            // Extraemos la entidad pura del envoltorio
+            Usuario entidadParaGuardar = UsuarioActual.ObtenerEntidadPura();
 
+            // Solo tocamos la contraseña de la entidad si escribieron una nueva
+            if (!string.IsNullOrWhiteSpace(NuevaPassword))
+            {
+                // NOTA: Aquí tu BLL debería hashear la contraseña antes del UPDATE/INSERT
+                entidadParaGuardar.Password = NuevaPassword;
+            }
 
+            // Aquí llamarías a: _usuariosService.GuardarUsuario(entidadParaGuardar);
 
+            MessageBox.Show(EsModoEdicion ? "Usuario actualizado correctamente." : "Usuario creado correctamente.",
+                            "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            OnUsuarioGuardado?.Invoke();
+            CerrarVentana?.Invoke();
+        }
+
+        private bool PuedeGuardar(object parametro)
+        {
+            // Validamos directamente desde el envoltorio
+            bool camposCompletos = !string.IsNullOrWhiteSpace(UsuarioActual.Nombre) &&
+                                   !string.IsNullOrWhiteSpace(UsuarioActual.Apellido) &&
+                                   !string.IsNullOrWhiteSpace(UsuarioActual.Nombre_Usuario) &&
+                                   !string.IsNullOrWhiteSpace(UsuarioActual.Rol);
+
+            // La contraseña debe estar validada según el modo
+            bool passwordValida = EsModoEdicion ? true : !string.IsNullOrWhiteSpace(NuevaPassword);
+
+            return camposCompletos && passwordValida;
+        }
     }
-
 }
