@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using System.Text.RegularExpressions;
 using TillasDesktop.Entities.Usuarios;
 
 namespace TillasDesktop.UI.Modelos
@@ -96,16 +97,26 @@ namespace TillasDesktop.UI.Modelos
 
         private bool PuedeGuardar(object parametro)
         {
-            // Validamos directamente desde el envoltorio
+            // 1. Validar que los campos de texto normales no estén vacíos
             bool camposCompletos = !string.IsNullOrWhiteSpace(UsuarioActual.Nombre) &&
                                    !string.IsNullOrWhiteSpace(UsuarioActual.Apellido) &&
                                    !string.IsNullOrWhiteSpace(UsuarioActual.Nombre_Usuario) &&
                                    !string.IsNullOrWhiteSpace(UsuarioActual.Rol);
 
-            // La contraseña debe estar validada según el modo
-            bool passwordValida = EsModoEdicion ? true : !string.IsNullOrWhiteSpace(NuevaPassword);
+            // 2. Validar DNI: Exactamente 8 caracteres numéricos
+            bool dniValido = !string.IsNullOrWhiteSpace(UsuarioActual.Dni) &&
+                             UsuarioActual.Dni.Length == 8 &&
+                             Regex.IsMatch(UsuarioActual.Dni, @"^\d{8}$");
 
-            return camposCompletos && passwordValida;
+            // 3. Validar Email: Formato estándar (texto @ texto . texto)
+            bool emailValido = !string.IsNullOrWhiteSpace(UsuarioActual.Email) &&
+                               Regex.IsMatch(UsuarioActual.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+
+            // 4. Validar Contraseña: Obligatoria en creación, opcional en edición
+            bool passwordValida = EsModoEdicion || !string.IsNullOrWhiteSpace(NuevaPassword);
+
+            // El botón GUARDAR se habilitará SOLO si las 4 condiciones son verdaderas
+            return camposCompletos && dniValido && emailValido && passwordValida;
         }
     }
 }
