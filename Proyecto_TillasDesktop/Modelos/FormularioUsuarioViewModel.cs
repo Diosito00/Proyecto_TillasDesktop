@@ -12,6 +12,12 @@ namespace TillasDesktop.UI.Modelos
         public bool EsModoEdicion { get; set; }
         public string MensajePassword { get; set; }
         public List<string> ListaRoles { get; set; }
+        private string _mensajeError;
+        public string MensajeError
+        {
+            get => _mensajeError;
+            set { _mensajeError = value; OnPropertyChanged(); }
+        }
 
         // === EL ENVOLTORIO REACTIVO ===
         public UsuarioViewModel UsuarioActual { get; set; }
@@ -98,25 +104,43 @@ namespace TillasDesktop.UI.Modelos
         private bool PuedeGuardar(object parametro)
         {
             // 1. Validar que los campos de texto normales no estén vacíos
-            bool camposCompletos = !string.IsNullOrWhiteSpace(UsuarioActual.Nombre) &&
-                                   !string.IsNullOrWhiteSpace(UsuarioActual.Apellido) &&
-                                   !string.IsNullOrWhiteSpace(UsuarioActual.Nombre_Usuario) &&
-                                   !string.IsNullOrWhiteSpace(UsuarioActual.Rol);
+            if (string.IsNullOrWhiteSpace(UsuarioActual.Nombre) ||
+                string.IsNullOrWhiteSpace(UsuarioActual.Apellido) ||
+                string.IsNullOrWhiteSpace(UsuarioActual.Nombre_Usuario) ||
+                string.IsNullOrWhiteSpace(UsuarioActual.Rol))
+            {
+                MensajeError = "Completa los campos obligatorios.";
+                return false;
+            }
 
             // 2. Validar DNI: Exactamente 8 caracteres numéricos
-            bool dniValido = !string.IsNullOrWhiteSpace(UsuarioActual.Dni) &&
-                             UsuarioActual.Dni.Length == 8 &&
-                             Regex.IsMatch(UsuarioActual.Dni, @"^\d{8}$");
+            if (string.IsNullOrWhiteSpace(UsuarioActual.Dni) ||
+                UsuarioActual.Dni.Length != 8 ||
+                !Regex.IsMatch(UsuarioActual.Dni, @"^\d{8}$"))
+            {
+                MensajeError = "El DNI debe tener exactamente 8 números.";
+                return false;
+            }
 
             // 3. Validar Email: Formato estándar (texto @ texto . texto)
-            bool emailValido = !string.IsNullOrWhiteSpace(UsuarioActual.Email) &&
-                               Regex.IsMatch(UsuarioActual.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+            if (string.IsNullOrWhiteSpace(UsuarioActual.Email) ||
+                !Regex.IsMatch(UsuarioActual.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                MensajeError = "Ingresa un correo electrónico válido.";
+                return false;
+            }
 
             // 4. Validar Contraseña: Obligatoria en creación, opcional en edición
-            bool passwordValida = EsModoEdicion || !string.IsNullOrWhiteSpace(NuevaPassword);
+            if (!EsModoEdicion && string.IsNullOrWhiteSpace(NuevaPassword))
+            {
+                MensajeError = "La contraseña es obligatoria para nuevos usuarios.";
+                return false;
+            }
 
             // El botón GUARDAR se habilitará SOLO si las 4 condiciones son verdaderas
-            return camposCompletos && dniValido && emailValido && passwordValida;
+            // Si pasa todas las validaciones, borramos el mensaje de error y habilitamos el botón
+            MensajeError = string.Empty;
+            return true;
         }
     }
 }

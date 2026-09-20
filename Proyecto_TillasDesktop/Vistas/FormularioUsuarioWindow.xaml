@@ -9,7 +9,9 @@
 
     <!-- Contenedor visual Border que genera una tarjeta blanca con esquinas redondeadas y márgenes decorativos. -->
     <Border Background="White" CornerRadius="10" Margin="20" Padding="20">
-
+        <Border.Effect>
+            <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+        </Border.Effect>
         <!-- StackPanel que organiza verticalmente todos los elementos del formulario de forma secuencial. -->
         <StackPanel>
 
@@ -72,7 +74,11 @@
 
             <!-- Casilla de verificación (CheckBox) para indicar si el usuario se encuentra activo o inactivo (marcado por defecto en true). -->
             <CheckBox  Content="Usuario Activo" IsChecked="{Binding UsuarioActual.Activo}" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,20"/>
-
+            
+            <!-- Mensaje de Error Dinámico -->
+            <TextBlock Text="{Binding MensajeError}" Foreground="{StaticResource BrushRojo}" FontWeight="SemiBold" HorizontalAlignment="Center" 
+                       Margin="0,0,0,10" TextWrapping="Wrap" TextAlignment="Center"/>
+            
             <!-- Botón principal de acción para guardar la información, vinculado al evento de clic y a un estilo visual predefinido. -->
             <Button Content="GUARDAR" Command="{Binding GuardarCommand}"  Height="40" Style="{StaticResource BotonSecundario}"/>
         </StackPanel>

@@ -6,7 +6,7 @@
 
     <Border Background="White" CornerRadius="10" Margin="20" Padding="20">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.08" Color="Black"/>
+            <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
         </Border.Effect>
         <StackPanel>
             <TextBlock Text="{Binding TituloVentana}" FontSize="18" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,15"/>

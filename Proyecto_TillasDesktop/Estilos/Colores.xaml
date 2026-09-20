@@ -16,7 +16,5 @@
     <!-- Pinceles de Texto y Bordes -->
     <SolidColorBrush x:Key="BrushTextoPrincipal" Color="#2d3748"/>
     <SolidColorBrush x:Key="BrushTextoSecundario" Color="#718096"/>
-    <SolidColorBrush x:Key="BrushBorde" Color="#cbd5e0"/>
-    <SolidColorBrush x:Key="BrushFondo" Color="#f7fafc"/>
-    <SolidColorBrush x:Key="BrushGrisClaro" Color="#e2e8f0"/>
+
 </ResourceDictionary>

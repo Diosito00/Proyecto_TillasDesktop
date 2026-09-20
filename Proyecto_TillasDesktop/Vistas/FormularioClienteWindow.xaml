@@ -8,7 +8,9 @@
 
     <!-- Contenedor visual Border que genera una tarjeta blanca con esquinas redondeadas y márgenes decorativos. -->
     <Border Background="White" CornerRadius="10" Margin="20" Padding="20">
-
+        <Border.Effect>
+            <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+        </Border.Effect>
         <!-- StackPanel ubicado en la fila 1 que apila verticalmente las etiquetas y los campos de entrada (TextBox). -->
         <StackPanel>
 
