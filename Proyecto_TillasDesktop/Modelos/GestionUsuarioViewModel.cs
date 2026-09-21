@@ -5,11 +5,14 @@ using System.Windows.Data;
 using System.Windows.Input;
 using TillasDesktop.Entities.Usuarios;
 using TillasDesktop.UI.Vistas;
+using TillasDesktop.DAL.Repositorios; // <-- 1. Importar el repositorio
 
 namespace TillasDesktop.UI.Modelos
 {
     public class GestionUsuarioViewModel : ViewModelBase
     {
+        // 2. Declarar una instancia del repositorio de usuarios
+        private readonly UsuarioRepository _usuarioRepository;
         private ObservableCollection<UsuarioViewModel> _listaUsuarios;
         public ObservableCollection<UsuarioViewModel> ListaUsuarios
         {
@@ -37,6 +40,9 @@ namespace TillasDesktop.UI.Modelos
 
         public GestionUsuarioViewModel()
         {
+            // 3. Inicializar el repositorio
+            _usuarioRepository = new UsuarioRepository();
+
             CargarDatos();
 
             VistaFiltroUsuarios = CollectionViewSource.GetDefaultView(ListaUsuarios);
@@ -48,16 +54,27 @@ namespace TillasDesktop.UI.Modelos
             EliminarCommand = new RelayCommand(EjecutarEliminar);
         }
 
+        // CARGAR DATOS DESDE LA BASE DE DATOS (REEMPLAZA USER1 Y USER2)
         private void CargarDatos()
         {
             ListaUsuarios = new ObservableCollection<UsuarioViewModel>();
 
-            // Simulamos la carga envolviendo las entidades puras
-            var user1 = new Usuario { Id_Usuario = 1, Nombre = "Juan", Apellido = "Perez", Dni = "12345678", Email = "admin@tillas.com", Nombre_Usuario = "jperez", Password = "123", Fecha_Nacimiento = new System.DateTime(1990, 5, 15), Rol = "Admin", Activo = true };
-            var user2 = new Usuario { Id_Usuario = 2, Nombre = "María", Apellido = "García", Dni = "87654321", Email = "gerente@tillas.com", Nombre_Usuario = "mgarcia", Password = "123", Fecha_Nacimiento = new System.DateTime(1995, 8, 25), Rol = "Gerente", Activo = true };
+            try
+            {
+                // Llamamos al repositorio para traer la lista de la BD
+                var usuariosDeDb = _usuarioRepository.ObtenerTodos();
 
-            ListaUsuarios.Add(new UsuarioViewModel(user1));
-            ListaUsuarios.Add(new UsuarioViewModel(user2));
+                // Envolvemos cada entidad pura de la BD en un UsuarioViewModel y la agregamos a la lista observable
+                foreach (var usuario in usuariosDeDb)
+                {
+                    ListaUsuarios.Add(new UsuarioViewModel(usuario));
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar los usuarios desde la base de datos: {ex.Message}",
+                                "Error de Conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         // 2. EL FILTRO AHORA EVALÚA EL ENVOLTORIO
@@ -77,7 +94,7 @@ namespace TillasDesktop.UI.Modelos
             return false;
         }
 
-        // 3. NUEVO USUARIO A TRAVÉS DEL VIEWMODEL
+        // 3. NUEVO USUARIO (INSERCIÓN EN LA BASE DE DATOS)
         private void EjecutarNuevo(object obj)
         {
             var ventana = new FormularioUsuarioWindow();
@@ -86,16 +103,32 @@ namespace TillasDesktop.UI.Modelos
             viewModel.CerrarVentana = () => ventana.Close();
             viewModel.OnUsuarioGuardado = () =>
             {
-                // Como es nuevo, tomamos el envoltorio creado en el formulario y lo añadimos a la vista
-                ListaUsuarios.Add(viewModel.UsuarioActual);
-                VistaFiltroUsuarios.Refresh();
+                try
+                {
+                    // Obtenemos la entidad pura desde el formulario
+                    var nuevaEntidad = viewModel.UsuarioActual.ObtenerEntidadPura();
+
+                    // Guardamos físicamente en la base de datos usando el repositorio
+                    bool insertado = _usuarioRepository.Insertar(nuevaEntidad);
+
+                    if (insertado)
+                    {
+                        // Si se guardó con éxito en la BD, lo agregamos a la interfaz visual
+                        ListaUsuarios.Add(viewModel.UsuarioActual);
+                        VistaFiltroUsuarios.Refresh();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error al Guardar", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             };
 
             ventana.DataContext = viewModel;
             ventana.ShowDialog();
         }
 
-        // 4. EDICIÓN EXTRAYENDO LA ENTIDAD PURA
+        // 4. EDICIÓN (ACTUALIZACIÓN EN LA BASE DE DATOS)
         private void EjecutarEditar(object obj)
         {
             // El obj llega desde el botón del DataGrid mediante CommandParameter="{Binding}"
@@ -109,9 +142,23 @@ namespace TillasDesktop.UI.Modelos
                 viewModel.CerrarVentana = () => ventana.Close();
                 viewModel.OnUsuarioGuardado = () =>
                 {
-                    // Como pasamos la misma referencia de memoria de la entidad, 
-                    // los cambios impactan automáticamente. Solo forzamos el refresco del DataGrid.
-                    VistaFiltroUsuarios.Refresh();
+                    try
+                    {
+                        // Extraemos la entidad modificada
+                        var entidadModificada = usuarioFila.ObtenerEntidadPura();
+
+                        // Actualizamos en la base de datos a través del repositorio
+                        bool actualizado = _usuarioRepository.Actualizar(entidadModificada);
+
+                        if (actualizado)
+                        {
+                            VistaFiltroUsuarios.Refresh();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error al Actualizar", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 };
 
                 ventana.DataContext = viewModel;
@@ -119,21 +166,34 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
-        // 5. ELIMINACIÓN DIRECTA
+        // 5. ELIMINACIÓN (BORRADO EN LA BASE DE DATOS)
         private void EjecutarEliminar(object obj)
         {
             if (obj is UsuarioViewModel usuarioFila)
             {
-                var respuesta = MessageBox.Show($"¿Estás seguro de que deseas eliminar permanentemente el usuario '{usuarioFila.Nombre} {usuarioFila.Apellido}'?",
+               var respuesta = MessageBox.Show($"¿Estás seguro de que deseas eliminar permanentemente el usuario '{usuarioFila.Nombre} {usuarioFila.Apellido}'?",
                                                 "Confirmar Eliminación",
                                                 MessageBoxButton.YesNo,
                                                 MessageBoxImage.Warning);
 
                 if (respuesta == MessageBoxResult.Yes)
                 {
-                    // TODO: _usuariosService.EliminarUsuario(usuarioFila.ID);
-                    ListaUsuarios.Remove(usuarioFila);
-                    VistaFiltroUsuarios.Refresh();
+                    try
+                    {
+                        // Llamamos al repositorio pasándole el ID del usuario seleccionado
+                        bool eliminado = _usuarioRepository.Eliminar(usuarioFila.Id_Usuario);
+
+                        if (eliminado)
+                        {
+                            // Si se borró de la BD, lo quitamos de la lista visual
+                            ListaUsuarios.Remove(usuarioFila);
+                            VistaFiltroUsuarios.Refresh();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error al Eliminar", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
