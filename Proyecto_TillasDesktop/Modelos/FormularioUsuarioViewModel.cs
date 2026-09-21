@@ -9,7 +9,7 @@ namespace TillasDesktop.UI.Modelos
     public class FormularioUsuarioViewModel : ViewModelBase
     {
         // === PROPIEDADES DE LA INTERFAZ ===
-        private readonly UsuariosService _usuarioService;
+        private readonly UsuariosService _usuarioService = new UsuariosService();
         public string TituloFormulario { get; set; }
         public bool EsModoEdicion { get; set; }
         public string MensajePassword { get; set; }
@@ -57,8 +57,7 @@ namespace TillasDesktop.UI.Modelos
         // CONSTRUCTOR 2: EDITAR USUARIO
         // ====================================================================
         public FormularioUsuarioViewModel(Usuario usuarioExistente)
-        {
-            _usuarioService = new UsuariosService();
+        {            
             EsModoEdicion = true;
             TituloFormulario = "DATOS DEL USUARIO (EDICIÓN)";
             MensajePassword = "* Dejar en blanco para mantener la contraseña actual.";

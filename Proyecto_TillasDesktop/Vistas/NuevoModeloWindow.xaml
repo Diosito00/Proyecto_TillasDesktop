@@ -1,7 +1,7 @@
 ﻿<Window x:Class="TillasDesktop.UI.Vistas.NuevoModeloWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Nuevo Modelo" Height="650" Width="450" 
+        Title="Gestión de Modelo" Height="650" Width="450" 
         WindowStartupLocation="CenterScreen" Background="#F0F4F8" ResizeMode="NoResize">
 
     <Border Background="White" CornerRadius="10" Margin="20" Padding="20">
@@ -9,14 +9,17 @@
             <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
         </Border.Effect>
         <StackPanel>
-            <TextBlock Text="REGISTRAR NUEVO MODELO" FontSize="18" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+            <!-- Título dinámico que responde al modo (Creación o Edición) -->
+            <TextBlock Text="{Binding TituloFormulario}" FontSize="18" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
+            <!-- Campos apuntando a las propiedades internas del envoltorio ProductoActual -->
             <TextBlock Text="Código (SKU)" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding CodigoModelo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15"/>
+            <TextBox Text="{Binding ProductoActual.Codigo_Modelo, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15"/>
 
             <TextBlock Text="Nombre del Modelo" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15"/>
+            <TextBox Text="{Binding ProductoActual.Nombre, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15"/>
 
+            <!-- Los ComboBox se mantienen apuntando a la raíz del ViewModel porque no pertenecen a la entidad Producto -->
             <TextBlock Text="Marca" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
             <ComboBox ItemsSource="{Binding MarcasDisponibles}" SelectedItem="{Binding MarcaSeleccionada}" DisplayMemberPath="Nombre" Height="35" Margin="0,0,0,15"/>
 
@@ -24,9 +27,9 @@
             <ComboBox ItemsSource="{Binding CategoriasDisponibles}" SelectedItem="{Binding CategoriaSeleccionada}" DisplayMemberPath="Nombre" Height="35" Margin="0,0,0,15"/>
 
             <TextBlock Text="Precio de Venta ($)" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding PrecioVenta, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,25"/>
+            <TextBox Text="{Binding ProductoActual.Precio_Venta, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,25"/>
 
-            <Button Content="GUARDAR MODELO" Command="{Binding GuardarCommand}" IsDefault="True" Height="45" Style="{StaticResource BotonSecundario}"/> 
+            <Button Content="GUARDAR MODELO" Command="{Binding GuardarCommand}" IsDefault="True" Height="45" Style="{StaticResource BotonSecundario}"/>
         </StackPanel>
     </Border>
 </Window>
