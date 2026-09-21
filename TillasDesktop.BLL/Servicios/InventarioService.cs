@@ -5,6 +5,8 @@ namespace TillasDesktop.BLL.Services
 {
     public class InventarioService
     {
+        // Estos métodos actualmente devuelven datos hardcodeados en memoria. 
+        // En el futuro, aquí llamarás a _inventarioRepo.ObtenerMarcas() para traerlas de SQL Server.
         public List<Marca> ObtenerMarcasActivas()
         {
             return new List<Marca>
@@ -23,9 +25,17 @@ namespace TillasDesktop.BLL.Services
             };
         }
 
-        // Lógica de validación centralizada
+        // ==========================================
+        // LÓGICA DE VALIDACIÓN CENTRALIZADA
+        // ==========================================
+        // El uso del modificador 'out string mensajeRespuesta' es una excelente práctica. 
+        // Permite devolver un 'bool' (para saber si falló o fue exitoso) y al mismo tiempo 
+        // "enviar" un mensaje de texto explicativo sin necesidad de lanzar costosas Excepciones.
+
         public bool RegistrarNuevoProducto(Producto nuevoProducto, out string mensajeRespuesta)
         {
+            // Defensa de la BLL: Aunque la UI ya validó esto, la capa de negocio no confía en nadie 
+            // y vuelve a verificar las reglas críticas antes de tocar la base de datos.
             if (string.IsNullOrWhiteSpace(nuevoProducto.Codigo_Modelo))
             {
                 mensajeRespuesta = "El código del modelo es obligatorio.";
@@ -36,10 +46,9 @@ namespace TillasDesktop.BLL.Services
             return true;
         }
 
-        // Agrega este método dentro de tu clase InventarioService existente
         public bool RegistrarIngresoStock(ProductoTalle nuevoStock, out string mensajeRespuesta)
         {
-            // Validamos directamente las propiedades de la entidad
+            // Validamos que no intenten ingresar mercadería fantasma o talles negativos.
             if (nuevoStock.Talle <= 0 || nuevoStock.Stock_Actual <= 0)
             {
                 mensajeRespuesta = "El talle y la cantidad deben ser mayores a cero.";
@@ -52,6 +61,8 @@ namespace TillasDesktop.BLL.Services
 
         public bool ActualizarStockTalle(ProductoTalle talleActualizado, out string mensajeRespuesta)
         {
+            // A diferencia de un nuevo ingreso, en una actualización permitimos que el stock sea '0' 
+            // (por si hubo un robo, merma o se vendió por otro canal xd).
             if (talleActualizado.Talle <= 0 || talleActualizado.Stock_Actual < 0)
             {
                 mensajeRespuesta = "El talle debe ser válido y el stock no puede ser negativo.";
@@ -62,7 +73,6 @@ namespace TillasDesktop.BLL.Services
             return true;
         }
 
-        // Agrega estos dos métodos a tu InventarioService en la BLL
         public bool ActualizarProducto(Producto productoActualizado, out string mensajeRespuesta)
         {
             if (string.IsNullOrWhiteSpace(productoActualizado.Codigo_Modelo))
@@ -77,6 +87,7 @@ namespace TillasDesktop.BLL.Services
 
         public bool EliminarProducto(int productoId, out string mensajeRespuesta)
         {
+            // Aquí en el futuro verificarás que el producto no tenga ventas asociadas antes de borrarlo físicamente.
             mensajeRespuesta = "Producto eliminado del sistema.";
             return true;
         }

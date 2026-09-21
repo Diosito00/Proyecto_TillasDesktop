@@ -5,31 +5,37 @@ using System.Windows.Input;
 
 namespace TillasDesktop.UI.Modelos
 {
+    // Implementa ICommand, la interfaz nativa que pide WPF para poder hacer Binding a un botón.
     public class RelayCommand : ICommand
     {
+        // El método principal que se ejecutará al hacer clic (Ej: Guardar, Cobrar).
         private readonly Action<object> _execute;
+
+        // Método opcional (devuelve true o false). Si devuelve false, WPF desactiva el botón automáticamente.
         private readonly Predicate<object> _canExecute;
 
-        // Constructor que recibe el método a ejecutar y, opcionalmente, una condición para habilitar/deshabilitar el botón
         public RelayCommand(Action<object> execute, Predicate<object> canExecute = null)
         {
+            // El Action es obligatorio, de lo contrario el botón no haría nada.
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
         }
 
-        // Determina si el botón debe estar clickeable o grisado (deshabilitado)
+        // Método invocado constantemente por el motor gráfico de WPF para saber si el botón debe habilitarse.
         public bool CanExecute(object parameter)
         {
+            // Si no envian condiciones de bloqueo, el botón siempre es CLICKEABLE (true).
             return _canExecute == null || _canExecute(parameter);
         }
 
-        // Ejecuta la acción cuando se hace clic
+        // Método que dispara el motor gráfico de WPF cuando el usuario presiona el botón.
         public void Execute(object parameter)
         {
             _execute(parameter);
         }
 
-        // Le avisa a la interfaz que re-evalúe si el botón debe habilitarse o deshabilitarse
+        // Este evento se "engancha" al administrador general de comandos de WPF (CommandManager).
+        // Obliga a que todos los botones de la pantalla re-evalúen su estado (CanExecute) si el usuario hace clic o teclea en otro lado.
         public event EventHandler CanExecuteChanged
         {
             add { CommandManager.RequerySuggested += value; }

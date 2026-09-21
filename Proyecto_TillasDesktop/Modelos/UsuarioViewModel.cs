@@ -3,15 +3,22 @@ using TillasDesktop.Entities.Usuarios;
 
 namespace TillasDesktop.UI.Modelos
 {
+    // Hereda de ViewModelBase para que la interfaz sepa cuándo repintar un TextBox si el valor cambia en código.
     public class UsuarioViewModel : ViewModelBase
     {
+        // La entidad original proveniente de la base de datos.
         private readonly Usuario _usuarioPuro;
 
+        // El constructor exige una entidad. Si llega nula (ej: al crear un usuario nuevo), inicializa una vacía.
         public UsuarioViewModel(Usuario usuario)
         {
             _usuarioPuro = usuario ?? new Usuario();
         }
 
+        // ==========================================
+        // PROPIEDADES ENLAZADAS (BINDING)
+        // Cada 'set' actualiza la entidad original y dispara OnPropertyChanged() para notificar a la vista.
+        // ==========================================
         public int Id_Usuario
         {
             get => _usuarioPuro.Id_Usuario;
@@ -66,7 +73,7 @@ namespace TillasDesktop.UI.Modelos
             set { _usuarioPuro.Activo = value; OnPropertyChanged(); }
         }
 
-        // Método vital para extraer la entidad limpia y mandarla a la base de datos
+        // Devuelve la entidad "limpia" para que pueda ser enviada con seguridad a la capa de negocios (BLL) y luego a la base de datos.
         public Usuario ObtenerEntidadPura()
         {
             return _usuarioPuro;

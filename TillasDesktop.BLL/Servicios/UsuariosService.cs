@@ -8,6 +8,7 @@ namespace TillasDesktop.BLL.Services
 {
     public class UsuariosService
     {
+        // Variable de solo lectura que mantiene la conexión con el repositorio de SQL a lo largo de este servicio.
         private readonly UsuarioRepository _usuarioRepo;
 
         public UsuariosService()
@@ -20,7 +21,7 @@ namespace TillasDesktop.BLL.Services
         // ==========================================
         public List<Usuario> ObtenerTodos()
         {
-            // Pide los datos directamente a la DAL
+            // Actúa como simple pasarela: Pide los datos directamente a la DAL y los devuelve al ViewModel.
             return _usuarioRepo.ObtenerTodos();
         }
 
@@ -29,14 +30,16 @@ namespace TillasDesktop.BLL.Services
         // ==========================================
         public bool CrearUsuario(Usuario nuevoUsuario)
         {
-            // Validaciones de negocio defensivas (por si la UI falla)
+            // Tener 'MessageBox.Show' aquí en la BLL rompe el patrón de capas 
+            // (la BLL no debería saber que existe una interfaz gráfica). Lo ideal sería usar el patrón 
+            // 'out string mensaje' que aplicamos en InventarioService.
             if (string.IsNullOrWhiteSpace(nuevoUsuario.Nombre_Usuario) || string.IsNullOrWhiteSpace(nuevoUsuario.Password))
             {
                 MessageBox.Show("El nombre de usuario y la contraseña son obligatorios.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
 
-            // Delegar la inserción a la capa de datos
+            // Delegar la inserción a la capa de datos (DAL).
             return _usuarioRepo.Insertar(nuevoUsuario);
         }
 
@@ -50,8 +53,7 @@ namespace TillasDesktop.BLL.Services
                 MessageBox.Show("ID de usuario inválido.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
-            // El repositorio (DAL) ya se encarga de evaluar si la propiedad Password 
-            // tiene texto o está en blanco para proteger la clave actual.
+
             return _usuarioRepo.Actualizar(usuarioActualizado);
         }
 
@@ -66,7 +68,8 @@ namespace TillasDesktop.BLL.Services
                 return false;
             }
 
-            // Podes agregar reglas de negocio, ej: "No se puede eliminar al usuario Admin principal"
+            // Protección contra el bloqueo del sistema.
+            // Impide que otro administrador borre accidentalmente (o por malicia) a la cuenta de SuperAdministrador (vo) (ID 1).
             if (idUsuario == 1)
             {
                 MessageBox.Show("Por seguridad, el usuario administrador principal no puede ser eliminado del sistema.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -81,6 +84,7 @@ namespace TillasDesktop.BLL.Services
         // ==========================================
         public Usuario AutenticarUsuario(string credencial, string password)
         {
+            // Si llega algo vacío, ni siquiera molestamos a la base de datos con una consulta inútil :D.
             if (string.IsNullOrWhiteSpace(credencial) || string.IsNullOrWhiteSpace(password))
             {
                 return null;

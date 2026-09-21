@@ -9,6 +9,9 @@ namespace Proyecto_TillasDesktop
     /// </summary>
     public partial class App : Application
     {
+        // Variables estáticas accesibles desde cualquier parte del sistema
+        public static string NombreUsuarioActual { get; set; }
+        public static int IdUsuarioActual { get; set; }
     }
 
 }

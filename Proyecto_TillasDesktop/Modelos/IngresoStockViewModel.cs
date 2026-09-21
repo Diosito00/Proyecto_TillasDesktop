@@ -8,20 +8,22 @@ namespace TillasDesktop.UI.Modelos
 {
     public class IngresoStockViewModel : ViewModelBase
     {
-        private readonly InventarioService _inventarioService;
+        private readonly InventarioService _inventarioService = new InventarioService();
         private readonly Producto _productoPuro;
 
-        // Entidad que viaja a la base de datos (sirve tanto para crear como para editar)
+        // Entidad DTO que sirve de transporte tanto para crear como para editar el stock del talle.
         private readonly ProductoTalle _movimiento;
 
         // === PROPIEDADES VISUALES DINÁMICAS ===
+        // Permiten que el formulario de XAML se adapte cambiando sus títulos y botones sin tener que crear dos ventanas distintas.
         public string TituloVentana { get; set; }
         public string LabelCantidad { get; set; }
         public string TextoBoton { get; set; }
 
-        // Controla si el campo "Talle" debe estar bloqueado
+        // Bandera (Flag) que le indica a la UI y a las validaciones cómo comportarse.
         public bool EsModoEdicion { get; set; }
 
+        // Muestra un resumen del producto en el encabezado de la ventana (ej: "Producto: NK-AF1 - Nike Air Force").
         private string _productoResumen;
         public string ProductoResumen
         {
@@ -29,6 +31,7 @@ namespace TillasDesktop.UI.Modelos
             set { _productoResumen = value; OnPropertyChanged(); }
         }
 
+        // Enlace directo a las propiedades del DTO del movimiento.
         public decimal Talle
         {
             get => _movimiento.Talle;
@@ -44,41 +47,43 @@ namespace TillasDesktop.UI.Modelos
         // === COMANDOS Y DELEGADOS ===
         public ICommand GuardarCommand { get; private set; }
         public Action CerrarVentana { get; set; }
+
+        // Delegado que permite pasarle la entidad actualizada de vuelta a DetalleStockViewModel para que la UI principal se entere del cambio.
         public Action<ProductoTalle> OnStockIngresado { get; set; }
 
         // ====================================================================
-        // CONSTRUCTOR 1: MODO NUEVO INGRESO (Cuando presionan "+ INGRESAR STOCK")
+        // CONSTRUCTOR 1: MODO NUEVO INGRESO (Cuando presionan "+ INGRESAR STOCK").
         // ====================================================================
         public IngresoStockViewModel(ProductoViewModel productoVM)
         {
-            _inventarioService = new InventarioService();
             _productoPuro = productoVM.ObtenerEntidadPura();
 
+            // Prepara un objeto de movimiento vacío, atado únicamente al ID del producto padre.
             _movimiento = new ProductoTalle
             {
                 Producto_ID = _productoPuro.ID
             };
 
+            // Configura la UI en modo "Creación".
             ConfigurarTextosUI("INGRESAR MERCADERÍA", "Cantidad a Ingresar", "CONFIRMAR INGRESO", false);
             InicializarComandos();
         }
 
         // ====================================================================
-        // CONSTRUCTOR 2: MODO EDICIÓN (Cuando presionan el lápiz ✏️)
+        // CONSTRUCTOR 2: MODO EDICIÓN (Cuando presionan el lápiz en un talle que ya existe).
         // ====================================================================
         public IngresoStockViewModel(ProductoViewModel productoVM, ProductoTalle talleExistente)
         {
-            _inventarioService = new InventarioService();
             _productoPuro = productoVM.ObtenerEntidadPura();
 
-            // Usamos la entidad existente que ya tiene un ID cargado
+            // Usamos la entidad existente que ya tiene un ID de base de datos cargado.
             _movimiento = talleExistente;
 
+            // Configura la UI en modo "Edición".
             ConfigurarTextosUI("EDITAR STOCK", "Stock Actual", "GUARDAR CAMBIOS", true);
             InicializarComandos();
         }
 
-        // === MÉTODOS AUXILIARES ===
         private void ConfigurarTextosUI(string titulo, string label, string boton, bool esEdicion)
         {
             TituloVentana = titulo;
@@ -90,19 +95,18 @@ namespace TillasDesktop.UI.Modelos
 
         private void InicializarComandos()
         {
+            // El comando Evalúa 'PuedeGuardar' automáticamente en tiempo real mientras el usuario escribe.
             GuardarCommand = new RelayCommand(Guardar, PuedeGuardar);
         }
 
-        // === LÓGICA DE GUARDADO ===
         private void Guardar(object parametro)
         {
             bool exito;
             string mensaje;
 
-            // Derivamos a la BLL dependiendo de si es una creación o una actualización
+            // Se rutea la operación a un método u otro de la capa de negocios según el contexto de la ventana.
             if (EsModoEdicion)
             {
-                // NOTA: Asegúrate de tener este método en tu InventarioService
                 exito = _inventarioService.ActualizarStockTalle(_movimiento, out mensaje);
             }
             else
@@ -112,6 +116,7 @@ namespace TillasDesktop.UI.Modelos
 
             if (exito)
             {
+                // Dispara el evento que manda el talle procesado hacia el ViewModel padre.
                 OnStockIngresado?.Invoke(_movimiento);
                 MessageBox.Show(mensaje, "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
                 CerrarVentana?.Invoke();
@@ -122,11 +127,13 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
+        // Método que bloquea visualmente el botón de guardar si no se cumplen las condiciones base.
         private bool PuedeGuardar(object parametro)
         {
-            // Si es edición, permitimos guardar stock en 0 (por si se quedaron sin stock), 
-            // pero si es nuevo ingreso, forzamos a que sea mayor a 0.
+            // Si está editando, se permite que el stock quede en 0 (ej: si se vendió el último par físicamente o hubo merma).
             if (EsModoEdicion) return Talle > 0 && Cantidad >= 0;
+
+            // Si es un nuevo ingreso de mercadería, carece de lógica ingresar "0" unidades.
             return Talle > 0 && Cantidad > 0;
         }
     }

@@ -15,10 +15,19 @@ namespace TillasDesktop.UI.Modelos
         private readonly VentasService _ventasService;
 
         // === COLECCIONES PARA LAS TABLAS ===
+
+        // 1. Catálogo Izquierdo: Muestra todos los talles disponibles para vender
         public ObservableCollection<ProductoDisponibleViewModel> ListaCatalogo { get; set; }
+
+        // 2. Carrito Derecho: Muestra lo que el cliente está a punto de llevarse
         public ObservableCollection<LineaCarritoViewModel> Carrito { get; set; }
+
+        // 3. ComboBox de Clientes: Permite asociar la venta a una persona
         public ObservableCollection<string> ClientesTotales { get; set; }
+
+        // Interfaz de filtrado reactivo para la barra de búsqueda del catálogo
         public ICollectionView VistaFiltroCatalogo { get; set; }
+
         private string _busquedaRapida;
         public string BusquedaRapida
         {
@@ -27,18 +36,21 @@ namespace TillasDesktop.UI.Modelos
             {
                 _busquedaRapida = value;
                 OnPropertyChanged();
-                // Actualizamos la tabla cada vez que el usuario teclea una letra
-                VistaFiltroCatalogo?.Refresh();
+                VistaFiltroCatalogo?.Refresh(); // Re-evalúa el filtro cada vez que el vendedor escribe una letra.
             }
         }
+
+        // Datos informativos del encabezado de facturación
         public string FechaActual { get; set; }
         public string VendedorActual { get; set; }
+
         private string _clienteSeleccionado;
         public string ClienteSeleccionado
         {
             get => _clienteSeleccionado;
             set { _clienteSeleccionado = value; OnPropertyChanged(); }
         }
+
         private string _metodoPagoSeleccionado;
         public string MetodoPagoSeleccionado
         {
@@ -46,6 +58,8 @@ namespace TillasDesktop.UI.Modelos
             set { _metodoPagoSeleccionado = value; OnPropertyChanged(); }
         }
         public ObservableCollection<string> MetodosPago { get; set; }
+
+        // Valor monetario de todo el carrito
         private decimal _totalCobrar;
         public decimal TotalCobrar
         {
@@ -53,7 +67,7 @@ namespace TillasDesktop.UI.Modelos
             set { _totalCobrar = value; OnPropertyChanged(); }
         }
 
-        // === COMANDOS ===
+        // === COMANDOS ENLAZADOS A LOS BOTONES DE LA UI ===
         public ICommand LimpiarBusquedaCommand { get; }
         public ICommand AgregarAlCarritoCommand { get; }
         public ICommand QuitarDelCarritoCommand { get; }
@@ -64,20 +78,18 @@ namespace TillasDesktop.UI.Modelos
             _ventasService = new VentasService();
 
             FechaActual = DateTime.Now.ToString("dd/MM/yyyy");
-            // FUTURO: Aquí leeremos el usuario que inició sesión. Por ahora lo simulamos.
-            VendedorActual = "Usuario: Admin";
+            VendedorActual = $"Vendedor: {Proyecto_TillasDesktop.App.NombreUsuarioActual}"; // Conectar con el usuario logueado en App.xaml.
 
+            // Inicialización de colecciones (Listas desplegables).
             MetodosPago = new ObservableCollection<string> { "Efectivo", "Tarjeta de Débito", "Tarjeta de Crédito", "Transferencia", "MercadoPago" };
-
-            ClienteSeleccionado = "Consumidor Final";
+            ClientesTotales = new ObservableCollection<string> { "Consumidor Final", "Juan Pérez", "María Gómez" };
+            ClienteSeleccionado = "Consumidor Final"; // Valor por defecto obligatorio por AFIP/SRI.
 
             ListaCatalogo = new ObservableCollection<ProductoDisponibleViewModel>();
             Carrito = new ObservableCollection<LineaCarritoViewModel>();
 
             VistaFiltroCatalogo = CollectionViewSource.GetDefaultView(ListaCatalogo);
             VistaFiltroCatalogo.Filter = FiltrarCatalogo;
-
-            ClientesTotales = new ObservableCollection<string> { "Consumidor Final", "Juan Pérez", "María Gómez" };
 
             LimpiarBusquedaCommand = new RelayCommand(LimpiarBusqueda);
             AgregarAlCarritoCommand = new RelayCommand(AgregarAlCarrito);
@@ -89,7 +101,7 @@ namespace TillasDesktop.UI.Modelos
 
         private void LimpiarBusqueda(object parametro)
         {
-            // Al vaciar la variable, el XAML se actualiza y la tabla vuelve a mostrar todo el catálogo
+            // Restablecer el texto de búsqueda hace que el filtro se anule y se muestre todo el inventario.
             BusquedaRapida = string.Empty;
         }
 
@@ -97,12 +109,9 @@ namespace TillasDesktop.UI.Modelos
         {
             if (obj is ProductoDisponibleViewModel producto)
             {
-                // Si la barra está vacía, mostramos todo
                 if (string.IsNullOrWhiteSpace(BusquedaRapida)) return true;
 
                 string filtro = BusquedaRapida.ToLower();
-
-                // Buscamos coincidencias en Nombre, Código o Marca
                 return (producto.Nombre != null && producto.Nombre.ToLower().Contains(filtro)) ||
                        (producto.Codigo_Modelo != null && producto.Codigo_Modelo.ToLower().Contains(filtro)) ||
                        (producto.NombreMarca != null && producto.NombreMarca.ToLower().Contains(filtro));
@@ -110,25 +119,32 @@ namespace TillasDesktop.UI.Modelos
             return false;
         }
 
-        // === LÓGICA DE CARRITO ===
+        // === LÓGICA CORE: CARRITO ===
+
+        // Evento disparado al hacer doble clic en una zapatilla del catálogo o al presionar su botón "+".
         private void AgregarAlCarrito(object parametro)
         {
+            // El parámetro trae la zapatilla seleccionada desde el XAML.
             if (parametro is ProductoDisponibleViewModel productoCatalogo)
             {
+                // Defensa contra venta "en negativo".
                 if (productoCatalogo.Stock_Actual <= 0)
                 {
                     MessageBox.Show("No hay stock suficiente de este talle.", "Sin Stock", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
+                // Busca si el cliente ya había agregado un par exactamente igual (mismo modelo y talle) al carrito.
                 var itemEnCarrito = Carrito.FirstOrDefault(c => c.ProductoID == productoCatalogo.ProductoID && c.Talle == productoCatalogo.Talle);
 
                 if (itemEnCarrito != null)
                 {
+                    // Si ya estaba en el carrito, solo aumenta la cantidad del renglón (Evita líneas duplicadas en el ticket).
                     itemEnCarrito.Cantidad++;
                 }
                 else
                 {
+                    // Si es nuevo, lo agrega como renglón independiente.
                     Carrito.Add(new LineaCarritoViewModel
                     {
                         ProductoID = productoCatalogo.ProductoID,
@@ -139,26 +155,32 @@ namespace TillasDesktop.UI.Modelos
                     });
                 }
 
+                // Descuenta "visualmente" el stock del catálogo para que el vendedor sepa cuántos quedan.
                 productoCatalogo.Stock_Actual--;
                 RecalcularTotal();
             }
         }
 
+        // Evento disparado al presionar el botón "-" en el renglón del carrito.
         private void QuitarDelCarrito(object parametro)
         {
             if (parametro is LineaCarritoViewModel itemCarrito)
             {
+                // Busca el producto original en el catálogo de la izquierda.
                 var productoCatalogo = ListaCatalogo.FirstOrDefault(p => p.ProductoID == itemCarrito.ProductoID && p.Talle == itemCarrito.Talle);
 
                 if (productoCatalogo != null)
                 {
+                    // Le devuelve "visualmente" el stock disponible.
                     productoCatalogo.Stock_Actual++;
                 }
 
+                // Resta la cantidad que el cliente iba a llevarse.
                 itemCarrito.Cantidad--;
 
                 if (itemCarrito.Cantidad == 0)
                 {
+                    // Si la cantidad llega a 0, destruye el renglón del carrito.
                     Carrito.Remove(itemCarrito);
                 }
 
@@ -166,8 +188,10 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
+        // Calcula el valor monetario a cobrar cada vez que el carrito se modifica.
         private void RecalcularTotal()
         {
+            // Transforma la lista del carrito en una lista de Detalles que la BLL pueda entender.
             var detallesVenta = Carrito.Select(c => new DetalleVenta
             {
                 Producto_Talle_ID = c.ProductoID,
@@ -175,33 +199,35 @@ namespace TillasDesktop.UI.Modelos
                 Precio_Unitario = c.PrecioUnitario
             });
 
+            // Delega el cálculo matemático a la BLL.
             TotalCobrar = _ventasService.CalcularTotalVenta(detallesVenta);
         }
 
+        // ====================================================================
+        // FINALIZAR VENTA (Botón "COBRAR")
+        // ====================================================================
         private void ConfirmarCobro(object parametro)
         {
-            // Validación 1: Carrito vacío
+            // 1. Validaciones preventivas para evitar tickets corruptos.
             if (!Carrito.Any())
             {
                 MessageBox.Show("El carrito está vacío. Agrega productos antes de cobrar.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Validación 2: Cliente vacío (por si el usuario borró el Consumidor Final sin querer)
             if (string.IsNullOrWhiteSpace(ClienteSeleccionado))
             {
                 MessageBox.Show("Debes seleccionar un cliente válido para la facturación.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Validación 3: Método de pago sin seleccionar
             if (string.IsNullOrWhiteSpace(MetodoPagoSeleccionado))
             {
                 MessageBox.Show("Por favor, selecciona un método de pago antes de confirmar el cobro.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Si pasa todas las validaciones, procedemos a facturar
+            // 2. Transforma el carrito final a entidades puras.
             var detallesVenta = Carrito.Select(c => new DetalleVenta
             {
                 Producto_Talle_ID = c.ProductoID,
@@ -209,14 +235,16 @@ namespace TillasDesktop.UI.Modelos
                 Precio_Unitario = c.PrecioUnitario
             }).ToList();
 
+            // 3. Ejecuta la transacción (que debe restar los stocks físicos reales y generar la factura (en teoria)).
             bool exito = _ventasService.RegistrarVenta(detallesVenta, out string mensaje);
 
+            // 4. Resolución.
             if (exito)
             {
                 MessageBox.Show($"Cobro por {TotalCobrar:C} procesado con éxito.\nCliente: {ClienteSeleccionado}\nPago: {MetodoPagoSeleccionado}\n\n{mensaje}",
                                 "Venta Registrada", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                // Limpiamos la pantalla para el siguiente cliente y restauramos los valores por defecto
+                // Limpia el campo de busqueda.
                 Carrito.Clear();
                 TotalCobrar = 0;
                 BusquedaRapida = string.Empty;
@@ -229,7 +257,6 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
-        // === DATOS SIMULADOS PARA EL CATÁLOGO VISUAL ===
         private void CargarDatosDePrueba()
         {
             ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 1, Codigo_Modelo = "NK-AF1-01", Nombre = "Nike Air Force 1", NombreMarca = "Nike", Talle = 40, Stock_Actual = 5, Precio_Venta = 125000 });

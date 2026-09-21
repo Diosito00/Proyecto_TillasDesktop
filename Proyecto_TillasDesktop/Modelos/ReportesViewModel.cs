@@ -5,10 +5,14 @@ using TillasDesktop.Entities.Reportes;
 
 namespace TillasDesktop.UI.Modelos
 {
+    // Hereda de ViewModelBase para que la interfaz reaccione a los cambios de fechas o filtros.
     public class ReportesViewModel : ViewModelBase
     {
         // === COLECCIÓN DE SOLO LECTURA ===
+        // Colección reactiva que mostrará el listado de ventas en la grilla principal.
         public ObservableCollection<VentaResumenDTO> HistorialVentas { get; set; }
+
+        // Opciones estáticas para el ComboBox de filtrado rápido.
         public List<string> OpcionesPeriodo { get; set; }
 
         // === FILTROS ===
@@ -20,10 +24,14 @@ namespace TillasDesktop.UI.Modelos
             {
                 _periodoSeleccionado = value;
                 OnPropertyChanged();
-                // Cada vez que el usuario cambia la opción, recalculamos las fechas
+
+                // Cada vez que el usuario elige una nueva opción (ej: "Este Mes"), 
+                // se dispara automáticamente el recálculo de las fechas de inicio y fin.
                 ActualizarFechasPorPeriodo();
             }
         }
+
+        // Fechas vinculadas a los controles DatePicker de la interfaz.
         private DateTime _fechaInicio;
         public DateTime FechaInicio
         {
@@ -48,6 +56,7 @@ namespace TillasDesktop.UI.Modelos
             OpcionesPeriodo = new List<string> { "Último Trimestre", "Este Mes", "Esta Semana" };
             HistorialVentas = new ObservableCollection<VentaResumenDTO>();
 
+            // Valores por defecto al abrir la pantalla.
             PeriodoSeleccionado = "Último Trimestre";
             FechaFin = DateTime.Now;
             FechaInicio = DateTime.Now.AddMonths(-3);
@@ -61,6 +70,7 @@ namespace TillasDesktop.UI.Modelos
         // === LÓGICA DE BOTONES ===
         private void GenerarReporte(object parametro)
         {
+            // Validación básica para evitar que el usuario busque rangos ilógicos (ej: desde el 20 de mayo hasta el 10 de mayo).
             if (FechaInicio > FechaFin)
             {
                 MessageBox.Show("La fecha de inicio no puede ser mayor a la fecha de fin.", "Error de fechas", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -73,9 +83,11 @@ namespace TillasDesktop.UI.Modelos
 
         private void ExportarReporte(object parametro)
         {
+            // Integración futura con librerías como iTextSharp o PDFsharp para generar el PDF.
             MessageBox.Show("El reporte se ha exportado exitosamente a PDF.", "Exportación Completa", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
+        // Método auxiliar que traduce el texto del ComboBox en fechas matemáticas reales.
         private void ActualizarFechasPorPeriodo()
         {
             DateTime hoy = DateTime.Now;
@@ -83,41 +95,45 @@ namespace TillasDesktop.UI.Modelos
             switch (PeriodoSeleccionado)
             {
                 case "Esta Semana":
-                    // Calculamos cuántos días pasaron desde el lunes
+                    // Fórmula matemática para encontrar el lunes de la semana actual.
                     int diasDesdeLunes = (7 + (hoy.DayOfWeek - DayOfWeek.Monday)) % 7;
                     FechaInicio = hoy.AddDays(-diasDesdeLunes).Date;
                     FechaFin = hoy.Date;
                     break;
 
                 case "Este Mes":
-                    // Primer día del mes actual
+                    // Crea una fecha forzando el día a '1' manteniendo el año y mes actual.
                     FechaInicio = new DateTime(hoy.Year, hoy.Month, 1);
                     FechaFin = hoy.Date;
                     break;
 
                 case "Último Trimestre":
-                    // Restamos 3 meses exactos al día de hoy
                     FechaInicio = hoy.AddMonths(-3).Date;
                     FechaFin = hoy.Date;
                     break;
             }
         }
 
+        // Método que se ejecuta al presionar el botón "Ver" (el ojo) en una fila de la grilla de ventas.
         private void VerDetalle(object parametro)
         {
+            // Se asegura de que el parámetro enviado desde el XAML sea un resumen de venta válido.
             if (parametro is VentaResumenDTO ventaSeleccionada)
             {
-                // Creamos la ventana y le inyectamos su ViewModel con la venta específica
+                // Instancia la ventana hija (diseñada para ser un ticket de solo lectura).
                 var ventanaDetalle = new Vistas.DetalleVentaView();
+
+                // Le inyecta la venta seleccionada al ViewModel de esa ventana hija.
                 ventanaDetalle.DataContext = new DetalleVentaViewModel(ventaSeleccionada);
 
-                // ShowDialog oscurece la pantalla de atrás y obliga al usuario a cerrar el ticket
+                // ShowDialog() oscurece el fondo y bloquea la ventana principal hasta que el usuario cierre el ticket.
                 ventanaDetalle.ShowDialog();
             }
         }
 
         private void CargarHistorialSimulado()
         {
+            // Datos de prueba para poder visualizar el diseño de la grilla.
             HistorialVentas.Add(new VentaResumenDTO
             {
                 ID = 1045,
