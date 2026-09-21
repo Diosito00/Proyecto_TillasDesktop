@@ -8,7 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Validaciones\" />
+    <Compile Remove="Validaciones\**" />
+    <EmbeddedResource Remove="Validaciones\**" />
+    <None Remove="Validaciones\**" />
+    <Page Remove="Validaciones\**" />
   </ItemGroup>
 
   <ItemGroup>

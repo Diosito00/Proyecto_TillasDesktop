@@ -81,6 +81,8 @@
                         <Button x:Name="btnConfiguracion" Content="👤  USUARIOS Y ROLES" Style="{StaticResource MenuButton}" Click="BtnConfiguracion_Click"/>
                         <Button x:Name="btnBackup" Content="⚙  COPIA DE RESPALDO" Style="{StaticResource MenuButton}" Click="BtnBackup_Click"/>
                     </StackPanel>
+                    <Button x:Name="btnCerrarSesion" Grid.Row="1" Content="🚪  CERRAR SESIÓN" Style="{StaticResource MenuButton}" 
+                            VerticalAlignment="Bottom" Margin="0,0,0,20" Click="BtnCerrarSesion_Click"/>
                 </Grid>
             </Border>
 

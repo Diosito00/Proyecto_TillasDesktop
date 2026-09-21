@@ -75,5 +75,18 @@ namespace TillasDesktop.BLL.Services
 
             return _usuarioRepo.Eliminar(idUsuario);
         }
+
+        // ==========================================
+        // AUTENTICAR LOGIN
+        // ==========================================
+        public Usuario AutenticarUsuario(string credencial, string password)
+        {
+            if (string.IsNullOrWhiteSpace(credencial) || string.IsNullOrWhiteSpace(password))
+            {
+                return null;
+            }
+
+            return _usuarioRepo.Autenticar(credencial, password);
+        }
     }
 }

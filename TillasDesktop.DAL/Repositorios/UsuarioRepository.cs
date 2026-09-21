@@ -87,9 +87,7 @@ namespace TillasDesktop.DAL.Repositorios
             return listaUsuarios;
         }
 
-        // ==========================================
-        // Obtener por ID
-        // ==========================================
+        // 2. Obtener por ID
         public Usuario ObtenerPorId(int id)
         {
             Usuario usuario;
@@ -145,7 +143,7 @@ namespace TillasDesktop.DAL.Repositorios
         }
 
 
-        // 2. INSERTAR UN NUEVO USUARIO (CREATE / CREACIÓN)
+        // 3. INSERTAR UN NUEVO USUARIO (CREATE / CREACIÓN)
         public bool Insertar(Usuario nuevoUsuario)
         {
             // Bloque try-catch para atrapar cualquier error imprevisto durante la ejecución con la base de datos.
@@ -198,7 +196,7 @@ namespace TillasDesktop.DAL.Repositorios
         }
 
        
-        // 3. ACTUALIZAR UN USUARIO EXISTENTE (UPDATE / MODIFICACIÓN)
+        // 4. ACTUALIZAR UN USUARIO EXISTENTE (UPDATE / MODIFICACIÓN)
         
         public bool Actualizar(Usuario usuarioModificado)
         {
@@ -260,8 +258,7 @@ namespace TillasDesktop.DAL.Repositorios
         }
 
         
-        // 4. ELIMINAR UN USUARIO (DELETE / BORRADO)
-       
+        // 5. ELIMINAR UN USUARIO (DELETE / BORRADO)
         public bool Eliminar(int idUsuario)
         {
             try
@@ -294,6 +291,48 @@ namespace TillasDesktop.DAL.Repositorios
                 // Captura y reporta cualquier error en el proceso de eliminación.
                 throw new Exception("Error al eliminar el usuario: " + ex.Message);
             }
+        }
+
+        // 6. OBTENER USUARIO POR CREDENCIALES (LOGIN)
+        public Usuario Autenticar(string credencial, string password)
+        {
+            // Buscamos por Nombre_Usuario o Email, exigiendo que coincida la clave y esté activo
+            string query = @"SELECT Id_Usuario, Nombre, Apellido, Rol 
+                     FROM Usuarios 
+                     WHERE (Nombre_Usuario = @Credencial OR Email = @Credencial) 
+                     AND Password = @Password 
+                     AND Activo = 1";
+
+            try
+            {
+                using (var conexion = ObtenerConexion())
+                using (var comando = new SqlCommand(query, conexion))
+                {
+                    comando.Parameters.AddWithValue("@Credencial", credencial);
+                    comando.Parameters.AddWithValue("@Password", password);
+
+                    conexion.Open();
+                    using (var lector = comando.ExecuteReader())
+                    {
+                        if (lector.Read())
+                        {
+                            return new Usuario
+                            {
+                                Id_Usuario = lector.GetInt32(0),
+                                Nombre = lector.IsDBNull(1) ? string.Empty : lector.GetString(1),
+                                Apellido = lector.IsDBNull(2) ? string.Empty : lector.GetString(2),
+                                Rol = lector.IsDBNull(3) ? string.Empty : lector.GetString(3)
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al intentar autenticar: " + ex.Message);
+            }
+
+            return null; // Retorna null si no encontró coincidencias
         }
     }
 }

@@ -8,7 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Configuracion\" />
+    <Compile Remove="Configuracion\**" />
+    <EmbeddedResource Remove="Configuracion\**" />
+    <None Remove="Configuracion\**" />
+    <Page Remove="Configuracion\**" />
   </ItemGroup>
 
   <ItemGroup>

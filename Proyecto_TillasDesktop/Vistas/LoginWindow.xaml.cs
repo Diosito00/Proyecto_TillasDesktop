@@ -1,6 +1,5 @@
 ﻿// Importación de las librerías necesarias de Windows Presentation Foundation (WPF) para la gestión de ventanas y controles
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using TillasDesktop.UI.Modelos;
 
@@ -21,9 +20,16 @@ namespace TillasDesktop.UI.Vistas
             InitializeComponent();
             _viewModel = new LoginViewModel();
             this.DataContext = _viewModel;
+
+            // Carga el usuario guardado si existe
+            if (!string.IsNullOrEmpty(Properties.Settings.Default.UsuarioGuardado))
+            {
+                _viewModel.Usuario = Properties.Settings.Default.UsuarioGuardado;
+                chkRecordarme.IsChecked = true;
+            }
         }
 
-        // 1. Permite arrastrar la ventana al mantener el clic presionado sobre la barra
+        // Permite arrastrar la ventana al mantener el clic presionado sobre la barra
         private void BarraSuperior_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
@@ -32,13 +38,13 @@ namespace TillasDesktop.UI.Vistas
             }
         }
 
-        // 2. Botón de minimizar
+        // Botón de minimizar
         private void BtnMinimizar_Click(object sender, RoutedEventArgs e)
         {
             WindowState = WindowState.Minimized;
         }
 
-        // 3. Botón de cerrar
+        // Botón de cerrar
         private void BtnCerrar_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
@@ -98,6 +104,17 @@ namespace TillasDesktop.UI.Vistas
 
             if (rolConfirmado != null)
             {
+                // Lógica para guardar o borrar el usuario en la configuración local
+                if (chkRecordarme.IsChecked == true)
+                {
+                    Properties.Settings.Default.UsuarioGuardado = usuario;
+                }
+                else
+                {
+                    Properties.Settings.Default.UsuarioGuardado = string.Empty;
+                }
+                Properties.Settings.Default.Save(); // Aplica los cambios al archivo de configuración
+
                 // Instancia la ventana del menú principal del sistema
                 MenuInicioView ventanaPrincipal = new MenuInicioView(rolConfirmado);
                 // Muestra la ventana principal en pantalla
@@ -108,7 +125,7 @@ namespace TillasDesktop.UI.Vistas
             }
             else
             {
-                MessageBox.Show("Usuario o contraseña incorrectos. Intente con vendedor, gerente o admin (clave: 123).", "Error de Acceso", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Usuario o contraseña incorrectos, o su cuenta se encuentra inactiva.", "Error de Acceso", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

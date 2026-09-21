@@ -5,6 +5,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using TillasDesktop.BLL.Services;
 using TillasDesktop.UI.Vistas;
+using TillasDesktop.Entities.Usuarios;
 
 namespace TillasDesktop.UI.Modelos
 {
@@ -117,15 +118,46 @@ namespace TillasDesktop.UI.Modelos
             // El obj llega desde el botón del DataGrid mediante CommandParameter="{Binding}"
             if (obj is UsuarioViewModel usuarioFila)
             {
+                // Extraemos la entidad original de la fila seleccionada
+                var entidadOriginal = usuarioFila.ObtenerEntidadPura();
+
+                // Creamos un "clon" desconectado en otra dirección de memoria
+                var entidadClonada = new Usuario
+                {
+                    Id_Usuario = entidadOriginal.Id_Usuario,
+                    Nombre = entidadOriginal.Nombre,
+                    Apellido = entidadOriginal.Apellido,
+                    Dni = entidadOriginal.Dni,
+                    Email = entidadOriginal.Email,
+                    Nombre_Usuario = entidadOriginal.Nombre_Usuario,
+                    Password = entidadOriginal.Password, // Mantenemos el hash intacto
+                    Fecha_Nacimiento = entidadOriginal.Fecha_Nacimiento,
+                    Rol = entidadOriginal.Rol,
+                    Activo = entidadOriginal.Activo
+                };
+
                 var ventana = new FormularioUsuarioWindow();
 
-                // Le pasamos la entidad pura al formulario
-                var viewModel = new FormularioUsuarioViewModel(usuarioFila.ObtenerEntidadPura());
+                // Le pasamos el CLON al formulario, protegiendo los datos reales
+                var viewModel = new FormularioUsuarioViewModel(entidadClonada);
 
                 viewModel.CerrarVentana = () => ventana.Close();
+
                 viewModel.OnUsuarioGuardado = () =>
                 {
-                    VistaFiltroUsuarios.Refresh();       
+                    // Si el guardado en BD fue exitoso, volcamos los cambios del clon a la fila original.
+                    // Usamos las propiedades de 'UsuarioViewModel' para que disparen automáticamente 
+                    // el evento OnPropertyChanged() y la tabla se redibuje al instante.
+                    usuarioFila.Nombre = entidadClonada.Nombre;
+                    usuarioFila.Apellido = entidadClonada.Apellido;
+                    usuarioFila.Dni = entidadClonada.Dni;
+                    usuarioFila.Email = entidadClonada.Email;
+                    usuarioFila.Nombre_Usuario = entidadClonada.Nombre_Usuario;
+                    usuarioFila.Fecha_Nacimiento = entidadClonada.Fecha_Nacimiento;
+                    usuarioFila.Rol = entidadClonada.Rol;
+                    usuarioFila.Activo = entidadClonada.Activo;
+
+                    VistaFiltroUsuarios.Refresh();
                 };
 
                 ventana.DataContext = viewModel;
@@ -138,7 +170,7 @@ namespace TillasDesktop.UI.Modelos
         {
             if (obj is UsuarioViewModel usuarioFila)
             {
-               var respuesta = MessageBox.Show($"¿Estás seguro de que deseas eliminar permanentemente el usuario '{usuarioFila.Nombre} {usuarioFila.Apellido}'?",
+               var respuesta = MessageBox.Show($"¿Estás seguro de que deseas eliminar el usuario '{usuarioFila.Nombre} {usuarioFila.Apellido}'?",
                                                 "Confirmar Eliminación",
                                                 MessageBoxButton.YesNo,
                                                 MessageBoxImage.Warning);

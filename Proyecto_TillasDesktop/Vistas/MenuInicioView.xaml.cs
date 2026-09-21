@@ -29,6 +29,7 @@ namespace TillasDesktop.UI.Vistas
                 btnInventario.Visibility = Visibility.Collapsed;
                 btnReportes.Visibility = Visibility.Collapsed;
                 btnConfiguracion.Visibility = Visibility.Collapsed; // Módulo bloqueado para el perfil Vendedor.
+                btnBackup.Visibility = Visibility.Collapsed;
             }
             else if (rolUsuario == "Gerente")
             {
@@ -36,6 +37,7 @@ namespace TillasDesktop.UI.Vistas
                 btnPuntoVenta.Visibility = Visibility.Collapsed;
                 btnClientes.Visibility = Visibility.Collapsed;
                 btnConfiguracion.Visibility = Visibility.Collapsed; // Módulo bloqueado para el perfil Gerente.
+                btnBackup.Visibility = Visibility.Collapsed;
             }
 
             // Carga por defecto la vista de bienvenida o inicio dentro del contenedor central al abrir la ventana.
@@ -103,6 +105,23 @@ namespace TillasDesktop.UI.Vistas
         private void BtnBackup_Click(object sender, RoutedEventArgs e)
         {
             AreaPrincipal.Content = new BackupView();
+        }
+
+        // Evento que se ejecuta al hacer clic en el botón de cerrar sesión.
+        private void BtnCerrarSesion_Click(object sender, RoutedEventArgs e)
+        {
+            // Opcional: Preguntar al usuario si está seguro
+            var confirmacion = MessageBox.Show("¿Está seguro que desea cerrar la sesión actual?", "Confirmar Cierre de Sesión", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (confirmacion == MessageBoxResult.Yes)
+            {
+                // Instancia una nueva ventana de Login
+                LoginWindow ventanaLogin = new LoginWindow();
+                ventanaLogin.Show();
+
+                // Cierra la ventana del menú principal
+                this.Close();
+            }
         }
     }
 }
