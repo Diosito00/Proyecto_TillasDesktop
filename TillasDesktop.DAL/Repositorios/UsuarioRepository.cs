@@ -28,7 +28,7 @@ namespace TillasDesktop.DAL.Repositorios
 
 
                 // Agregamos el filtro para traer solo los activos
-                string query = "SELECT id_usuario, nombre, apellido, dni, email, nombre_usuario, password, fecha_nacimiento, rol, activo FROM Usuarios WHERE activo = 1";
+                string query = "SELECT * FROM Usuarios WHERE activo = 1";
               
 
                 // Prepara el comando SQL pasándole la consulta y la conexión activa.
@@ -87,7 +87,64 @@ namespace TillasDesktop.DAL.Repositorios
             return listaUsuarios;
         }
 
-       
+        // ==========================================
+        // Obtener por ID
+        // ==========================================
+        public Usuario ObtenerPorId(int id)
+        {
+            Usuario usuario;
+            string query = "SELECT * FROM Usuarios WHERE Id_Usuario = @Id";
+
+            using (var con = ObtenerConexion())
+            using (var cmd = new SqlCommand(query, con))
+            {
+                cmd.Parameters.AddWithValue("@Id", id);
+                con.Open();
+
+                using (SqlDataReader lector = cmd.ExecuteReader())
+                {
+                    if (lector.Read())
+                    {
+                        usuario = new Usuario
+                        {
+                            // Leemos la columna 0 (id_usuario) asegurando que sea un entero.
+                            Id_Usuario = lector.GetInt32(0),
+
+                            // Verificamos si la columna 1 (nombre) es nula en la BD; si lo es, asignamos un string vacío, de lo contrario leemos el texto.
+                            Nombre = lector.IsDBNull(1) ? string.Empty : lector.GetString(1),
+
+                            // Verificamos si la columna 2 (apellido) es nula; si es así, asignamos un string vacío.
+                            Apellido = lector.IsDBNull(2) ? string.Empty : lector.GetString(2),
+
+                            // Verificamos y leemos la columna 3 (dni).
+                            Dni = lector.IsDBNull(3) ? string.Empty : lector.GetString(3),
+
+                            // Verificamos y leemos la columna 4 (email).
+                            Email = lector.IsDBNull(4) ? string.Empty : lector.GetString(4),
+
+                            // Verificamos y leemos la columna 5 (nombre_usuario).
+                            Nombre_Usuario = lector.IsDBNull(5) ? string.Empty : lector.GetString(5),
+
+                            // Verificamos y leemos la columna 6 (password).
+                            Password = lector.IsDBNull(6) ? string.Empty : lector.GetString(6),
+
+                            // Verificamos si la fecha de nacimiento es nula; si lo es, asignamos un DateTime? nulo, de lo contrario obtenemos la fecha.
+                            Fecha_Nacimiento = lector.IsDBNull(7) ? DateTime.MinValue : lector.GetDateTime(7),
+
+                            // Verificamos y leemos la columna 8 (rol).
+                            Rol = lector.IsDBNull(8) ? string.Empty : lector.GetString(8),
+
+                            // Leemos la columna 9 (activo) convirtiéndola a su valor booleano correspondiente.
+                            Activo = lector.GetBoolean(9)
+                        };
+                        return usuario;
+                    }
+                }
+            }
+            return null;
+        }
+
+
         // 2. INSERTAR UN NUEVO USUARIO (CREATE / CREACIÓN)
         public bool Insertar(Usuario nuevoUsuario)
         {
@@ -119,11 +176,17 @@ namespace TillasDesktop.DAL.Repositorios
                         // Abre el canal de comunicación con el servidor.
                         conexion.Open();
 
-                        // Ejecuta la consulta de modificación y devuelve un entero con la cantidad de filas afectadas.
-                        int filasAfectadas = comando.ExecuteNonQuery();
+                        // ExecuteScalar ejecuta la consulta y devuelve la primera columna de la primera fila (nuestro nuevo ID)
+                        object resultado = comando.ExecuteScalar();
 
-                        // Retorna verdadero (true) si se insertó al menos una fila con éxito.
-                        return filasAfectadas > 0;
+                        if (resultado != null)
+                        {
+                            // Asignamos el ID real de la base de datos a nuestra entidad
+                            nuevoUsuario.Id_Usuario = Convert.ToInt32(resultado);
+                            return true;
+                        }
+
+                        return false;
                     }
                 }
             }
@@ -139,24 +202,30 @@ namespace TillasDesktop.DAL.Repositorios
         
         public bool Actualizar(Usuario usuarioModificado)
         {
-            try
-            {
-                // Obtiene la conexión a través de la clase base.
-                using (var conexion = ObtenerConexion())
-                {
-                    // Consulta SQL para modificar los campos de un usuario específico usando su ID como filtro (WHERE).
-                    string query = @"UPDATE Usuarios 
+            // Verificamos si el campo de contraseña del formulario NO esta vacio
+            bool actualizaPassword = !string.IsNullOrWhiteSpace(usuarioModificado.Password);
+
+            // Consulta SQL para modificar los campos de un usuario específico usando su ID como filtro (WHERE).
+            string query = @"UPDATE Usuarios 
                                      SET Nombre = @Nombre, 
                                          Apellido = @Apellido, 
                                          Dni = @Dni, 
                                          Email = @Email, 
                                          Nombre_Usuario = @Nombre_Usuario, 
-                                         Password = @Password, 
                                          Fecha_Nacimiento = @Fecha_Nacimiento, 
                                          Rol = @Rol, 
-                                         Activo = @Activo 
-                                     WHERE Id_Usuario = @Id_Usuario";
+                                         Activo = @Activo";
 
+            // Si el campo contiene información nueva se extiende el query para actualizar la contraseña
+            if (actualizaPassword) query += ", Password = @Password";
+
+            query += " WHERE Id_Usuario = @Id_Usuario";
+
+            try
+            {
+                // Obtiene la conexión a través de la clase base.
+                using (var conexion = ObtenerConexion())
+                {
                     // Prepara el comando SQL.
                     using (var comando = new SqlCommand(query, conexion))
                     {

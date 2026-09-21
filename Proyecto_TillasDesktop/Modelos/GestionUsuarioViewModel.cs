@@ -3,16 +3,15 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using TillasDesktop.Entities.Usuarios;
+using TillasDesktop.BLL.Services;
 using TillasDesktop.UI.Vistas;
-using TillasDesktop.DAL.Repositorios; // <-- 1. Importar el repositorio
 
 namespace TillasDesktop.UI.Modelos
 {
     public class GestionUsuarioViewModel : ViewModelBase
     {
-        // 2. Declarar una instancia del repositorio de usuarios
-        private readonly UsuarioRepository _usuarioRepository;
+        // Declarar una instancia del servicio de usuarios
+        private readonly UsuariosService _usuarioService;
         private ObservableCollection<UsuarioViewModel> _listaUsuarios;
         public ObservableCollection<UsuarioViewModel> ListaUsuarios
         {
@@ -40,8 +39,8 @@ namespace TillasDesktop.UI.Modelos
 
         public GestionUsuarioViewModel()
         {
-            // 3. Inicializar el repositorio
-            _usuarioRepository = new UsuarioRepository();
+            // Inicializar el servicio
+            _usuarioService = new UsuariosService();
 
             CargarDatos();
 
@@ -61,8 +60,8 @@ namespace TillasDesktop.UI.Modelos
 
             try
             {
-                // Llamamos al repositorio para traer la lista de la BD
-                var usuariosDeDb = _usuarioRepository.ObtenerTodos();
+                // Llamamos al servicio para traer la lista de la BD
+                var usuariosDeDb = _usuarioService.ObtenerTodos();
 
                 // Envolvemos cada entidad pura de la BD en un UsuarioViewModel y la agregamos a la lista observable
                 foreach (var usuario in usuariosDeDb)
@@ -77,7 +76,7 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
-        // 2. EL FILTRO AHORA EVALÚA EL ENVOLTORIO
+        // EL FILTRO AHORA EVALÚA EL ENVOLTORIO
         private bool FiltrarCriteriosUsuarios(object obj)
         {
             if (obj is UsuarioViewModel usuarioFila)
@@ -94,7 +93,7 @@ namespace TillasDesktop.UI.Modelos
             return false;
         }
 
-        // 3. NUEVO USUARIO (INSERCIÓN EN LA BASE DE DATOS)
+        // NUEVO USUARIO (INSERCIÓN EN LA BASE DE DATOS)
         private void EjecutarNuevo(object obj)
         {
             var ventana = new FormularioUsuarioWindow();
@@ -103,25 +102,9 @@ namespace TillasDesktop.UI.Modelos
             viewModel.CerrarVentana = () => ventana.Close();
             viewModel.OnUsuarioGuardado = () =>
             {
-                try
-                {
-                    // Obtenemos la entidad pura desde el formulario
-                    var nuevaEntidad = viewModel.UsuarioActual.ObtenerEntidadPura();
-
-                    // Guardamos físicamente en la base de datos usando el repositorio
-                    bool insertado = _usuarioRepository.Insertar(nuevaEntidad);
-
-                    if (insertado)
-                    {
-                        // Si se guardó con éxito en la BD, lo agregamos a la interfaz visual
-                        ListaUsuarios.Add(viewModel.UsuarioActual);
-                        VistaFiltroUsuarios.Refresh();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error al Guardar", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                // Ya no calculamos nada. La entidad ya trae su ID real de SQL Server.
+                ListaUsuarios.Add(viewModel.UsuarioActual);
+                VistaFiltroUsuarios.Refresh();
             };
 
             ventana.DataContext = viewModel;
@@ -142,23 +125,7 @@ namespace TillasDesktop.UI.Modelos
                 viewModel.CerrarVentana = () => ventana.Close();
                 viewModel.OnUsuarioGuardado = () =>
                 {
-                    try
-                    {
-                        // Extraemos la entidad modificada
-                        var entidadModificada = usuarioFila.ObtenerEntidadPura();
-
-                        // Actualizamos en la base de datos a través del repositorio
-                        bool actualizado = _usuarioRepository.Actualizar(entidadModificada);
-
-                        if (actualizado)
-                        {
-                            VistaFiltroUsuarios.Refresh();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "Error al Actualizar", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
+                    VistaFiltroUsuarios.Refresh();       
                 };
 
                 ventana.DataContext = viewModel;
@@ -181,7 +148,7 @@ namespace TillasDesktop.UI.Modelos
                     try
                     {
                         // Llamamos al repositorio pasándole el ID del usuario seleccionado
-                        bool eliminado = _usuarioRepository.Eliminar(usuarioFila.Id_Usuario);
+                        bool eliminado = _usuarioService.EliminarUsuario(usuarioFila.Id_Usuario);
 
                         if (eliminado)
                         {

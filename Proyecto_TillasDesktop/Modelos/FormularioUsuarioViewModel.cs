@@ -1,6 +1,7 @@
-﻿using System.Windows;
+﻿using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Input;
-using System.Text.RegularExpressions;
+using TillasDesktop.BLL.Services;
 using TillasDesktop.Entities.Usuarios;
 
 namespace TillasDesktop.UI.Modelos
@@ -8,11 +9,11 @@ namespace TillasDesktop.UI.Modelos
     public class FormularioUsuarioViewModel : ViewModelBase
     {
         // === PROPIEDADES DE LA INTERFAZ ===
+        private readonly UsuariosService _usuarioService;
         public string TituloFormulario { get; set; }
         public bool EsModoEdicion { get; set; }
         public string MensajePassword { get; set; }
         public List<string> ListaRoles { get; set; }
-        private string _mensajeError;
 
         // === EL ENVOLTORIO REACTIVO ===
         public UsuarioViewModel UsuarioActual { get; set; }
@@ -57,6 +58,7 @@ namespace TillasDesktop.UI.Modelos
         // ====================================================================
         public FormularioUsuarioViewModel(Usuario usuarioExistente)
         {
+            _usuarioService = new UsuariosService();
             EsModoEdicion = true;
             TituloFormulario = "DATOS DEL USUARIO (EDICIÓN)";
             MensajePassword = "* Dejar en blanco para mantener la contraseña actual.";
@@ -139,11 +141,28 @@ namespace TillasDesktop.UI.Modelos
                 entidadParaGuardar.Password = NuevaPassword;
             }
 
-            MessageBox.Show(EsModoEdicion ? "Usuario actualizado correctamente." : "Usuario creado correctamente.",
-                            "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
+            bool exito;
 
-            OnUsuarioGuardado?.Invoke();
-            CerrarVentana?.Invoke();
+            if (EsModoEdicion)
+            {
+                exito = _usuarioService.ActualizarUsuario(entidadParaGuardar);
+            }
+            else
+            {
+                exito = _usuarioService.CrearUsuario(entidadParaGuardar);
+
+                // Forzamos la actualización en la UI para que desaparezca el "0" y muestre el ID real
+                if (exito) UsuarioActual.Id_Usuario = entidadParaGuardar.Id_Usuario;
+            }
+
+            if (exito)
+            {
+                MessageBox.Show(EsModoEdicion ? "Usuario actualizado correctamente." : "Usuario creado correctamente.",
+                                "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                OnUsuarioGuardado?.Invoke();
+                CerrarVentana?.Invoke();
+            }
         }
     }
 }

@@ -12,7 +12,11 @@ namespace TillasDesktop.UI.Modelos
             _usuarioPuro = usuario ?? new Usuario();
         }
 
-        public int Id_Usuario => _usuarioPuro.Id_Usuario;
+        public int Id_Usuario
+        {
+            get => _usuarioPuro.Id_Usuario;
+            set { _usuarioPuro.Id_Usuario = value; OnPropertyChanged(); }
+        }
 
         public string Nombre
         {

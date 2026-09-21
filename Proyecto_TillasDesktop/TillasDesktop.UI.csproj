@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TillasDesktop.BLL\TillasDesktop.BLL.csproj" />
-    <ProjectReference Include="..\TillasDesktop.DAL\TillasDesktop.DAL.csproj" />
     <ProjectReference Include="..\TillasDesktop.Entities\TillasDesktop.Entities.csproj" />
   </ItemGroup>
 

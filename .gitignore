@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # Ignorar configuraciones locales de base de datos
 TillasDesktop.UI/App.config
+Proyecto_TillasDesktop/App.config
