@@ -11,12 +11,12 @@
             <RowDefinition Height="Auto"/>
             <!-- KPIs Dinámicos -->
             <RowDefinition Height="Auto"/>
-            <!-- Gráfico -->
+            <!-- Zona Central (Gráfico u Objetivos) -->
             <RowDefinition Height="*"/>
             <!-- Tabla -->
         </Grid.RowDefinitions>
 
-        <!-- 1. BARRA SUPERIOR (Perfil alineado a la derecha) -->
+        <!-- BARRA SUPERIOR (Perfil alineado a la derecha) -->
         <Border Grid.Row="0" Background="White" CornerRadius="8" Margin="0,0,0,20" Padding="15">
             <Border.Effect>
                 <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
@@ -25,37 +25,29 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <!-- Columna 0: Ocupa todo el espacio disponible -->
                     <ColumnDefinition Width="Auto"/>
-                    <!-- Columna 1: Ocupa solo lo necesario para el perfil -->
                 </Grid.ColumnDefinitions>
 
-                <!-- Lado Izquierdo: Saludo y Subtítulo apilados verticalmente -->
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
                     <TextBlock Text="{Binding SaludoUsuario}" FontSize="24" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}"/>
                     <TextBlock Text="Aquí tienes el resumen de tu actividad de hoy." FontSize="14" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,5,0,0"/>
                 </StackPanel>
 
-                <!-- Lado Derecho: Contenedor horizontal para los datos y el avatar -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-
-                    <!-- Datos del usuario apilados verticalmente y alineados a la derecha -->
                     <StackPanel VerticalAlignment="Center" Margin="0,0,10,0">
                         <TextBlock Text="{Binding RolUsuario}" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" HorizontalAlignment="Right"/>
                         <TextBlock Text="{Binding FechaActual}" FontSize="11" Foreground="{StaticResource BrushTextoSecundario}" HorizontalAlignment="Right"/>
                     </StackPanel>
 
-                    <!-- Avatar -->
                     <Border Width="40" Height="40" CornerRadius="20" Background="#CBD5E0" VerticalAlignment="Center">
                         <TextBlock Text="👤" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
                     </Border>
-
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- 3. TARJETAS KPI -->
-        <UniformGrid Grid.Row="1" Columns="3" Margin="0,0,0,20">
+        <!-- TARJETAS KPI -->
+        <UniformGrid Grid.Row="1" Columns="3" Margin="0,0,0,10">
             <Border Background="White" CornerRadius="8" Padding="20" Margin="0,0,5,0">
                 <Border.Effect>
                     <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
@@ -87,34 +79,53 @@
             </Border>
         </UniformGrid>
 
-        <!-- 4. GRÁFICO -->
-        <Border Grid.Row="2" Background="White" CornerRadius="8" Padding="20" Margin="0,0,0,20">
-            <Border.Effect>
-                <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
-            </Border.Effect>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="250"/>
-                </Grid.RowDefinitions>
-                <TextBlock Text="RENDIMIENTO SEMANAL" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
+        <!-- ZONA CENTRAL: GRÁFICO (Admin) O OBJETIVOS (Vendedor) -->
+        <Grid Grid.Row="2" Margin="0,0,0,10">
 
-                <lvc:CartesianChart Grid.Row="1" Series="{Binding SeriesCollectionVentas}" LegendLocation="None">
-                    <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Labels="{Binding LabelsDias}">
-                            <lvc:Axis.Separator>
-                                <lvc:Separator Step="1" />
-                            </lvc:Axis.Separator>
-                        </lvc:Axis>
-                    </lvc:CartesianChart.AxisX>
-                    <lvc:CartesianChart.AxisY>
-                        <lvc:Axis LabelFormatter="{Binding FormatterMoneda}" />
-                    </lvc:CartesianChart.AxisY>
-                </lvc:CartesianChart>
-            </Grid>
-        </Border>
+            <!-- PANEL DE RENDIMIENTO (Admin/Gerente) -->
+            <Border Visibility="{Binding VisibilidadGrafico}" Background="White" CornerRadius="8" Padding="20">
+                <Border.Effect>
+                    <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="250"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="RENDIMIENTO SEMANAL" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
 
-        <!-- 5. TABLA DE VENTAS CON NUEVA COLUMNA Y FORMATOS -->
+                    <lvc:CartesianChart Grid.Row="1" Series="{Binding SeriesCollectionVentas}" LegendLocation="None">
+                        <lvc:CartesianChart.AxisX>
+                            <lvc:Axis Labels="{Binding LabelsDias}">
+                                <lvc:Axis.Separator>
+                                    <lvc:Separator Step="1" />
+                                </lvc:Axis.Separator>
+                            </lvc:Axis>
+                        </lvc:CartesianChart.AxisX>
+                        <lvc:CartesianChart.AxisY>
+                            <lvc:Axis LabelFormatter="{Binding FormatterMoneda}" />
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+                </Grid>
+            </Border>
+
+            <!-- PANEL DE OBJETIVOS (Vendedor) -->
+            <Border Visibility="{Binding VisibilidadObjetivos}" Background="White" CornerRadius="8" Padding="30">
+                <Border.Effect>
+                    <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+                </Border.Effect>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="🎯 TU META MENSUAL" FontSize="14" FontWeight="Bold" Foreground="#718096" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding TextoObjetivo}" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,20"/>
+
+                    <ProgressBar Value="{Binding ProgresoObjetivo}" Height="25" Minimum="0" Maximum="100" Foreground="{StaticResource BrushVerde}" Background="#EDF2F7" BorderThickness="0"/>
+                    <TextBlock Text="{Binding ProgresoObjetivo, StringFormat={}{0}% Alcanzado}" HorizontalAlignment="Right" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrushVerde}" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
+
+        </Grid>
+
+        <!-- TABLA DE VENTAS -->
         <Border Grid.Row="3" Background="White" CornerRadius="8" Padding="20">
             <Border.Effect>
                 <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
@@ -124,18 +135,18 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="ÚLTIMAS VENTAS" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
+
+                <!-- Título dinámico -->
+                <TextBlock Text="{Binding TituloTablaVentas}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
 
                 <DataGrid Grid.Row="1" ItemsSource="{Binding UltimasVentasList}" Style="{StaticResource DataGridTillas}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="N° TICKET" Width="Auto" Binding="{Binding ID}"/>
-                        <!-- Formato de fecha para que no muestre los segundos -->
-                        <DataGridTextColumn Header="FECHA" Width="2*" Binding="{Binding Fecha_Hora, StringFormat=dd/MM/yyyy HH:mm}"/>
+                        <DataGridTextColumn Header="FECHA" Width="*" Binding="{Binding Fecha_Hora, StringFormat=dd/MM/yyyy HH:mm}"/>
                         <DataGridTextColumn Header="CLIENTE" Width="*" Binding="{Binding NombreCliente}"/>
                         <DataGridTextColumn Header="PAGO" Width="*" Binding="{Binding MetodoPago}"/>
-                        <!-- Formato moneda "C" inyecta el signo $ automáticamente -->
                         <DataGridTextColumn Header="TOTAL" Width="*" Binding="{Binding Total, StringFormat=C}"/>
-                        <DataGridTextColumn Header="VENDEDOR" Width="Auto" Binding="{Binding NombreVendedor}"/>
+                        <DataGridTextColumn Header="VENDEDOR" Width="*" Binding="{Binding NombreVendedor}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
