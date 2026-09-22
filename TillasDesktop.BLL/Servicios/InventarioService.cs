@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Data.SqlClient;
+using System.Collections.Generic;
 using TillasDesktop.Entities.Inventario;
 
 namespace TillasDesktop.BLL.Services
@@ -90,6 +91,24 @@ namespace TillasDesktop.BLL.Services
             // Aquí en el futuro verificarás que el producto no tenga ventas asociadas antes de borrarlo físicamente.
             mensajeRespuesta = "Producto eliminado del sistema.";
             return true;
+        }
+
+        // Guardamos los talles en una lista estática interna para que no se pierdan al cambiar de ventana
+        private static List<ProductoTalle> _tallesEnMemoria = new List<ProductoTalle>
+        {
+        // Talles iniciales para el Air Force 1 (ID = 1)
+        new ProductoTalle { ID = 1, Producto_ID = 1, Talle = 39, Stock_Actual = 20 },
+        new ProductoTalle { ID = 2, Producto_ID = 1, Talle = 42, Stock_Actual = 25 },
+        
+        // Talles iniciales para el Samba OG (ID = 2) 
+        new ProductoTalle { ID = 3, Producto_ID = 2, Talle = 35, Stock_Actual = 10 },
+        new ProductoTalle { ID = 4, Producto_ID = 2, Talle = 40, Stock_Actual = 15 }
+         };
+
+        public List<ProductoTalle> ObtenerTallesPorProducto(int productoId)
+        {
+            // Filtramos y devolvemos los talles que coincidan con el ID del producto
+            return _tallesEnMemoria.Where(t => t.Producto_ID == productoId).ToList();
         }
     }
 }

@@ -52,7 +52,7 @@ namespace TillasDesktop.UI.Modelos
             var producto2 = new Producto { ID = 2, Codigo_Modelo = "AD-SM-02", Nombre = "Samba OG", Precio_Venta = 110000, Marca_ID = 2, Categoria_ID = 1, Activo = true };
 
             ListaProductos.Add(new ProductoViewModel(producto1) { NombreMarca = "Nike", NombreCategoria = "Deportivo", StockTotal = 45 });
-            ListaProductos.Add(new ProductoViewModel(producto2) { NombreMarca = "Adidas", NombreCategoria = "Deportivo", StockTotal = 12 });
+            ListaProductos.Add(new ProductoViewModel(producto2) { NombreMarca = "Adidas", NombreCategoria = "Deportivo", StockTotal = 25 });
 
             // Configuramos la vista de filtrado basándonos en la lista observable.
             VistaFiltroProductos = CollectionViewSource.GetDefaultView(ListaProductos);

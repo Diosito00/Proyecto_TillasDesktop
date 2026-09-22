@@ -47,18 +47,27 @@ namespace TillasDesktop.UI.Modelos
             // Construimos el título dinámico usando las propiedades de la entidad.
             TituloVentana = $"Stock detallado: {_productoPuro.Codigo_Modelo} - {_productoPuro.Nombre}";
 
-            // Inicializamos la lista con datos hardcodeados para pruebas visuales.
-            ListaTalles = new ObservableCollection<ProductoTalle>
-            {
-                new ProductoTalle { Talle = 39, Stock_Actual = 20 },
-                new ProductoTalle { Talle = 42, Stock_Actual = 25 }
-            };
+            // Consultamos al servicio los talles reales que pertenecen a este ID de producto específico
+            var tallesDesdeDb = _inventarioService.ObtenerTallesPorProducto(_productoPuro.ID);
+
+            // Si la base de datos devuelve resultados, los cargamos; si no, iniciará vacía
+            ListaTalles = new ObservableCollection<ProductoTalle>(tallesDesdeDb);
+
+            // Y llamamos al método para que calcule el StockTotal basándose en estos datos reales
+            RecalcularStockTotal();
 
             // Asignamos los comandos a sus respectivos métodos.
             IngresarNuevoStockCommand = new RelayCommand(AbrirVentanaIngreso);
             EditarTalleCommand = new RelayCommand(EditarTalle);
             EliminarTalleCommand = new RelayCommand(EliminarTalle);
         }
+
+        //  Agregamos método auxiliar para sumar todo el stock actual de los talles
+        private void RecalcularStockTotal()
+        {
+            _productoVMOriginal.StockTotal = ListaTalles.Sum(t => t.Stock_Actual);
+        }
+
 
         private void AbrirVentanaIngreso(object parametro)
         {
@@ -76,17 +85,7 @@ namespace TillasDesktop.UI.Modelos
 
                 if (talleExistente != null)
                 {
-                    // Si ya existe, NO agregamos una fila nueva. Creamos un registro actualizado sumando las cantidades.
-                    var talleActualizado = new ProductoTalle
-                    {
-                        Producto_ID = talleExistente.Producto_ID,
-                        Talle = talleExistente.Talle,
-                        Stock_Actual = talleExistente.Stock_Actual + movimientoStock.Stock_Actual
-                    };
-
-                    // Reemplazamos el viejo por el nuevo en la colección para refrescar la UI.
-                    int index = ListaTalles.IndexOf(talleExistente);
-                    ListaTalles[index] = talleActualizado;
+                    talleExistente.Stock_Actual += movimientoStock.Stock_Actual;
                 }
                 else
                 {
@@ -98,6 +97,9 @@ namespace TillasDesktop.UI.Modelos
                         Stock_Actual = movimientoStock.Stock_Actual
                     });
                 }
+
+                //  Recalculamos el total automáticamente basado en la lista real
+                RecalcularStockTotal();
             };
 
             // Instanciamos y abrimos la ventana hija pasándole nuestro ViewModel configurado.
@@ -126,8 +128,20 @@ namespace TillasDesktop.UI.Modelos
 
                     if (index >= 0)
                     {
-                        ListaTalles[index] = talleActualizado;
+                        // Forzamos a la ObservableCollection a refrescar la fila reemplazándola o actualizándola
+                        // Si talleActualizado es el mismo objeto pero con el stock cambiado, 
+                        // podemos quitarlo y volverlo a insertar (o asignar la misma posición) para que la grilla lo redibuje:
+                        ListaTalles[index] = new ProductoTalle
+                        {
+                            ID = talleActualizado.ID,
+                            Producto_ID = talleActualizado.Producto_ID,
+                            Talle = talleActualizado.Talle,
+                            Stock_Actual = talleActualizado.Stock_Actual
+                        };
                     }
+
+                    //  Recalculamos el total al editar
+                    RecalcularStockTotal();
                 };
 
                 ventanaEdicion.DataContext = viewModelEdicion;
@@ -147,6 +161,9 @@ namespace TillasDesktop.UI.Modelos
                 {
                     // Al removerlo de la ObservableCollection, desaparece instantáneamente de la grilla.
                     ListaTalles.Remove(talleSeleccionado);
+
+                    // Recalculamos el total al eliminar un talle
+                    RecalcularStockTotal();
                 }
             }
         }
