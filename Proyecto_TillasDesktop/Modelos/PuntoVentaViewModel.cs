@@ -259,9 +259,13 @@ namespace TillasDesktop.UI.Modelos
 
         private void CargarDatosDePrueba()
         {
-            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 1, Codigo_Modelo = "NK-AF1-01", Nombre = "Nike Air Force 1", NombreMarca = "Nike", Talle = 40, Stock_Actual = 5, Precio_Venta = 125000 });
-            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 1, Codigo_Modelo = "NK-AF1-01", Nombre = "Nike Air Force 1", NombreMarca = "Nike", Talle = 42, Stock_Actual = 2, Precio_Venta = 125000 });
-            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 2, Codigo_Modelo = "AD-SM-02", Nombre = "Adidas Samba OG", NombreMarca = "Adidas", Talle = 39, Stock_Actual = 1, Precio_Venta = 110000 });
+            // Talles iniciales para el Air Force 1 (ID = 1): 39 (Stock: 20) y 42 (Stock: 25)
+            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 1, Codigo_Modelo = "NK-AF1-01", Nombre = "Nike Air Force 1", NombreMarca = "Nike", Talle = 39, Stock_Actual = 20, Precio_Venta = 125000 });
+            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 1, Codigo_Modelo = "NK-AF1-01", Nombre = "Nike Air Force 1", NombreMarca = "Nike", Talle = 42, Stock_Actual = 25, Precio_Venta = 125000 });
+
+            // Talles iniciales para el Samba OG (ID = 2): 35 (Stock: 10) y 40 (Stock: 15)
+            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 2, Codigo_Modelo = "AD-SM-02", Nombre = "Adidas Samba OG", NombreMarca = "Adidas", Talle = 35, Stock_Actual = 10, Precio_Venta = 110000 });
+            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 2, Codigo_Modelo = "AD-SM-02", Nombre = "Adidas Samba OG", NombreMarca = "Adidas", Talle = 40, Stock_Actual = 15, Precio_Venta = 110000 });
         }
     }
 }
