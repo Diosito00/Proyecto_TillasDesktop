@@ -44,7 +44,8 @@ namespace TillasDesktop.UI.Modelos
             {
                 // Guardamos el nombre y el ID a nivel global para usarlos en toda la sesión
                 Proyecto_TillasDesktop.App.NombreUsuarioActual = $"{usuarioAutenticado.Nombre} {usuarioAutenticado.Apellido}";
-                Proyecto_TillasDesktop.App.IdUsuarioActual = usuarioAutenticado.Id_Usuario; // Vital para registrar quién hizo la venta en SQL
+                Proyecto_TillasDesktop.App.IdUsuarioActual = usuarioAutenticado.Id_Usuario;
+                Proyecto_TillasDesktop.App.RolUsuarioActual = $"{usuarioAutenticado.Rol}";
 
                 // Si el usuario existe y la clave es correcta, retornamos el rol real (Ej: "Admin", "Vendedor") 
                 // para que la ventana principal sepa qué botones ocultar o mostrar.

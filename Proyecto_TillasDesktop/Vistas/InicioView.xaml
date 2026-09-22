@@ -2,94 +2,123 @@
              xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:TillasDesktop.UI.Vistas"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
              Background="#F0F4F8">
-    
-    <!-- CONTENIDO PRINCIPAL -->
-    <Grid Grid.Column="1" Margin="20">
+
+    <Grid Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- CABECERA -->
-            <RowDefinition Height="Auto"/> <!-- KPIs -->
-            <RowDefinition Height="*"/> <!-- GRÁFICO -->
-            <RowDefinition Height="Auto"/> <!-- TABLA -->
+            <RowDefinition Height="Auto"/>
+            <!-- Perfil -->
+            <RowDefinition Height="Auto"/>
+            <!-- KPIs Dinámicos -->
+            <RowDefinition Height="Auto"/>
+            <!-- Gráfico -->
+            <RowDefinition Height="*"/>
+            <!-- Tabla -->
         </Grid.RowDefinitions>
 
-        <!-- CABECERA -->
-        <Grid Grid.Row="0" Margin="10,0,10,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <!-- 1. BARRA SUPERIOR (Perfil alineado a la derecha) -->
+        <Border Grid.Row="0" Background="White" CornerRadius="8" Margin="0,0,0,20" Padding="15">
+            <Border.Effect>
+                <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+            </Border.Effect>
 
-            <TextBox Width="350" HorizontalAlignment="Left" Foreground="{StaticResource BrushTextoSecundario}" 
-                 Text="🔍 Buscar productos, ventas..."/>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <Border Width="35" Height="35" CornerRadius="17.5" Background="#cbd5e0" Margin="0,0,10,0">
-                    <TextBlock Text="👤" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
-                </Border>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <!-- Columna 0: Ocupa todo el espacio disponible -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Columna 1: Ocupa solo lo necesario para el perfil -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Lado Izquierdo: Saludo y Subtítulo apilados verticalmente -->
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding SaludoUsuario}" FontSize="24" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                    <TextBlock Text="Aquí tienes el resumen de tu actividad de hoy." FontSize="14" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,5,0,0"/>
+                </StackPanel>
+
+                <!-- Lado Derecho: Contenedor horizontal para los datos y el avatar -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+
+                    <!-- Datos del usuario apilados verticalmente y alineados a la derecha -->
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,10,0">
+                        <TextBlock Text="{Binding RolUsuario}" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" HorizontalAlignment="Right"/>
+                        <TextBlock Text="{Binding FechaActual}" FontSize="11" Foreground="{StaticResource BrushTextoSecundario}" HorizontalAlignment="Right"/>
+                    </StackPanel>
+
+                    <!-- Avatar -->
+                    <Border Width="40" Height="40" CornerRadius="20" Background="#CBD5E0" VerticalAlignment="Center">
+                        <TextBlock Text="👤" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+                    </Border>
+
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 3. TARJETAS KPI -->
+        <UniformGrid Grid.Row="1" Columns="3" Margin="0,0,0,20">
+            <Border Background="White" CornerRadius="8" Padding="20" Margin="0,0,5,0">
+                <Border.Effect>
+                    <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+                </Border.Effect>
                 <StackPanel>
-                    <TextBlock Text="Admin" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}"/>
-                    <TextBlock Text="fecha/hora" FontSize="11" Foreground="{StaticResource BrushTextoSecundario}"/>
-                </StackPanel>
-            </StackPanel>
-        </Grid>
-
-        <!-- TARJETAS KPI -->
-        <UniformGrid Grid.Row="1" Columns="3">
-            <Border Style="{StaticResource CardStyle}">
-                <StackPanel Margin="20,15">
-                    <TextBlock Text="VENTAS HOY" FontSize="12" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
-                    <TextBlock Text="$$$$" FontSize="32" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,5,0,0"/>
+                    <TextBlock Text="{Binding Kpi1Titulo}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
+                    <TextBlock Text="{Binding Kpi1Valor}" FontSize="32" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,5,0,0"/>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardStyle}">
-                <StackPanel Margin="20,15">
-                    <TextBlock Text="NUEVOS PEDIDOS" FontSize="12" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
-                    <TextBlock Text="38" FontSize="32" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,5,0,0"/>
+            <Border Background="White" CornerRadius="8" Padding="20" Margin="5,0,5,0">
+                <Border.Effect>
+                    <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+                </Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="{Binding Kpi2Titulo}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
+                    <TextBlock Text="{Binding Kpi2Valor}" FontSize="32" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,5,0,0"/>
                 </StackPanel>
             </Border>
 
-            <Border Style="{StaticResource CardStyle}">
-                <StackPanel Margin="20,15">
-                    <TextBlock Text="ALERTAS DE STOCK" FontSize="12" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
-                    <TextBlock Text="5 Modelos" FontSize="32" FontWeight="ExtraBold" Foreground="{StaticResource BrushRojo}" Margin="0,5,0,0"/>
+            <Border Background="White" CornerRadius="8" Padding="20" Margin="5,0,0,0">
+                <Border.Effect>
+                    <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+                </Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="{Binding Kpi3Titulo}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
+                    <TextBlock Text="{Binding Kpi3Valor}" FontSize="32" FontWeight="ExtraBold" Foreground="{StaticResource BrushRojo}" Margin="0,5,0,0"/>
                 </StackPanel>
             </Border>
         </UniformGrid>
 
-        <!-- GRAFICO -->
-        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="20">
+        <!-- 4. GRÁFICO -->
+        <Border Grid.Row="2" Background="White" CornerRadius="8" Padding="20" Margin="0,0,0,20">
+            <Border.Effect>
+                <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+            </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="250"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="RESUMEN VENTAS SEMANAL" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
+                <TextBlock Text="RENDIMIENTO SEMANAL" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
 
-                <Border Grid.Row="1" Background="White" CornerRadius="8" Margin="0,10,0,0">
-                    <lvc:CartesianChart Series="{Binding SeriesCollection}" LegendLocation="None" Margin="10">
-                        <lvc:CartesianChart.AxisX>
-                            <lvc:Axis Labels="{Binding Labels}">
-                                <lvc:Axis.Separator>
-                                    <lvc:Separator Step="1" />
-                                </lvc:Axis.Separator>
-                            </lvc:Axis>
-                        </lvc:CartesianChart.AxisX>
-                        <lvc:CartesianChart.AxisY>
-                            <lvc:Axis LabelFormatter="{Binding Formatter}" />
-                        </lvc:CartesianChart.AxisY>
-                    </lvc:CartesianChart>
-                </Border>
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding SeriesCollectionVentas}" LegendLocation="None">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Labels="{Binding LabelsDias}">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator Step="1" />
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis LabelFormatter="{Binding FormatterMoneda}" />
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
             </Grid>
         </Border>
 
-        <!-- TABLA VENTAS -->
-        <Border Grid.Row="3" Style="{StaticResource CardStyle}" Padding="20" Margin="10,10,10,0">
+        <!-- 5. TABLA DE VENTAS CON NUEVA COLUMNA Y FORMATOS -->
+        <Border Grid.Row="3" Background="White" CornerRadius="8" Padding="20">
+            <Border.Effect>
+                <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+            </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -97,15 +126,16 @@
                 </Grid.RowDefinitions>
                 <TextBlock Text="ÚLTIMAS VENTAS" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
 
-                <DataGrid Grid.Row="1" Height="140" AutoGenerateColumns="False" Background="White"
-                      RowBackground="#f7fafc" AlternatingRowBackground="White" HeadersVisibility="Column"
-                      GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#e2e8f0" BorderThickness="0">
+                <DataGrid Grid.Row="1" ItemsSource="{Binding UltimasVentasList}" Style="{StaticResource DataGridTillas}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID VENTA" Width="100" Binding="{Binding ID}"/>
-                        <DataGridTextColumn Header="FECHA" Width="120" Binding="{Binding Fecha}"/>
-                        <DataGridTextColumn Header="CLIENTE" Width="220" Binding="{Binding Cliente}"/>
-                        <DataGridTextColumn Header="TOTAL" Width="120" Binding="{Binding Total}"/>
-                        <DataGridTextColumn Header="VENDEDOR" Width="*" Binding="{Binding Vendedor}"/>
+                        <DataGridTextColumn Header="N° TICKET" Width="Auto" Binding="{Binding ID}"/>
+                        <!-- Formato de fecha para que no muestre los segundos -->
+                        <DataGridTextColumn Header="FECHA" Width="2*" Binding="{Binding Fecha_Hora, StringFormat=dd/MM/yyyy HH:mm}"/>
+                        <DataGridTextColumn Header="CLIENTE" Width="*" Binding="{Binding NombreCliente}"/>
+                        <DataGridTextColumn Header="PAGO" Width="*" Binding="{Binding MetodoPago}"/>
+                        <!-- Formato moneda "C" inyecta el signo $ automáticamente -->
+                        <DataGridTextColumn Header="TOTAL" Width="*" Binding="{Binding Total, StringFormat=C}"/>
+                        <DataGridTextColumn Header="VENDEDOR" Width="Auto" Binding="{Binding NombreVendedor}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

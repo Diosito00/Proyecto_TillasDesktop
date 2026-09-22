@@ -12,6 +12,7 @@ namespace Proyecto_TillasDesktop
         // Variables estáticas accesibles desde cualquier parte del sistema
         public static string NombreUsuarioActual { get; set; }
         public static int IdUsuarioActual { get; set; }
+        public static string RolUsuarioActual { get; set; }
     }
 
 }
