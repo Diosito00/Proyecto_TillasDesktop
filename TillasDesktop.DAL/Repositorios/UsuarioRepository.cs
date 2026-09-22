@@ -13,7 +13,7 @@ namespace TillasDesktop.DAL.Repositorios
     public class UsuarioRepository : ConexionDb
     {
         
-        // 1. OBTENER TODOS LOS USUARIOS (READ / LECTURA)
+        //  OBTENER TODOS LOS USUARIOS (READ / LECTURA)
         public List<Usuario> ObtenerTodos()
         {
             // Crea una lista vacía donde iremos guardando cada usuario que traigamos de la base de datos.
@@ -87,7 +87,7 @@ namespace TillasDesktop.DAL.Repositorios
             return listaUsuarios;
         }
 
-        // 2. Obtener por ID
+        // Obtener por ID
         public Usuario ObtenerPorId(int id)
         {
             Usuario usuario;
@@ -143,7 +143,7 @@ namespace TillasDesktop.DAL.Repositorios
         }
 
 
-        // 3. INSERTAR UN NUEVO USUARIO (CREATE / CREACIÓN)
+        // INSERTAR UN NUEVO USUARIO (CREATE / CREACIÓN)
         public bool Insertar(Usuario nuevoUsuario)
         {
             // Bloque try-catch para atrapar cualquier error imprevisto durante la ejecución con la base de datos.
@@ -198,7 +198,7 @@ namespace TillasDesktop.DAL.Repositorios
         }
 
        
-        // 4. ACTUALIZAR UN USUARIO EXISTENTE (UPDATE / MODIFICACIÓN)
+        //  ACTUALIZAR UN USUARIO EXISTENTE (UPDATE / MODIFICACIÓN)
         
         public bool Actualizar(Usuario usuarioModificado)
         {
@@ -260,7 +260,7 @@ namespace TillasDesktop.DAL.Repositorios
         }
 
         
-        // 5. ELIMINAR UN USUARIO (DELETE / BORRADO)
+        // ELIMINAR UN USUARIO (DELETE / BORRADO)
         public bool Eliminar(int idUsuario)
         {
             try
@@ -268,7 +268,7 @@ namespace TillasDesktop.DAL.Repositorios
                 // Establece la conexión utilizando la clase base.
                 using (var conexion = ObtenerConexion())
                 {
-                    // Consulta SQL para borrar permanentemente un registro de la tabla según su ID.
+                    // Consulta SQL para borrar un registro de la tabla según su ID.
                     string query = "UPDATE Usuarios SET activo = 0 WHERE Id_Usuario = @Id_Usuario";
 
                     // Prepara el comando con la consulta y la conexión.
@@ -295,7 +295,7 @@ namespace TillasDesktop.DAL.Repositorios
             }
         }
 
-        // 6. OBTENER USUARIO POR CREDENCIALES (LOGIN)
+        // OBTENER USUARIO POR CREDENCIALES (LOGIN)
         public Usuario Autenticar(string credencial, string password)
         {
             // Buscamos por Nombre_Usuario o Email, exigiendo que coincida la clave y esté activo

@@ -3,17 +3,18 @@ using TillasDesktop.Entities.Reportes;
 
 namespace TillasDesktop.UI.Modelos
 {
-    // Hereda de ViewModelBase para mantener el estándar, aunque al ser de solo lectura rara vez usará el OnPropertyChanged aquí.
+    // Hereda de ViewModelBase para mantener la consistencia del proyecto, 
+    // aunque al ser una vista de solo lectura casi no requiera notificar cambios dinámicos.
     public class DetalleVentaViewModel : ViewModelBase
     {
-        // El encabezado del ticket (Contiene la fecha, el cajero, el total, etc.).
-        // Usamos DTOs (Data Transfer Objects) porque son versiones "procesadas" de las entidades, ideales para reportes.
+        // Contiene la info principal del ticket (fecha, cajero, total, etc.).
+        // Usamos un DTO (Data Transfer Object) porque es un objeto optimizado y armado específicamente para reportes o consultas.
         public VentaResumenDTO VentaGeneral { get; set; }
 
-        // La lista de productos que componen este ticket específico.
+        // Colección observable con los ítems individuales que forman parte de esta venta.
         public ObservableCollection<LineaDetalleVentaDTO> Lineas { get; set; }
 
-        // El constructor exige que le pases la venta seleccionada desde la tabla principal.
+        // El constructor recibe obligatoriamente la venta que el usuario seleccionó en la grilla principal.
         public DetalleVentaViewModel(VentaResumenDTO ventaSeleccionada)
         {
             VentaGeneral = ventaSeleccionada;

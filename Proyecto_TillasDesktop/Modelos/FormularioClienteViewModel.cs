@@ -6,8 +6,10 @@ using System.Windows.Input;
 
 namespace TillasDesktop.UI.Modelos
 {
+    // ViewModel encargado de manejar la lógica del formulario para crear o editar un cliente.
     public class FormularioClienteViewModel : ViewModelBase
     {
+        // Campos privados y propiedades públicas para cada input del formulario
         private string _nombre = string.Empty;
         public string Nombre
         {
@@ -43,16 +45,23 @@ namespace TillasDesktop.UI.Modelos
             set { _email = value; OnPropertyChanged(); }
         }
 
+        // Almacena el resultado final (el cliente creado o modificado) que será devuelto a la ventana principal.
         public ClienteViewModel ClienteResultado { get; private set; }
 
+        // Comando que se dispara al hacer clic en el botón de guardar.
         public ICommand GuardarCommand { get; }
+
+        // Acción (delegado) para cerrar la ventana devolviendo un booleano (true si guardó con éxito).
         public Action<bool?> CerrarVentanaAccion { get; set; }
 
+        // Constructor por defecto: se usa cuando queremos dar de alta un cliente nuevo.
         public FormularioClienteViewModel()
         {
             GuardarCommand = new RelayCommand(EjecutarGuardar);
         }
 
+        // Sobrecarga del constructor: se usa cuando pasamos un cliente existente para editarlo. 
+        // El ': this()' asegura que primero se ejecute el constructor base para inicializar el comando.
         public FormularioClienteViewModel(ClienteViewModel clienteAEditar) : this()
         {
             if (clienteAEditar != null)
@@ -66,8 +75,10 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
+        // Método que valida  los datos antes de aceptar el guardado.
         private void EjecutarGuardar(object obj)
         {
+            // Validar que no queden campos vacíos o en blanco.
             if (string.IsNullOrWhiteSpace(Nombre) ||
                 string.IsNullOrWhiteSpace(Apellido) ||
                 string.IsNullOrWhiteSpace(Cuit) ||
@@ -78,6 +89,7 @@ namespace TillasDesktop.UI.Modelos
                 return;
             }
 
+            //  Validar que el CUIT contenga exactamente 11 dígitos numéricos (ignorando guiones).
             string cuitLimpio = Cuit.Replace("-", "").Trim();
             if (cuitLimpio.Length != 11 || !cuitLimpio.All(char.IsDigit))
             {
@@ -99,7 +111,8 @@ namespace TillasDesktop.UI.Modelos
                 MessageBox.Show("El teléfono ingresado es demasiado corto.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            
+
+            // Validar el formato del correo electrónico mediante Expresiones Regulares (Regex).
             string patronEmail = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
             if (!Regex.IsMatch(Email.Trim(), patronEmail))
             {
@@ -107,6 +120,7 @@ namespace TillasDesktop.UI.Modelos
                 return;
             }
 
+            // Validar que el nombre y el apellido no tengan números ni símbolos raros.
             if (!Nombre.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)) ||
                 !Apellido.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
             {
@@ -114,17 +128,20 @@ namespace TillasDesktop.UI.Modelos
                 return;
             }
 
+            // Si es un cliente nuevo, instanciamos el objeto contenedor. Si estabamos editando, reutilizamos el existente.
             if (ClienteResultado == null)
             {
                 ClienteResultado = new ClienteViewModel();
             }
 
+            // Volcamos los datos validados al resultado final con los espacios limpiados.
             ClienteResultado.Nombre = Nombre.Trim();
             ClienteResultado.Apellido = Apellido.Trim();
             ClienteResultado.CUIT = Cuit.Trim();
             ClienteResultado.Telefono = Telefono.Trim();
             ClienteResultado.Email = Email.Trim();
 
+            // Damos la orden de cerrar la ventana indicando que la operación fue exitosa (true).
             CerrarVentanaAccion?.Invoke(true);
         }
     }

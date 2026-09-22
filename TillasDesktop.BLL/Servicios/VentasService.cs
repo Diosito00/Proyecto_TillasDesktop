@@ -5,7 +5,7 @@ namespace TillasDesktop.BLL.Services
 {
     public class VentasService
     {
-        // Catálogo temporal para pruebas del Punto de Venta.
+        // Catálogo temporal simulado para las pruebas iniciales del Punto de Venta.
         private readonly List<Producto> _catalogoPrueba;
 
         public VentasService()
@@ -17,12 +17,13 @@ namespace TillasDesktop.BLL.Services
             };
         }
 
+        // Busca y devuelve un producto del catálogo interno según su código de modelo.
         public Producto ObtenerProductoPorCodigo(string codigo)
         {
             if (string.IsNullOrWhiteSpace(codigo)) return null;
 
-            // LINQ: FirstOrDefault busca el primer elemento que cumpla la condición. 
-            // Si no encuentra nada, devuelve null sin hacer explotar el programa.
+            // LINQ: FirstOrDefault busca el primer elemento que coincide con la condición.
+            // Si no lo encuentra, devuelve null de forma segura en lugar de lanzar una excepción.
             return _catalogoPrueba.FirstOrDefault(p => p.Codigo_Modelo == codigo);
         }
 
@@ -35,6 +36,7 @@ namespace TillasDesktop.BLL.Services
             return detalles.Sum(item => item.Precio_Unitario * item.Cantidad);
         }
 
+        // Valida que el carrito tenga elementos antes de procesar el cobro y registrar la venta.
         public bool RegistrarVenta(IEnumerable<DetalleVenta> carrito, out string mensajeRespuesta)
         {
             // LINQ: .Any() verifica si la colección tiene al menos 1 elemento. 

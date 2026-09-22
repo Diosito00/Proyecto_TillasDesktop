@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Linq; // Necesario implícitamente para usar .FirstOrDefault() más abajo.
+using System.Linq; 
 using System.Windows;
 using System.Windows.Input;
 using TillasDesktop.BLL.Services;
@@ -71,20 +71,21 @@ namespace TillasDesktop.UI.Modelos
 
         private void AbrirVentanaIngreso(object parametro)
         {
-            // Preparamos el ViewModel de la ventana hija (Ingreso de Stock).
+            // Instanciamos el ViewModel encargado del formulario para agregar stock.
             var formViewModel = new IngresoStockViewModel(_productoVMOriginal);
 
-            // Definimos qué debe pasar cuando la ventana hija termine de guardar el stock exitosamente:
+            // Definimos qué pasa cuando se guarda con éxito en la ventana secundaria
             formViewModel.OnStockIngresado = (movimientoStock) =>
             {
-                // 1. Actualizamos el stock total del modelo en la tabla principal.
+                //  Actualizamos el stock total del modelo en la tabla principal.
                 _productoVMOriginal.StockTotal += movimientoStock.Stock_Actual;
 
-                // 2. Buscamos si el talle ingresado ya existía en nuestra lista.
+                //  Buscamos si el talle ingresado ya existía en nuestra lista.
                 var talleExistente = ListaTalles.FirstOrDefault(t => t.Talle == movimientoStock.Talle);
 
                 if (talleExistente != null)
                 {
+                    // Si ya existe, solo le sumamos la cantidad nueva al stock que ya tenía.
                     talleExistente.Stock_Actual += movimientoStock.Stock_Actual;
                 }
                 else
@@ -111,12 +112,12 @@ namespace TillasDesktop.UI.Modelos
 
         private void EditarTalle(object parametro)
         {
-            // El parámetro viene del CommandParameter del botón en el XAML, asegurando que sea un ProductoTalle válido.
+            // Validamos que el parámetro que llega desde el botón de la grilla sea realmente un ProductoTalle.
             if (parametro is ProductoTalle talleSeleccionado)
             {
                 var ventanaEdicion = new IngresoStockWindow();
 
-                // A diferencia de un nuevo ingreso, aquí le pasamos el talle específico que se va a editar.
+                // Le pasamos al ViewModel el producto y el talle puntual que queremos modificar.
                 var viewModelEdicion = new IngresoStockViewModel(_productoVMOriginal, talleSeleccionado);
 
                 viewModelEdicion.CerrarVentana = () => ventanaEdicion.Close();
@@ -128,9 +129,7 @@ namespace TillasDesktop.UI.Modelos
 
                     if (index >= 0)
                     {
-                        // Forzamos a la ObservableCollection a refrescar la fila reemplazándola o actualizándola
-                        // Si talleActualizado es el mismo objeto pero con el stock cambiado, 
-                        // podemos quitarlo y volverlo a insertar (o asignar la misma posición) para que la grilla lo redibuje:
+                        // Reemplazamos el objeto en la misma posición para forzar a la grilla a redibujar los cambios. para que la grilla lo redibuje:
                         ListaTalles[index] = new ProductoTalle
                         {
                             ID = talleActualizado.ID,
