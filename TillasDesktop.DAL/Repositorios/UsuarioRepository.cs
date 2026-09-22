@@ -154,7 +154,8 @@ namespace TillasDesktop.DAL.Repositorios
                 {
                     // Consulta SQL de inserción indicando las columnas y los parámetros seguros (@).
                     string query = @"INSERT INTO Usuarios (Nombre, Apellido, Dni, Email, Nombre_Usuario, Password, Fecha_Nacimiento, Rol, Activo) 
-                                     VALUES (@Nombre, @Apellido, @Dni, @Email, @Nombre_Usuario, @Password, @Fecha_Nacimiento, @Rol, @Activo)";
+                                    OUTPUT INSERTED.Id_Usuario
+                                    VALUES (@Nombre, @Apellido, @Dni, @Email, @Nombre_Usuario, @Password, @Fecha_Nacimiento, @Rol, @Activo)";
 
                     // Prepara el comando de SQL con la consulta y la conexión.
                     using (var comando = new SqlCommand(query, conexion))
@@ -177,7 +178,8 @@ namespace TillasDesktop.DAL.Repositorios
                         // ExecuteScalar ejecuta la consulta y devuelve la primera columna de la primera fila (nuestro nuevo ID)
                         object resultado = comando.ExecuteScalar();
 
-                        if (resultado != null)
+                        // Verificamos que el resultado sea válido antes de intentar convertirlo a entero
+                        if (resultado != null && resultado != DBNull.Value)
                         {
                             // Asignamos el ID real de la base de datos a nuestra entidad
                             nuevoUsuario.Id_Usuario = Convert.ToInt32(resultado);

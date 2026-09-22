@@ -150,30 +150,43 @@ namespace TillasDesktop.UI.Modelos
             }
 
             // Variable de control para saber si la base de datos confirmó la transacción.
-            bool exito;
+            bool exito = false;
 
-            // Ejecutamos el método correspondiente en la capa de servicios.
-            if (EsModoEdicion)
-            {
-                exito = _usuarioService.ActualizarUsuario(entidadParaGuardar);
+            try
+            { 
+                // Ejecutamos el método correspondiente en la capa de servicios.
+                if (EsModoEdicion)
+                {
+                    exito = _usuarioService.ActualizarUsuario(entidadParaGuardar);
+                }
+                else
+                {
+                    exito = _usuarioService.CrearUsuario(entidadParaGuardar);
+
+                    // Si se insertó con éxito, SQL Server generó un ID. Se lo inyectamos al envoltorio 
+                    // para que la tabla principal no muestre un "0".
+                    if (exito) UsuarioActual.Id_Usuario = entidadParaGuardar.Id_Usuario;
+                }
+
+                // Solo cerramos la ventana y avisamos si NO hubo errores de base de datos (Evita falsos positivos).
+                if (exito)
+                {
+                    MessageBox.Show(EsModoEdicion ? "Usuario actualizado correctamente." : "Usuario creado correctamente.",
+                                    "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    OnUsuarioGuardado?.Invoke(); // Avisa a la grilla principal que recargue
+                    CerrarVentana?.Invoke();     // Cierra este formulario
+                }
+                else
+                {
+                    // Solo por precaución, si llegara a dar false pero no se lanza excepción
+                    MessageBox.Show("No se pudo completar la operación en la base de datos.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                exito = _usuarioService.CrearUsuario(entidadParaGuardar);
-
-                // Si se insertó con éxito, SQL Server generó un ID. Se lo inyectamos al envoltorio 
-                // para que la tabla principal no muestre un "0".
-                if (exito) UsuarioActual.Id_Usuario = entidadParaGuardar.Id_Usuario;
-            }
-
-            // Solo cerramos la ventana y avisamos si NO hubo errores de base de datos (Evita falsos positivos).
-            if (exito)
-            {
-                MessageBox.Show(EsModoEdicion ? "Usuario actualizado correctamente." : "Usuario creado correctamente.",
-                                "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                OnUsuarioGuardado?.Invoke(); // Avisa a la grilla principal que recargue
-                CerrarVentana?.Invoke();     // Cierra este formulario
+                // Ahora, si el usuario hace doble clic o hay un error de red, el programa mostrara un mensaje de error.
+                MessageBox.Show(ex.Message, "Error Crítico", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
