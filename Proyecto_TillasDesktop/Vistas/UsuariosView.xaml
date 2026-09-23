@@ -29,8 +29,10 @@
 
                 <!-- Buscador y Botón alineados a la derecha -->
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                    <TextBox Width="350" Height="40" Margin="0,0,10,0" VerticalContentAlignment="Center"
-                            Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged}"/>
+                    <!-- Nuevo Switch para Inactivos -->
+                    <ToggleButton Content="Mostrar Inactivos" IsChecked="{Binding MostrarInactivos, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,15,0" Style="{DynamicResource BotonGris}" Height="35"/>
+
+                    <TextBox Width="350" Height="40" Margin="0,0,10,0" VerticalContentAlignment="Center" Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged}"/>
                     <Button Content="+ NUEVO USUARIO" Command="{Binding NuevoUsuarioCommand}" Width="150" Height="35" Style="{StaticResource BotonSecundario}"/>
                 </StackPanel>
             </DockPanel>
@@ -44,8 +46,8 @@
             </Border.Effect>
             <!-- Control DataGrid que enlaza su lista de elementos (ItemsSource) a ListaUsuarios y su elemento activo a UsuarioSeleccionado. 
                  Configurado como solo lectura (IsReadOnly="True") para forzar el uso exclusivo de los botones de edición del formulario. -->
-            <DataGrid x:Name="dgUsuarios" Style="{StaticResource DataGridTillas}"  ItemsSource="{Binding ListaUsuarios}"
-             SelectedItem="{Binding UsuarioSeleccionado}">
+            <DataGrid x:Name="dgUsuarios" Style="{StaticResource DataGridTillas}"  ItemsSource="{Binding VistaFiltroUsuarios}"
+                      SelectedItem="{Binding UsuarioSeleccionado}">
                 <DataGrid.Columns>
                     <!-- Columna de texto para mostrar el ID único del usuario con un ancho fijo de 50 píxeles. -->
                     <DataGridTextColumn Header="ID" Width="50" Binding="{Binding Id_Usuario}"/>

@@ -58,24 +58,36 @@
     </Style>
 
     <!-- Estilo para acciones neutras o de utilidad (Gris) -->
-    <Style x:Key="BotonGris" TargetType="Button">
-        <Setter Property="Background" Value="{DynamicResource BrushGrisClaro}"/>
-        <Setter Property="Foreground" Value="{DynamicResource BrushTextoPrincipal}"/>
+    <Style x:Key="BotonGris" TargetType="ToggleButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushTextoSecundario}"/>
+        <Setter Property="Foreground" Value="{DynamicResource BrushTextoSecundario}"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Padding" Value="10,5"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="bordeBoton" Background="{TemplateBinding Background}" CornerRadius="6">
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="bordeBoton" Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" Padding="{TemplateBinding Padding}" CornerRadius="6">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
 
                     <ControlTemplate.Triggers>
+                        <!-- Efecto al pasar el mouse -->
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="bordeBoton" Property="Opacity" Value="0.85"/>
                         </Trigger>
+
+                        <!-- Efecto cuando está presionado (click) -->
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="bordeBoton" Property="Opacity" Value="0.6"/>
+                        </Trigger>
+
+                        <!-- Feedback visual: Cuando el Switch está activo, le damos un fondo sutil -->
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="bordeBoton" Property="Background" Value="#E2E8F0"/>
+                            <Setter TargetName="bordeBoton" Property="BorderBrush" Value="#A0AEC0"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

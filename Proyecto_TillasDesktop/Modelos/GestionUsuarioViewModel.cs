@@ -36,6 +36,23 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
+        // Propiedad para mostrar inactivos
+        private bool _mostrarInactivos;
+        public bool MostrarInactivos
+        {
+            get => _mostrarInactivos;
+            set
+            {
+                // Solo recargamos si el usuario realmente cambió el estado del botón
+                if (_mostrarInactivos != value)
+                {
+                    _mostrarInactivos = value;
+                    OnPropertyChanged();
+                    CargarDatos(); // Recarga la tabla automáticamente al cambiar el switch
+                }
+            }
+        }
+
         // Una vista especial que envuelve nuestra lista para poder filtrar y ordenar sin romper los datos originales.
         public ICollectionView VistaFiltroUsuarios { get; set; }
 
@@ -48,12 +65,12 @@ namespace TillasDesktop.UI.Modelos
         {
             _usuarioService = new UsuariosService();
 
-            // Cargamos todos los usuarios apenas se abre la ventana.
-            CargarDatos();
-
             // Configura la vista de filtrado basándose en la lista observable principal.
+            ListaUsuarios = new ObservableCollection<UsuarioViewModel>();
             VistaFiltroUsuarios = CollectionViewSource.GetDefaultView(ListaUsuarios);
             VistaFiltroUsuarios.Filter = FiltrarCriteriosUsuarios; // Asigna el método que evalúa cada fila.
+
+            CargarDatos();
 
             // Vinculamos cada comando con su respectivo método.
             NuevoUsuarioCommand = new RelayCommand(EjecutarNuevo);
@@ -64,18 +81,20 @@ namespace TillasDesktop.UI.Modelos
         // Trae los usuarios de la base de datos y los prepara para la pantalla.
         private void CargarDatos()
         {
-            ListaUsuarios = new ObservableCollection<UsuarioViewModel>();
-
             try
             {
-                // Pedimos la lista pura a la capa de servicios.
-                var usuariosDeDb = _usuarioService.ObtenerTodos();
+                ListaUsuarios.Clear();
+
+                // Pide todas las entidades a la BLL. (!MostrarInactivos invierte el bool para SQL)
+                var usuariosDeDb = _usuarioService.ObtenerTodos(!MostrarInactivos);
 
                 // Envolvemos cada usuario en un ViewModel para que la interfaz pueda mostrarlos y editarlos bien.
                 foreach (var usuario in usuariosDeDb)
                 {
                     ListaUsuarios.Add(new UsuarioViewModel(usuario));
                 }
+
+                VistaFiltroUsuarios?.Refresh();
             }
             catch (Exception ex)
             {
@@ -182,29 +201,42 @@ namespace TillasDesktop.UI.Modelos
         {
             if (obj is UsuarioViewModel usuarioFila)
             {
-                // Validación de seguridad para evitar borrados accidentales.
-                var respuesta = MessageBox.Show($"¿Estás seguro de que deseas eliminar el usuario '{usuarioFila.Nombre} {usuarioFila.Apellido}'?",
-                                                 "Confirmar Eliminación",
-                                                 MessageBoxButton.YesNo,
-                                                 MessageBoxImage.Warning);
-
-                if (respuesta == MessageBoxResult.Yes)
+                // Usuario Activo -> Baja Lógica
+                if (usuarioFila.Activo)
                 {
-                    try
+                    var respuesta = MessageBox.Show($"¿Dar de baja al usuario '{usuarioFila.Nombre} {usuarioFila.Apellido}'?",
+                                                     "Baja de Usuario", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    if (respuesta == MessageBoxResult.Yes)
                     {
-                        // Mandamos la orden de eliminar a la base de datos a través del servicio.
-                        bool eliminado = _usuarioService.EliminarUsuario(usuarioFila.Id_Usuario);
-
-                        if (eliminado)
+                        try
                         {
-                            // Elimina la fila visualmente de la lista.
-                            ListaUsuarios.Remove(usuarioFila);
-                            VistaFiltroUsuarios.Refresh();
+                            // Mandamos la orden de baja logica a la base de datos a través del servicio.
+                            if (_usuarioService.EliminarUsuario(usuarioFila.Id_Usuario))
+                            {
+                                ListaUsuarios.Remove(usuarioFila);
+                                VistaFiltroUsuarios.Refresh();
+                            }
                         }
+                        catch (Exception ex) { MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
                     }
-                    catch (Exception ex)
+                }
+                // Usuario Inactivo -> Baja Física
+                else
+                {
+                    var respuesta = MessageBox.Show($"ATENCIÓN: ¿Deseas eliminar PERMANENTEMENTE a '{usuarioFila.Nombre}' de la base de datos? Esta acción no se puede deshacer.",
+                                                     "Eliminación Definitiva", MessageBoxButton.YesNo, MessageBoxImage.Error);
+                    if (respuesta == MessageBoxResult.Yes)
                     {
-                        MessageBox.Show(ex.Message, "Error al Eliminar", MessageBoxButton.OK, MessageBoxImage.Error);
+                        try
+                        {
+                            // Mandamos la orden de baja fisica a la base de datos a través del servicio.
+                            if (_usuarioService.EliminarUsuarioFisico(usuarioFila.Id_Usuario))
+                            {
+                                ListaUsuarios.Remove(usuarioFila);
+                                VistaFiltroUsuarios.Refresh();
+                            }
+                        }
+                        catch (Exception ex) { MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
                     }
                 }
             }

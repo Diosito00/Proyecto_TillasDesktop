@@ -18,9 +18,9 @@ namespace TillasDesktop.BLL.Services
 
         // Obtiene la lista completa de usuarios registrados. 
         // Funciona como una pasarela simple que comunica el ViewModel con la capa de datos (DAL).
-        public List<Usuario> ObtenerTodos()
+        public List<Usuario> ObtenerTodos(bool activos = true)
         {
-            return _usuarioRepo.ObtenerTodos();
+            return _usuarioRepo.ObtenerTodos(activos);
         }
 
         // Valida los datos obligatorios y solicita al repositorio la creación de un nuevo usuario.
@@ -70,6 +70,18 @@ namespace TillasDesktop.BLL.Services
             return _usuarioRepo.Eliminar(idUsuario);
         }
 
+        public bool EliminarUsuarioFisico(int idUsuario)
+        {
+            if (idUsuario <= 0) return false;
+
+            if (idUsuario == 1)
+            {
+                MessageBox.Show("El usuario administrador principal jamás puede ser eliminado del sistema.", "Seguridad", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            return _usuarioRepo.EliminarFisico(idUsuario);
+        }
 
         // Valida las credenciales de acceso contra la base de datos para iniciar sesión.
         public Usuario AutenticarUsuario(string credencial, string password)
@@ -81,6 +93,19 @@ namespace TillasDesktop.BLL.Services
             }
 
             return _usuarioRepo.Autenticar(credencial, password);
+        }
+
+        // Valida si un correo electrónico ya está registrado y pertenece a un usuario activo.
+        public bool VerificarEmailExistente(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return false;
+
+            // Obtenemos todos los usuarios activos de la base de datos
+            var usuarios = ObtenerTodos();
+
+            // Comparamos ignorando mayúsculas y minúsculas para evitar falsos negativos
+            return usuarios.Exists(u => u.Email != null &&
+                                        u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

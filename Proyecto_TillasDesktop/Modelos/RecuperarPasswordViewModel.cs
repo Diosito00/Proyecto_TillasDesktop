@@ -2,12 +2,16 @@
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using TillasDesktop.BLL.Services;
 
 namespace TillasDesktop.UI.Modelos
 {
 
     public class RecuperarPasswordViewModel : ViewModelBase
     {
+        // Instancia del servicio para acceder a las validaciones de base de datos.
+        private readonly UsuariosService _usuarioService;
+
         // Almacena el correo ingresado por el usuario con su respectiva notificación a la vista.
         private string _emailRecuperacion = string.Empty;
         public string EmailRecuperacion
@@ -50,6 +54,14 @@ namespace TillasDesktop.UI.Modelos
             if (!Regex.IsMatch(email, patronEmail))
             {
                 MessageBox.Show("El formato del correo electrónico no es válido.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validación 3: Verificar que el email exista realmente en la base de datos.
+            if (!_usuarioService.VerificarEmailExistente(email))
+            {
+                MessageBox.Show("El correo electrónico ingresado no se encuentra registrado en el sistema o pertenece a un usuario inactivo.",
+                                "Usuario no encontrado", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 

@@ -14,7 +14,7 @@ namespace TillasDesktop.DAL.Repositorios
     {
         
         //  OBTENER TODOS LOS USUARIOS (READ / LECTURA)
-        public List<Usuario> ObtenerTodos()
+        public List<Usuario> ObtenerTodos(bool activos = true)
         {
             // Crea una lista vacía donde iremos guardando cada usuario que traigamos de la base de datos.
             List<Usuario> listaUsuarios = new List<Usuario>();
@@ -23,17 +23,16 @@ namespace TillasDesktop.DAL.Repositorios
             // El bloque 'using' asegura que la conexión se cierre y libere recursos automáticamente al terminar.
             using (var conexion = ObtenerConexion())
             {
+                // Agregamos el filtro para traer activos o inactivos
+                string query = "SELECT * FROM Usuarios WHERE activo = @Activo";
+
                 // Abre físicamente el canal de comunicación con el servidor de base de datos.
                 conexion.Open();
-
-
-                // Agregamos el filtro para traer solo los activos
-                string query = "SELECT * FROM Usuarios WHERE activo = 1";
-              
 
                 // Prepara el comando SQL pasándole la consulta y la conexión activa.
                 using (var comando = new SqlCommand(query, conexion))
                 {
+                    comando.Parameters.AddWithValue("@Activo", activos);
 
                     // Ejecuta la consulta y devuelve un lector para recorrer los resultados fila por fila.
                     // El bloque 'using' garantiza que el lector también se cierre y libere al terminar.
@@ -260,7 +259,7 @@ namespace TillasDesktop.DAL.Repositorios
         }
 
         
-        // ELIMINAR UN USUARIO (DELETE / BORRADO)
+        // BAJA LOGICA
         public bool Eliminar(int idUsuario)
         {
             try
@@ -292,6 +291,30 @@ namespace TillasDesktop.DAL.Repositorios
             {
                 // Captura y reporta cualquier error en el proceso de eliminación.
                 throw new Exception("Error al eliminar el usuario: " + ex.Message);
+            }
+        }
+
+        // BAJA FISICA
+        public bool EliminarFisico(int idUsuario)
+        {
+            try
+            {
+                using (var conexion = ObtenerConexion())
+                {
+                    // Borrado permanente de la base de datos
+                    string query = "DELETE FROM Usuarios WHERE Id_Usuario = @Id_Usuario";
+
+                    using (var comando = new SqlCommand(query, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@Id_Usuario", idUsuario);
+                        conexion.Open();
+                        return comando.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al eliminar físicamente el usuario: " + ex.Message);
             }
         }
 

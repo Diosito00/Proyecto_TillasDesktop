@@ -23,7 +23,7 @@ namespace TillasDesktop.UI.Vistas
             InitializeComponent(); // Carga y dibuja los elementos visuales definidos en el archivo XAML.
 
             // Aplicación del Control de Acceso Basado en Roles (RBAC) para limitar la visibilidad de los módulos del menú lateral.
-            if (rolUsuario == "Vendedor")
+            if (rolUsuario.ToLower() == "vendedor")
             {
                 // Si el usuario es Vendedor, se ocultan los módulos de inventario, reportes y configuración/usuarios.
                 btnInventario.Visibility = Visibility.Collapsed;
@@ -31,13 +31,18 @@ namespace TillasDesktop.UI.Vistas
                 btnConfiguracion.Visibility = Visibility.Collapsed; // Módulo bloqueado para el perfil Vendedor.
                 btnBackup.Visibility = Visibility.Collapsed;
             }
-            else if (rolUsuario == "Gerente")
+            else if (rolUsuario.ToLower() == "gerente")
             {
                 // Si el usuario es Gerente, se ocultan los módulos de punto de venta, clientes y configuración/usuarios.
                 btnPuntoVenta.Visibility = Visibility.Collapsed;
                 btnClientes.Visibility = Visibility.Collapsed;
                 btnConfiguracion.Visibility = Visibility.Collapsed; // Módulo bloqueado para el perfil Gerente.
                 btnBackup.Visibility = Visibility.Collapsed;
+            }
+            else if (rolUsuario.ToLower() == "admin")
+            {
+                // Si el usuario es Admin, se ocultan los módulos de punto de venta
+                btnPuntoVenta.Visibility = Visibility.Collapsed;
             }
 
             // Carga por defecto la vista de bienvenida o inicio dentro del contenedor central al abrir la ventana.
