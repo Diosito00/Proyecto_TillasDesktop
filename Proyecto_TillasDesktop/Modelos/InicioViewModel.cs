@@ -78,7 +78,7 @@ namespace TillasDesktop.UI.Modelos
                 {
                     Title = "Recaudación",
                     Values = new ChartValues<double> { 82000, 213000, 445000, 123000, 555000, 325000, 410000 },
-                    PointGeometrySize = 12, // Tamaño de los "puntos" en las intersecciones
+                    PointGeometrySize = 10, // Tamaño de los "puntos" en las intersecciones
                     LineSmoothness = 0.6    // Curva las líneas rígidas para un diseño más moderno y fluido
                 }
             };
