@@ -9,7 +9,7 @@ using TillasDesktop.Entities.Usuarios;
 
 namespace TillasDesktop.UI.Modelos
 {
-    // Hereda de ViewModelBase para mantener reactiva la interfaz gráfica.
+    // Hereda de ViewModelBase para mantener la interfaz conectada y reactiva (avisando cuando cambian los datos).
     public class GestionUsuarioViewModel : ViewModelBase
     {
         // Instancia del servicio que contiene las reglas de negocio y conexión a datos.
@@ -36,7 +36,7 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
-        // Interfaz que envuelve la lista original para permitir filtrado y ordenamiento sin modificar los datos base.
+        // Una vista especial que envuelve nuestra lista para poder filtrar y ordenar sin romper los datos originales.
         public ICollectionView VistaFiltroUsuarios { get; set; }
 
         // Comandos vinculados a los botones de la interfaz.
@@ -48,27 +48,30 @@ namespace TillasDesktop.UI.Modelos
         {
             _usuarioService = new UsuariosService();
 
+            // Cargamos todos los usuarios apenas se abre la ventana.
             CargarDatos();
 
             // Configura la vista de filtrado basándose en la lista observable principal.
             VistaFiltroUsuarios = CollectionViewSource.GetDefaultView(ListaUsuarios);
             VistaFiltroUsuarios.Filter = FiltrarCriteriosUsuarios; // Asigna el método que evalúa cada fila.
 
+            // Vinculamos cada comando con su respectivo método.
             NuevoUsuarioCommand = new RelayCommand(EjecutarNuevo);
             EditarCommand = new RelayCommand(EjecutarEditar);
             EliminarCommand = new RelayCommand(EjecutarEliminar);
         }
 
+        // Trae los usuarios de la base de datos y los prepara para la pantalla.
         private void CargarDatos()
         {
             ListaUsuarios = new ObservableCollection<UsuarioViewModel>();
 
             try
             {
-                // Pide todas las entidades a la BLL.
+                // Pedimos la lista pura a la capa de servicios.
                 var usuariosDeDb = _usuarioService.ObtenerTodos();
 
-                // Envuelve cada entidad pura en un ViewModel (Wrapper) para que la UI pueda interactuar con ellas con seguridad.
+                // Envolvemos cada usuario en un ViewModel para que la interfaz pueda mostrarlos y editarlos bien.
                 foreach (var usuario in usuariosDeDb)
                 {
                     ListaUsuarios.Add(new UsuarioViewModel(usuario));
@@ -102,12 +105,13 @@ namespace TillasDesktop.UI.Modelos
             return false; // Oculta la fila si no hay coincidencias.
         }
 
+        // Abre el formulario en blanco para dar de alta un usuario nuevo.
         private void EjecutarNuevo(object obj)
         {
             var ventana = new FormularioUsuarioWindow();
             var viewModel = new FormularioUsuarioViewModel();
 
-            // Configuramos las delegaciones (Actions) para que el formulario hijo pueda comunicarse con este padre.
+            // Acciones para que el formulario se pueda cerrar solo y avise cuando guarde con éxito.
             viewModel.CerrarVentana = () => ventana.Close();
             viewModel.OnUsuarioGuardado = () =>
             {
@@ -117,18 +121,19 @@ namespace TillasDesktop.UI.Modelos
             };
 
             ventana.DataContext = viewModel;
-            ventana.ShowDialog(); // Detiene la ejecución aquí hasta que la ventana hija se cierre.
+            ventana.ShowDialog(); // Abre la ventana y frena la ejecución hasta que la cierren.
         }
 
+        // Abre el formulario cargando los datos del usuario que seleccionamos en la grilla para modificarlo.
         private void EjecutarEditar(object obj)
         {
-            // El parámetro (obj) viene desde el CommandParameter="{Binding}" del botón en el XAML, asegurando que sea el usuario correcto de la fila.
+            // El objeto viene del botón de la fila en la interfaz. Nos aseguramos que sea un usuario válido.
             if (obj is UsuarioViewModel usuarioFila)
             {
                 // Extrae la entidad pura para tener los datos originales.
                 var entidadOriginal = usuarioFila.ObtenerEntidadPura();
 
-                // 1. CLONACIÓN: Se crea una instancia completamente nueva con los mismos datos. 
+                // CLONACIÓN: Se crea una instancia completamente nueva con los mismos datos. 
                 // Esto previene la "edición fantasma" en la interfaz si el usuario cancela la operación.
                 var entidadClonada = new Usuario
                 {
@@ -146,14 +151,14 @@ namespace TillasDesktop.UI.Modelos
 
                 var ventana = new FormularioUsuarioWindow();
 
-                // 2. Se le pasa el CLON al formulario en lugar de la entidad original.
+                //  Se le pasa el CLON al formulario en lugar de la entidad original.
                 var viewModel = new FormularioUsuarioViewModel(entidadClonada);
 
                 viewModel.CerrarVentana = () => ventana.Close();
 
                 viewModel.OnUsuarioGuardado = () =>
                 {
-                    // 3. Si la base de datos confirma el éxito, copiamos los datos del clon de vuelta a la fila original.
+                    //  Si la base de datos confirma el éxito, copiamos los datos del clon de vuelta a la fila original.
                     // Al usar las propiedades del ViewModel (usuarioFila), se dispara OnPropertyChanged() y la grilla se actualiza en pantalla de inmediato.
                     usuarioFila.Nombre = entidadClonada.Nombre;
                     usuarioFila.Apellido = entidadClonada.Apellido;
@@ -172,6 +177,7 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
+        // Da de baja al usuario seleccionado tras pedir una confirmación por seguridad.
         private void EjecutarEliminar(object obj)
         {
             if (obj is UsuarioViewModel usuarioFila)
@@ -186,7 +192,7 @@ namespace TillasDesktop.UI.Modelos
                 {
                     try
                     {
-                        // Solicita a la BLL que elimine el registro.
+                        // Mandamos la orden de eliminar a la base de datos a través del servicio.
                         bool eliminado = _usuarioService.EliminarUsuario(usuarioFila.Id_Usuario);
 
                         if (eliminado)

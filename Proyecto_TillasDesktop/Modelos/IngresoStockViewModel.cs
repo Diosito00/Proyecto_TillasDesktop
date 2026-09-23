@@ -6,22 +6,29 @@ using TillasDesktop.BLL.Services;
 
 namespace TillasDesktop.UI.Modelos
 {
+    // ViewModel encargado de manejar la ventana secundaria para ingresar stock nuevo o modificar un talle existente.
     public class IngresoStockViewModel : ViewModelBase
     {
+        // Servicio que se comunica con la capa de negocios para impactar los cambios en la base de datos.
         private readonly InventarioService _inventarioService = new InventarioService();
+
+        // El producto base sobre el cual estamos operando los talles.
         private readonly Producto _productoPuro;
 
-        // Entidad DTO que sirve de transporte tanto para crear como para editar el stock del talle.
+        // El objeto que almacena los datos del talle y la cantidad. 
+        // Se comparte tanto para crear uno nuevo como para editar uno existente.
         private readonly ProductoTalle _movimiento;
 
-        // === PROPIEDADES VISUALES DINÁMICAS ===
-        // Permiten que el formulario de XAML se adapte cambiando sus títulos y botones sin tener que crear dos ventanas distintas.
+
+        // Propiedades de la interfaz que cambian dinámicamente (títulos y textos de botones) 
+        // para que la misma ventana sirva tanto para dar de alta como para editar.
         public string TituloVentana { get; set; }
         public string LabelCantidad { get; set; }
         public string TextoBoton { get; set; }
 
-        // Bandera (Flag) que le indica a la UI y a las validaciones cómo comportarse.
+        // Bandera booleana para saber si estamos editando (true) o creando un ingreso nuevo (false).
         public bool EsModoEdicion { get; set; }
+
 
         // Muestra un resumen del producto en el encabezado de la ventana (ej: "Producto: NK-AF1 - Nike Air Force").
         private string _productoResumen;
@@ -31,59 +38,59 @@ namespace TillasDesktop.UI.Modelos
             set { _productoResumen = value; OnPropertyChanged(); }
         }
 
-        // Enlace directo a las propiedades del DTO del movimiento.
+        // Propiedad bindeada al campo de talle en la pantalla.
         public decimal Talle
         {
             get => _movimiento.Talle;
             set { _movimiento.Talle = value; OnPropertyChanged(); }
         }
 
+        // Propiedad bindeada al campo de cantidad/stock en la pantalla.
         public int Cantidad
         {
             get => _movimiento.Stock_Actual;
             set { _movimiento.Stock_Actual = value; OnPropertyChanged(); }
         }
 
-        // === COMANDOS Y DELEGADOS ===
+        // Comando que dispara la acción de guardar al hacer clic en el botón correspondiente.
         public ICommand GuardarCommand { get; private set; }
+        // Acción (delegado) para ordenar a la ventana que se cierre sola sin romper el MVVM.
         public Action CerrarVentana { get; set; }
 
-        // Delegado que permite pasarle la entidad actualizada de vuelta a DetalleStockViewModel para que la UI principal se entere del cambio.
+        // Acción que avisa al ViewModel  (DetalleStockViewModel) 
+        // que la operación fue un éxito y le devuelve el talle actualizado para que la tabla se refresque 
         public Action<ProductoTalle> OnStockIngresado { get; set; }
 
-        // ====================================================================
-        // CONSTRUCTOR 1: MODO NUEVO INGRESO (Cuando presionan "+ INGRESAR STOCK").
-        // ====================================================================
+        // CONSTRUCTOR de  NUEVO INGRESO DE STOCK (Se usa al agregar un talle).
         public IngresoStockViewModel(ProductoViewModel productoVM)
         {
             _productoPuro = productoVM.ObtenerEntidadPura();
 
-            // Prepara un objeto de movimiento vacío, atado únicamente al ID del producto padre.
+            // Inicializamos un objeto nuevo apuntando al ID del producto actual.
             _movimiento = new ProductoTalle
             {
                 Producto_ID = _productoPuro.ID
             };
 
-            // Configura la UI en modo "Creación".
+            // Configuramos los textos de la ventana para el modo "Creación".
             ConfigurarTextosUI("INGRESAR MERCADERÍA", "Cantidad a Ingresar", "CONFIRMAR INGRESO", false);
             InicializarComandos();
         }
 
-        // ====================================================================
-        // CONSTRUCTOR 2: MODO EDICIÓN (Cuando presionan el lápiz en un talle que ya existe).
-        // ====================================================================
+        // CONSTRUCTOR de  EDICIÓN DE STOCK (Se usa al modificar un talle que ya figuraba en la lista).
         public IngresoStockViewModel(ProductoViewModel productoVM, ProductoTalle talleExistente)
         {
             _productoPuro = productoVM.ObtenerEntidadPura();
 
-            // Usamos la entidad existente que ya tiene un ID de base de datos cargado.
+            // Reutilizamos la entidad existente que ya tiene su ID cargado desde la base de datos.
             _movimiento = talleExistente;
 
-            // Configura la UI en modo "Edición".
+            // Configuramos los textos de la ventana para el modo "Edición".
             ConfigurarTextosUI("EDITAR STOCK", "Stock Actual", "GUARDAR CAMBIOS", true);
             InicializarComandos();
         }
 
+        // Método auxiliar para no repetir código al configurar los textos visuales en los constructores.
         private void ConfigurarTextosUI(string titulo, string label, string boton, bool esEdicion)
         {
             TituloVentana = titulo;
@@ -93,12 +100,15 @@ namespace TillasDesktop.UI.Modelos
             ProductoResumen = $"Producto: {_productoPuro.Codigo_Modelo} - {_productoPuro.Nombre}";
         }
 
+        // Prepara el comando de guardado atándole la regla de validación para habilitar/deshabilitar el botón.
         private void InicializarComandos()
         {
-            // El comando Evalúa 'PuedeGuardar' automáticamente en tiempo real mientras el usuario escribe.
+            /// El método PuedeGuardar se ejecuta automáticamente cada vez que el usuario tipea algo, 
+            // bloqueando o desbloqueando el botón de guardar en tiempo real.
             GuardarCommand = new RelayCommand(Guardar, PuedeGuardar);
         }
 
+        // Lógica que se ejecuta al presionar el botón de confirmar.
         private void Guardar(object parametro)
         {
             bool exito;
@@ -130,10 +140,10 @@ namespace TillasDesktop.UI.Modelos
         // Método que bloquea visualmente el botón de guardar si no se cumplen las condiciones base.
         private bool PuedeGuardar(object parametro)
         {
-            // Si está editando, se permite que el stock quede en 0 (ej: si se vendió el último par físicamente o hubo merma).
+            // Si estamos editando, permitimos que la cantidad quede en 0 (por ejemplo, si se agotó el stock físico).
             if (EsModoEdicion) return Talle > 0 && Cantidad >= 0;
 
-            // Si es un nuevo ingreso de mercadería, carece de lógica ingresar "0" unidades.
+            // Si es un ingreso nuevo, no tiene sentido ingresar 0 o menos unidades; el talle y la cantidad deben ser positivos.
             return Talle > 0 && Cantidad > 0;
         }
     }

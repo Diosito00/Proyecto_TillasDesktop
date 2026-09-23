@@ -14,15 +14,16 @@ namespace TillasDesktop.UI.Modelos
         // Servicio que contiene la lógica de negocio y se comunica con la base de datos.
         private readonly InventarioService _inventarioService;
 
-        // Propiedad privada y pública para la barra de búsqueda.
+        /// Campo privado que almacena el texto que va escribiendo el usuario en el buscador.
         private string _textoBusqueda = string.Empty;
 
         // Colección observable que notifica a la tabla visual (DataGrid) cuando se agregan o eliminan productos.
         public ObservableCollection<ProductoViewModel> ListaProductos { get; set; }
 
-        // Interfaz que envuelve la lista para permitir filtrado sin modificar la colección original.
+        // Vista de colección especial que envuelve la lista para filtrar los datos en tiempo real sin romper la colección original.
         public ICollectionView VistaFiltroProductos { get; set; }
 
+        // Propiedad pública vinculada al cuadro de texto de búsqueda de la pantalla.
         public string TextoBusqueda
         {
             get => _textoBusqueda;
@@ -35,12 +36,13 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
-        // Comandos que se enlazan a los botones de la interfaz gráfica.
+        // Comandos asociados a los botones principales de la interfaz (nuevo, ver stock, modificar, eliminar).
         public ICommand NuevoModeloCommand { get; }
         public ICommand VerDetalleStockCommand { get; }
         public ICommand ModificarModeloCommand { get; }
         public ICommand EliminarModeloCommand { get; }
 
+        // Constructor principal: inicializa el servicio, levanta los datos y arma los comandos.
         public InventarioViewModel()
         {
             _inventarioService = new InventarioService();
@@ -54,9 +56,11 @@ namespace TillasDesktop.UI.Modelos
             ListaProductos.Add(new ProductoViewModel(producto1) { NombreMarca = "Nike", NombreCategoria = "Deportivo", StockTotal = 45 });
             ListaProductos.Add(new ProductoViewModel(producto2) { NombreMarca = "Adidas", NombreCategoria = "Deportivo", StockTotal = 25 });
 
-            // Configuramos la vista de filtrado basándonos en la lista observable.
+            // Configuramos la vista de filtrado tomando como base la lista observable de productos.
             VistaFiltroProductos = CollectionViewSource.GetDefaultView(ListaProductos);
-            VistaFiltroProductos.Filter = FiltrarCriterios; // Le asignamos el método que decide qué filas se ven.
+
+            // Asignamos el método que decide qué filas se muestran y cuáles se ocultan según la búsqueda.
+            VistaFiltroProductos.Filter = FiltrarCriterios;
 
             // Inicialización de comandos vinculados a sus respectivos métodos.
             NuevoModeloCommand = new RelayCommand(AbrirVentanaNuevoModelo);
@@ -65,6 +69,7 @@ namespace TillasDesktop.UI.Modelos
             EliminarModeloCommand = new RelayCommand(EliminarModelo);
         }
 
+        // Abre el formulario en blanco para dar de alta un nuevo modelo de zapatilla
         private void AbrirVentanaNuevoModelo(object parametro)
         {
             var ventana = new Vistas.NuevoModeloWindow();
@@ -83,15 +88,16 @@ namespace TillasDesktop.UI.Modelos
             ventana.ShowDialog();
         }
 
+        // Abre el formulario cargando los datos del modelo que seleccionamos en la grilla para modificarlo.
         private void AbrirVentanaModificar(object parametro)
         {
             // Verificamos que el botón clickeado haya enviado un producto válido desde la grilla.
             if (parametro is ProductoViewModel productoFila)
             {
-                // 1. Extraemos la entidad original pura.
+                // Extraemos la entidad original pura que está en esa fila.
                 var entidadOriginal = productoFila.ObtenerEntidadPura();
 
-                // 2. Hacemos una copia exacta. Esto asegura que si el usuario 
+                //  Hacemos una copia exacta. Esto asegura que si el usuario 
                 // abre la ventana de edición, borra el nombre y luego presiona la "X" (sin guardar), 
                 // la grilla principal no muestre el producto con el nombre borrado.
                 var entidadClonada = new Producto
@@ -106,14 +112,15 @@ namespace TillasDesktop.UI.Modelos
                 };
 
                 var ventana = new Vistas.NuevoModeloWindow();
-                var formViewModel = new NuevoModeloViewModel(entidadClonada); // Le pasamos el clon al formulario.
+                // Le pasamos el clon al ViewModel del formulario de edición.
+                var formViewModel = new NuevoModeloViewModel(entidadClonada);
+
 
                 formViewModel.CerrarVentana = () => ventana.Close();
                 formViewModel.OnModeloGuardado = () =>
                 {
-                    // 3. Si el guardado fue exitoso, copiamos los datos del clon 
-                    // de regreso a la fila original. Como 'productoFila' es un ViewModel, 
-                    // disparará 'OnPropertyChanged' y actualizará la UI al instante.
+                    // Si se guardó bien, pasamos los datos modificados del clon de regreso a la fila original de la tabla.
+                    // Al tocar las propiedades del ViewModel (productoFila), salta el OnPropertyChanged y la pantalla se actualiza al toque.
                     productoFila.Codigo_Modelo = entidadClonada.Codigo_Modelo;
                     productoFila.Nombre = entidadClonada.Nombre;
                     productoFila.Precio_Venta = entidadClonada.Precio_Venta;
@@ -133,6 +140,7 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
+        // Abre la ventana secundaria para administrar los talles y stock físico de un modelo específico.
         private void AbrirVentanaDetalleStock(object parametro)
         {
             // Abre la ventana secundaria para gestionar los talles y cantidades de un modelo específico.
@@ -145,10 +153,12 @@ namespace TillasDesktop.UI.Modelos
                 ventana.DataContext = detalleViewModel;
                 ventana.ShowDialog();
 
+                // Al cerrar la ventana de stock, refrescamos la tabla principal por si hubo cambios en las cantidades totales.
                 VistaFiltroProductos.Refresh();
             }
         }
 
+        // Da de baja un modelo de zapatilla tras pedir confirmación por seguridad.
         private void EliminarModelo(object parametro)
         {
             if (parametro is ProductoViewModel productoFila)
@@ -167,7 +177,7 @@ namespace TillasDesktop.UI.Modelos
 
                     if (exito)
                     {
-                        // Si la BD confirmó el borrado, lo quitamos de la UI.
+                        /// Si la base de datos confirmó la baja, lo sacamos de nuestra lista y la tabla se actualiza sola.
                         ListaProductos.Remove(productoFila);
                     }
                     else
@@ -183,15 +193,18 @@ namespace TillasDesktop.UI.Modelos
         {
             if (obj is ProductoViewModel producto)
             {
+                // Si la barra está vacía, dejamos pasar a todos los productos sin filtrar.
                 if (string.IsNullOrWhiteSpace(TextoBusqueda)) return true;
 
+                // Pasamos el texto a minúsculas para que no importe si buscan con mayúsculas o minúsculas.
                 string filtro = TextoBusqueda.ToLower();
-                // Retorna verdadero si el texto coincide con el Nombre, el Código SKU o la Marca del producto.
+
+                // Devuelve true (muestra la fila) si el filtro coincide con el Nombre, el Código o la Marca.
                 return (producto.Nombre != null && producto.Nombre.ToLower().Contains(filtro)) ||
                        (producto.Codigo_Modelo != null && producto.Codigo_Modelo.ToLower().Contains(filtro)) ||
                        (producto.NombreMarca != null && producto.NombreMarca.ToLower().Contains(filtro));
             }
-            return false;
+            return false; // Si no es un producto válido, lo ocultamos.
         }
     }
 }

@@ -4,20 +4,23 @@ using TillasDesktop.Entities.Usuarios;
 
 namespace TillasDesktop.UI.Modelos
 {
-    // Hereda de ViewModelBase para mantener el estándar MVVM, permitiendo actualizar la UI si es necesario.
+    // Hereda de ViewModelBase para mantener la pantalla sincronizada con los datos mediante notificaciones.
     public class LoginViewModel : ViewModelBase
     {
-        // Instancia del servicio que se comunicará con la capa de datos (DAL) para verificar las credenciales.
+        // Instancia del servicio que maneja la lógica de negocio de usuarios para verificar las credenciales.
         private readonly UsuariosService _usuarioService;
 
-        // Propiedad bindeada (Binding) al TextBox del nombre de usuario o email en el XAML.
+        // Campo privado que almacena el nombre de usuario o correo que escribe la persona.
         private string _usuario;
+
+        // Propiedad pública vinculada al cuadro de texto del usuario en la pantalla de inicio de sesión.
         public string Usuario
         {
             get => _usuario;
             set { _usuario = value; OnPropertyChanged(); }
         }
 
+        // Constructor principal: inicializa el servicio de usuarios ni bien se abre la ventana de login.
         public LoginViewModel()
         {
             // Inicializa el servicio al momento de abrir la ventana de Login.
@@ -28,18 +31,18 @@ namespace TillasDesktop.UI.Modelos
         // porque los PasswordBox de WPF no soportan Binding directo por motivos de seguridad en memoria.
         public string Autenticar(string password)
         {
-            // 1. Validación rápida: Si dejaron algún campo vacío, cortamos el proceso al instante.
+            /// Validamos que no hayan dejado el usuario o la contraseña en blanco; si falta alguno, cortamos acá.
             if (string.IsNullOrWhiteSpace(Usuario) || string.IsNullOrWhiteSpace(password))
                 return null;
 
-            // 2. Limpieza de datos: El método Trim() elimina los espacios en blanco accidentales 
+            //  Limpieza de datos: El método Trim() elimina los espacios en blanco accidentales 
             // al principio o al final del texto (muy común al copiar y pegar un email).
             string credencialLimpia = Usuario.Trim();
 
-            // 3. Consulta a la base de datos a través del servicio de la capa BLL.
+            // Consultamos a la base de datos a través de la capa de servicios para chequear si el usuario y la clave existen.
             Usuario usuarioAutenticado = _usuarioService.AutenticarUsuario(credencialLimpia, password);
-
-            // 4. Resolución.
+            
+            // Si la base de datos nos devuelve un usuario válido...
             if (usuarioAutenticado != null)
             {
                 // Guardamos el nombre y el ID a nivel global para usarlos en toda la sesión
@@ -52,7 +55,7 @@ namespace TillasDesktop.UI.Modelos
                 return usuarioAutenticado.Rol;
             }
 
-            // Si retorna null, significa que las credenciales son incorrectas o el usuario fue desactivado.
+            // Si el usuario no existe o la contraseña es incorrecta, devolvemos null para que la vista muestre el error.
             return null;
         }
     }

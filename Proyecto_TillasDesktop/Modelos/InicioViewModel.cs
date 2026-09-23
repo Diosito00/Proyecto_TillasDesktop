@@ -100,7 +100,7 @@ namespace TillasDesktop.UI.Modelos
                 new VentaResumenDTO {
                     ID = 1044,
                     Fecha_Hora = DateTime.Now.AddHours(-2),
-                    NombreCliente = "Juan Pérez",
+                    NombreCliente = "Lucia Pérez",
                     MetodoPago = "Tarjeta Débito",
                     Total = 235000m,
                     NombreVendedor = nombre

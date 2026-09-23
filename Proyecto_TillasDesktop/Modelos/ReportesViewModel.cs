@@ -8,14 +8,14 @@ namespace TillasDesktop.UI.Modelos
     // Hereda de ViewModelBase para que la interfaz reaccione a los cambios de fechas o filtros.
     public class ReportesViewModel : ViewModelBase
     {
-        // === COLECCIÓN DE SOLO LECTURA ===
+       
         // Colección reactiva que mostrará el listado de ventas en la grilla principal.
         public ObservableCollection<VentaResumenDTO> HistorialVentas { get; set; }
 
         // Opciones estáticas para el ComboBox de filtrado rápido.
         public List<string> OpcionesPeriodo { get; set; }
 
-        // === FILTROS ===
+        
         private string _periodoSeleccionado;
         public string PeriodoSeleccionado
         {
@@ -46,7 +46,7 @@ namespace TillasDesktop.UI.Modelos
             set { _fechaFin = value; OnPropertyChanged(); }
         }
 
-        // === COMANDOS ===
+        
         public ICommand GenerarReporteCommand { get; }
         public ICommand ExportarCommand { get; }
         public ICommand VerDetalleCommand { get; }
@@ -67,7 +67,6 @@ namespace TillasDesktop.UI.Modelos
             VerDetalleCommand = new RelayCommand(VerDetalle);
         }
 
-        // === LÓGICA DE BOTONES ===
         private void GenerarReporte(object parametro)
         {
             // Validación básica para evitar que el usuario busque rangos ilógicos (ej: desde el 20 de mayo hasta el 10 de mayo).

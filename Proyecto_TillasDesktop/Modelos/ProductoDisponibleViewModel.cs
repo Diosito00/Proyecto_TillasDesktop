@@ -1,5 +1,6 @@
 ﻿namespace TillasDesktop.UI.Modelos
 {
+    // Hereda de ViewModelBase para mantener la pantalla sincronizada mediante notificaciones automáticas.
     public class ProductoDisponibleViewModel : ViewModelBase
     {
         // Propiedades de identidad e información. Son fijas y no necesitan disparar eventos 

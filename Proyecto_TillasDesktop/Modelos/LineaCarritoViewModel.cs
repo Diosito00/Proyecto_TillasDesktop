@@ -1,6 +1,6 @@
 ﻿namespace TillasDesktop.UI.Modelos
 {
-    // Hereda de ViewModelBase para poder avisar a la interfaz gráfica cuando cambia algún valor.
+    // Hereda de ViewModelBase para mantener la pantalla conectada y avisarle automáticamente cuando algún dato cambia.
     public class LineaCarritoViewModel : ViewModelBase
     {
         // Propiedades de configuración estática que no cambian una vez que el producto se agrega al carrito.
@@ -11,6 +11,8 @@
 
         // Propiedad reactiva: La cantidad puede aumentar o disminuir mediante los botones de "+" o "-" del carrito.
         private int _cantidad;
+
+        // Propiedad pública que se enlaza con la interfaz para ver o modificar la cantidad de pares.
         public int Cantidad
         {
             get => _cantidad;

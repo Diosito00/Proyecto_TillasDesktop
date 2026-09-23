@@ -9,36 +9,39 @@ using TillasDesktop.BLL.Services;
 
 namespace TillasDesktop.UI.Modelos
 {
+    // Hereda de ViewModelBase para mantener la interfaz actualizada automáticamente cuando cambian los datos.
     public class NuevoModeloViewModel : ViewModelBase
     {
-        // Inicialización en línea de la variable readonly.
+        // Instancia del servicio que maneja la lógica de negocio  
         private readonly InventarioService _inventarioService = new InventarioService();
 
         // Título dinámico de la ventana ("NUEVO MODELO" o "EDITAR MODELO").
         public string TituloFormulario { get; set; }
         public bool EsModoEdicion { get; set; }
 
-        // Envoltorio que contiene a la entidad pura del producto y avisa a la UI de los cambios.
+        // Objeto que envuelve la entidad del producto y avisa a la pantalla cuando alguna de sus propiedades se modifica.
         public ProductoViewModel ProductoActual { get; set; }
 
-        // Propiedades seleccionadas desde los ComboBox (Listas desplegables) de la interfaz.
+        // Campo privado y propiedad pública para la marca que el usuario selecciona en el ComboBox de la interfaz.
         private Marca _marcaSeleccionada;
         public Marca MarcaSeleccionada { get => _marcaSeleccionada; set { _marcaSeleccionada = value; OnPropertyChanged(); } }
 
+        // Campo privado y propiedad pública para la categoría que el usuario selecciona en el ComboBox.
         private Categoria _categoriaSeleccionada;
         public Categoria CategoriaSeleccionada { get => _categoriaSeleccionada; set { _categoriaSeleccionada = value; OnPropertyChanged(); } }
 
-        // Colecciones observables que llenan las opciones de los ComboBox de Marcas y Categorías.
+        // Colecciones observables para llenar las listas desplegables (ComboBox) de marcas y categorías en la vista.
         public ObservableCollection<Marca> MarcasDisponibles { get; set; }
         public ObservableCollection<Categoria> CategoriasDisponibles { get; set; }
 
+        // Comando vinculado al botón de guardar del formulario.
         public ICommand GuardarCommand { get; private set; }
+
+        // Acciones (delegados) para ordenar que la ventana se cierre y para avisarle al listado principal que guardamos un producto.
         public Action CerrarVentana { get; set; }
         public Action OnModeloGuardado { get; set; }
 
-        // ====================================================================
-        // CONSTRUCTOR 1: NUEVO MODELO (Alta de registro).
-        // ====================================================================
+        // CONSTRUCTOR 1: Se usa cuando abrimos el formulario limpio para dar de alta un producto nuevo.
         public NuevoModeloViewModel()
         {
             EsModoEdicion = false;
@@ -51,9 +54,7 @@ namespace TillasDesktop.UI.Modelos
             InicializarComunes();
         }
 
-        // ====================================================================
-        // CONSTRUCTOR 2: EDITAR MODELO (Modificación de registro).
-        // ====================================================================
+        // CONSTRUCTOR 2: Se usa cuando seleccionamos un producto existente en la tabla para modificar sus datos.
         public NuevoModeloViewModel(Producto productoExistente)
         {
             EsModoEdicion = true;
@@ -70,6 +71,7 @@ namespace TillasDesktop.UI.Modelos
             CategoriaSeleccionada = CategoriasDisponibles.FirstOrDefault(c => c.ID == ProductoActual.Categoria_ID);
         }
 
+        // Método auxiliar para evitar repetir código: carga las listas desde la base de datos y arma el comando de guardar.
         private void InicializarComunes()
         {
             // Llenamos las listas desplegables consultando las marcas y categorías guardados en InventarioService.
@@ -79,9 +81,10 @@ namespace TillasDesktop.UI.Modelos
             GuardarCommand = new RelayCommand(Guardar);
         }
 
+        // Lógica que se ejecuta al hacer clic en el botón de guardar.
         private void Guardar(object parametro)
         {
-            // 1. Validaciones explícitas de campos requeridos y coherencia de datos (precio mayor a 0).
+            //  Validaciones explícitas de campos requeridos y coherencia de datos (precio mayor a 0).
             if (string.IsNullOrWhiteSpace(ProductoActual.Codigo_Modelo) ||
                 string.IsNullOrWhiteSpace(ProductoActual.Nombre) ||
                 ProductoActual.Precio_Venta <= 0 ||
@@ -105,7 +108,7 @@ namespace TillasDesktop.UI.Modelos
                 return;
             }
 
-            // Extraemos la entidad e inyectamos los IDs de los ComboBox.
+            // Extraemos la entidad pura y le asignamos los IDs correspondientes a la marca y categoría elegidas en los ComboBox.
             Producto entidadParaGuardar = ProductoActual.ObtenerEntidadPura();
             entidadParaGuardar.Marca_ID = MarcaSeleccionada.ID;
             entidadParaGuardar.Categoria_ID = CategoriaSeleccionada.ID;
@@ -113,6 +116,7 @@ namespace TillasDesktop.UI.Modelos
             bool exito;
             string mensaje;
 
+            // Dependiendo del modo, llamamos al método del servicio para actualizar un producto existente o registrar uno nuevo.
             if (EsModoEdicion)
             {
                 exito = _inventarioService.ActualizarProducto(entidadParaGuardar, out mensaje);
@@ -124,21 +128,23 @@ namespace TillasDesktop.UI.Modelos
                 if (exito) ProductoActual.ID = entidadParaGuardar.ID;
             }
 
-            // Resolución de la operación.
+            // Si la base de datos confirmó la operación con éxito...
             if (exito)
             {
-                // Sincroniza los nombres en texto de los ComboBox hacia el ViewModel 
-                // para que la grilla principal actualice los textos inmediatamente.
+                // Actualizamos los nombres en texto de la marca y categoría en el ViewModel 
+                // para que la tabla principal los refleje al instante sin necesidad de recargar todo.
                 ProductoActual.NombreMarca = MarcaSeleccionada.Nombre;
                 ProductoActual.NombreCategoria = CategoriaSeleccionada.Nombre;
 
                 MessageBox.Show(EsModoEdicion ? "Modelo actualizado correctamente." : "Modelo creado correctamente.", "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
 
+                // Disparamos los avisos para actualizar la tabla de la ventana principal y cerrar este formulario.
                 OnModeloGuardado?.Invoke();
                 CerrarVentana?.Invoke();
             }
             else
             {
+               // Si hubo algún rechazo en las reglas de negocio, mostramos el aviso.
                 MessageBox.Show(mensaje, "Error de Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
