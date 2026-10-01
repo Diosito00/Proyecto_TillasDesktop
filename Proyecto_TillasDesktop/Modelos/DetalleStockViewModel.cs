@@ -85,8 +85,15 @@ namespace TillasDesktop.UI.Modelos
 
                 if (talleExistente != null)
                 {
-                    // Si ya existe, solo le sumamos la cantidad nueva al stock que ya tenía.
-                    talleExistente.Stock_Actual += movimientoStock.Stock_Actual;
+                    // Obtenemos el índice y reemplazamos la fila para forzar el redibujado
+                    int index = ListaTalles.IndexOf(talleExistente);
+                    ListaTalles[index] = new ProductoTalle
+                    {
+                        ID = talleExistente.ID,
+                        Producto_ID = talleExistente.Producto_ID,
+                        Talle = talleExistente.Talle,
+                        Stock_Actual = talleExistente.Stock_Actual + movimientoStock.Stock_Actual
+                    };
                 }
                 else
                 {

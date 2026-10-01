@@ -189,16 +189,37 @@ namespace TillasDesktop.DAL.Repositorios
                     }
                 }
             }
+            catch (SqlException sqlEx)
+            {
+                // El error 2627 o 2601 en SQL Server significa "Violación de restricción UNIQUE"
+                if (sqlEx.Number == 2627 || sqlEx.Number == 2601)
+                {
+                    // Inspeccionamos el mensaje original para saber qué campo causó el choque
+                    if (!string.IsNullOrEmpty(nuevoUsuario.Dni) && sqlEx.Message.Contains(nuevoUsuario.Dni))
+                        throw new Exception("Ya existe un usuario registrado con este DNI.");
+
+                    if(!string.IsNullOrEmpty(nuevoUsuario.Email) && sqlEx.Message.Contains(nuevoUsuario.Email))
+                        throw new Exception("Este correo electrónico ya está en uso por otro usuario.");
+
+                    if (!string.IsNullOrEmpty(nuevoUsuario.Nombre_Usuario) && sqlEx.Message.Contains(nuevoUsuario.Nombre_Usuario))
+                        throw new Exception("El nombre de usuario elegido no está disponible.");
+
+                    // Mensaje por defecto si choca otra restricción
+                    throw new Exception("Un dato ingresado ya existe en el sistema y no puede duplicarse.");
+                }
+
+                // Si es otro error de SQL (ej. base de datos caída), mostramos el genérico
+                throw new Exception("Error de base de datos al insertar el usuario: " + sqlEx.Message);
+            }
             catch (Exception ex)
             {
-                // Si ocurre un error, detiene la ejecución y lanza una excepción clara con el detalle.
-                throw new Exception("Error al insertar el usuario: " + ex.Message);
+                // Atrapa cualquier otro error que no provenga de SQL Server
+                throw new Exception("Error inesperado al insertar el usuario: " + ex.Message);
             }
         }
 
        
         //  ACTUALIZAR UN USUARIO EXISTENTE (UPDATE / MODIFICACIÓN)
-        
         public bool Actualizar(Usuario usuarioModificado)
         {
             // Verificamos si el campo de contraseña del formulario NO esta vacio
@@ -251,10 +272,23 @@ namespace TillasDesktop.DAL.Repositorios
                     }
                 }
             }
-            catch (Exception ex)
+            catch (SqlException sqlEx)
             {
-                // Maneja cualquier fallo durante la actualización.
-                throw new Exception("Error al actualizar el usuario: " + ex.Message);
+                if (sqlEx.Number == 2627 || sqlEx.Number == 2601)
+                {
+                    if (!string.IsNullOrEmpty(usuarioModificado.Dni) && sqlEx.Message.Contains(usuarioModificado.Dni))
+                        throw new Exception("Ya existe un usuario registrado con este DNI.");
+
+                    if (!string.IsNullOrEmpty(usuarioModificado.Email) && sqlEx.Message.Contains(usuarioModificado.Email))
+                        throw new Exception("Este correo electrónico ya está en uso por otro usuario.");
+
+                    if (!string.IsNullOrEmpty(usuarioModificado.Nombre_Usuario) && sqlEx.Message.Contains(usuarioModificado.Nombre_Usuario))
+                        throw new Exception("El nombre de usuario elegido no está disponible.");
+
+                    throw new Exception("Un dato ingresado ya existe en el sistema y no puede duplicarse.");
+                }
+
+                throw new Exception("Error de base de datos al actualizar: " + sqlEx.Message);
             }
         }
 

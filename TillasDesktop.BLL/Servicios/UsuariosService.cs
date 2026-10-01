@@ -104,7 +104,7 @@ namespace TillasDesktop.BLL.Services
             var usuarios = ObtenerTodos();
             bool resultado = usuarios.Exists(u => u.Email != null && u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
             // Comparamos ignorando mayúsculas y minúsculas para evitar falsos negativos
-            return resultado;
+            return usuarios.Exists(u => u.Email != null && u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

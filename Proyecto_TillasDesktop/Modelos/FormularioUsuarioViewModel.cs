@@ -182,7 +182,7 @@ namespace TillasDesktop.UI.Modelos
             catch (Exception ex)
             {
                 // Atrapamos cualquier error inesperado de red o de la capa de datos y lo mostramos claramente.
-                MessageBox.Show(ex.Message, "Error Crítico", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
     }
