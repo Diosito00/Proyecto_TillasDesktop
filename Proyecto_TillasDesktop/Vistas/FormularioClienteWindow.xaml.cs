@@ -1,8 +1,8 @@
-﻿using System.Windows; // Importa los componentes esenciales de la interfaz y ventanas de WPF.
+﻿using System.Windows;
 using System.Windows.Input;
-using TillasDesktop.Entities.Usuarios;
-using TillasDesktop.UI.Modelos;// Importa los modelos del proyecto (como la clase Cliente).
-using System.Text.RegularExpressions;
+using System.Linq;
+using TillasDesktop.Entities.Clientes; // Asegurado para usar la entidad Cliente
+using TillasDesktop.UI.Modelos;
 
 
 namespace TillasDesktop.UI.Vistas
@@ -13,9 +13,7 @@ namespace TillasDesktop.UI.Vistas
         // Instancia del ViewModel que contiene las reglas de negocio, validaciones y datos del formulario.
         private FormularioClienteViewModel _viewModel;
 
-        /// Propiedad pública que expone el cliente resultante (creado o modificado) para ser recuperado
-        /// por la ventana padre una vez que se confirma la operación de guardado.
-        public ClienteViewModel? NuevoCliente => _viewModel?.ClienteResultado;
+       
 
         // Constructor vacío: se utiliza cuando se quiere dar de alta/crear un nuevo cliente desde cero.
         public FormularioClienteWindow()
@@ -26,7 +24,7 @@ namespace TillasDesktop.UI.Vistas
         }
 
         // Constructor con parámetros: se utiliza cuando se quiere editar un cliente existente, recibiendo sus datos actuales.
-        public FormularioClienteWindow(ClienteViewModel clienteAEditar)
+        public FormularioClienteWindow(Cliente clienteAEditar)
         {
             InitializeComponent(); // Inicializa los componentes de la interfaz.
 
@@ -42,9 +40,9 @@ namespace TillasDesktop.UI.Vistas
 
             // Define la acción (delegado) que ejecutará el ViewModel para cerrar la ventana,
             // devolviendo el resultado booleano (DialogResult = true si se guardó con éxito).
-            _viewModel.CerrarVentanaAccion = (resultado) =>
+            _viewModel.CerrarVentana= () =>
             {
-                DialogResult = resultado;
+                DialogResult = true;
                 Close();
             };
         }

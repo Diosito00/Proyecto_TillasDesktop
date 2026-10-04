@@ -1,104 +1,95 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using TillasDesktop.BLL;
+using TillasDesktop.BLL.Services;
+using TillasDesktop.Entities.Clientes;
 
 namespace TillasDesktop.UI.Modelos
 {
-    // ViewModel encargado de manejar la lógica del formulario para crear o editar un cliente.
     public class FormularioClienteViewModel : ViewModelBase
     {
-        // Campos privados y propiedades públicas para cada input del formulario
-        private string _nombre = string.Empty;
-        public string Nombre
-        {
-            get => _nombre;
-            set { _nombre = value; OnPropertyChanged(); }
-        }
+        // Instanciamos el servicio directamente para manejar la persistencia de clientes.
+        private readonly ClienteService _clienteService = new ClienteService();
 
-        private string _apellido = string.Empty;
-        public string Apellido
-        {
-            get => _apellido;
-            set { _apellido = value; OnPropertyChanged(); }
-        }
+        // Propiedades de control para la interfaz que cambian dinámicamente según la operación.
+        public string TituloFormulario { get; set; }
+        public bool EsModoEdicion { get; set; }
 
-        private string _cuit = string.Empty;
-        public string Cuit
-        {
-            get => _cuit;
-            set { _cuit = value; OnPropertyChanged(); }
-        }
+        // Contiene a la entidad Cliente real, pero expone sus propiedades con OnPropertyChanged para que la vista reaccione.
+        public ClienteViewModel ClienteActual { get; set; }
 
-        private string _telefono = string.Empty;
-        public string Telefono
-        {
-            get => _telefono;
-            set { _telefono = value; OnPropertyChanged(); }
-        }
+        // Comando vinculado al botón de guardar del formulario.
+        public ICommand GuardarCommand { get; private set; }
 
-        private string _email = string.Empty;
-        public string Email
-        {
-            get => _email;
-            set { _email = value; OnPropertyChanged(); }
-        }
+        // Acciones (Actions) que permiten al ViewModel dar órdenes a la Vista (cerrar la ventana o 
+        // recargar la tabla principal) respetando el patrón MVVM sin acoplar código visual.
+        public Action CerrarVentana { get; set; }
+        public Action OnClienteGuardado { get; set; }
 
-        // Almacena el resultado final (el cliente creado o modificado) que será devuelto a la ventana principal.
-        public ClienteViewModel ClienteResultado { get; private set; }
-
-        // Comando que se dispara al hacer clic en el botón de guardar.
-        public ICommand GuardarCommand { get; }
-
-        // Acción (delegado) para cerrar la ventana devolviendo un booleano (true si guardó con éxito).
-        public Action<bool?> CerrarVentanaAccion { get; set; }
-
-        // Constructor por defecto: se usa cuando queremos dar de alta un cliente nuevo.
+        // Constructor que se ejecuta al crear un cliente nuevo desde la grilla principal.
         public FormularioClienteViewModel()
         {
-            GuardarCommand = new RelayCommand(EjecutarGuardar);
+            EsModoEdicion = false;
+            TituloFormulario = "DATOS DEL CLIENTE (NUEVO)";
+
+            // Creamos una entidad en blanco con valores lógicos por defecto si es necesario.
+            var entidadNueva = new Cliente();
+
+            // Envolvemos la entidad pura para que la interfaz pueda enlazarla (DataBinding).
+            ClienteActual = new ClienteViewModel(entidadNueva);
+
+            Inicializar();
         }
 
-        // Sobrecarga del constructor: se usa cuando pasamos un cliente existente para editarlo. 
-        // El ': this()' asegura que primero se ejecute el constructor base para inicializar el comando.
-        public FormularioClienteViewModel(ClienteViewModel clienteAEditar) : this()
+        // Constructor que se ejecuta al hacer clic en editar un cliente existente.
+        public FormularioClienteViewModel(Cliente clienteExistente)
         {
-            if (clienteAEditar != null)
-            {
-                ClienteResultado = clienteAEditar;
-                Nombre = clienteAEditar.Nombre;
-                Apellido = clienteAEditar.Apellido;
-                Cuit = clienteAEditar.CUIT;
-                Telefono = clienteAEditar.Telefono;
-                Email = clienteAEditar.Email;
-            }
+            EsModoEdicion = true;
+            TituloFormulario = "DATOS DEL CLIENTE (EDICIÓN)";
+
+            // Envolvemos la entidad original que vino de la base de datos.
+            ClienteActual = new ClienteViewModel(clienteExistente);
+
+            Inicializar();
         }
 
-        // Método que valida  los datos antes de aceptar el guardado.
-        private void EjecutarGuardar(object obj)
+        // Método auxiliar para no repetir código en ambos constructores.
+        private void Inicializar()
         {
-            // Validar que no queden campos vacíos o en blanco.
-            if (string.IsNullOrWhiteSpace(Nombre) ||
-                string.IsNullOrWhiteSpace(Apellido) ||
-                string.IsNullOrWhiteSpace(Cuit) ||
-                string.IsNullOrWhiteSpace(Telefono) ||
-                string.IsNullOrWhiteSpace(Email))
+            GuardarCommand = new RelayCommand(Guardar);
+        }
+
+        // Lógica principal de validación y guardado contra la base de datos.
+        private void Guardar(object parametro)
+        {
+            // Validar que no queden campos vacíos o en blanco
+            if (string.IsNullOrWhiteSpace(ClienteActual.Nombre) ||
+                string.IsNullOrWhiteSpace(ClienteActual.Apellido) ||
+                string.IsNullOrWhiteSpace(ClienteActual.CUIT) ||
+                string.IsNullOrWhiteSpace(ClienteActual.Telefono) ||
+                string.IsNullOrWhiteSpace(ClienteActual.Email))
             {
                 MessageBox.Show("Todos los campos son obligatorios. Por favor, complete la información faltante.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                return; // Corta la ejecución aquí mismo.
             }
 
-            //  Validar que el CUIT contenga exactamente 11 dígitos numéricos (ignorando guiones).
-            string cuitLimpio = Cuit.Replace("-", "").Trim();
+            // Extraemos la entidad pura (sin código de UI) para mandarla a la Capa de Negocios.
+            Cliente entidadParaGuardar = ClienteActual.ObtenerEntidadPura();
+
+            // Validar que el CUIT contenga exactamente 11 dígitos numéricos (ignorando guiones).
+            string cuitLimpio = ClienteActual.CUIT.Replace("-", "").Trim();
             if (cuitLimpio.Length != 11 || !cuitLimpio.All(char.IsDigit))
             {
                 MessageBox.Show("El CUIT ingresado no es válido (debe contener exactamente 11 números).", "Validación de CUIT", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Limpiamos el teléfono de símbolos comunes (+, -, espacios) para contar únicamente los dígitos reales
-            string telefonoLimpio = new string(Telefono.Where(char.IsDigit).ToArray());
+            // Limpiamos el teléfono de símbolos comunes (+, -, espacios) para contar únicamente los dígitos reales.
+            string telefonoLimpio = new string(ClienteActual.Telefono.Where(char.IsDigit).ToArray());
 
             if (telefonoLimpio.Length < 8 || telefonoLimpio.Length > 15)
             {
@@ -106,7 +97,7 @@ namespace TillasDesktop.UI.Modelos
                 return;
             }
 
-            if (Telefono.Trim().Length < 7)
+            if (ClienteActual.Telefono.Trim().Length < 7)
             {
                 MessageBox.Show("El teléfono ingresado es demasiado corto.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -114,35 +105,59 @@ namespace TillasDesktop.UI.Modelos
 
             // Validar el formato del correo electrónico mediante Expresiones Regulares (Regex).
             string patronEmail = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
-            if (!Regex.IsMatch(Email.Trim(), patronEmail))
+            if (!Regex.IsMatch(ClienteActual.Email.Trim(), patronEmail))
             {
                 MessageBox.Show("El formato del correo electrónico no es válido (ejemplo: usuario@dominio.com).", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             // Validar que el nombre y el apellido no tengan números ni símbolos raros.
-            if (!Nombre.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)) ||
-                !Apellido.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
+            if (!ClienteActual.Nombre.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)) ||
+                !ClienteActual.Apellido.All(c => char.IsLetter(c) || char.IsWhiteSpace(c)))
             {
                 MessageBox.Show("El nombre y el apellido no deben contener números ni símbolos.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Si es un cliente nuevo, instanciamos el objeto contenedor. Si estabamos editando, reutilizamos el existente.
-            if (ClienteResultado == null)
+            // Variable de control para saber si la base de datos confirmó la transacción.
+            bool exito = false;
+
+            try
             {
-                ClienteResultado = new ClienteViewModel();
+                // Decidimos si llamamos al servicio de actualización o al de creación según el modo.
+                if (EsModoEdicion)
+                {
+                    exito = _clienteService.ActualizarCliente(entidadParaGuardar);
+                }
+                else
+                {
+                    exito = _clienteService.CrearCliente(entidadParaGuardar);
+
+                    // Si se creó con éxito, la BD asigna un ID autoincremental. Se lo pasamos al envoltorio 
+                    // para que la grilla principal refleje el ID real en lugar de un "0".
+                    if (exito) ClienteActual.ID = entidadParaGuardar.ID;
+                }
+
+                // Si todo salió bien, informamos al usuario, actualizamos la tabla principal y cerramos el formulario.
+                if (exito)
+                {
+                    MessageBox.Show(EsModoEdicion ? "Cliente actualizado correctamente." : "Cliente creado correctamente.",
+                                    "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    OnClienteGuardado?.Invoke(); // Avisa a la grilla principal que recargue
+                    CerrarVentana?.Invoke();     // Cierra este formulario
+                }
+                else
+                {
+                    // Solo por precaución, si llegara a dar false pero no se lanza excepción
+                    MessageBox.Show("No se pudo completar la operación en la base de datos.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
-
-            // Volcamos los datos validados al resultado final con los espacios limpiados.
-            ClienteResultado.Nombre = Nombre.Trim();
-            ClienteResultado.Apellido = Apellido.Trim();
-            ClienteResultado.CUIT = Cuit.Trim();
-            ClienteResultado.Telefono = Telefono.Trim();
-            ClienteResultado.Email = Email.Trim();
-
-            // Damos la orden de cerrar la ventana indicando que la operación fue exitosa (true).
-            CerrarVentanaAccion?.Invoke(true);
+            catch (Exception ex)
+            {
+                // Atrapamos cualquier error inesperado de red o de la capa de datos y lo mostramos claramente.
+                MessageBox.Show(ex.Message, "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
     }
 }

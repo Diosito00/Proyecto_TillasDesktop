@@ -10,11 +10,6 @@
              d:DesignHeight="450" d:DesignWidth="800" Background="#F0F4F8">
     <!-- Color de fondo general para toda la vista -->
 
-
-    <!-- Asignamos el ViewModel como DataContext de la vista -->
-    <UserControl.DataContext>
-        <vm:ListadoClientesViewModel/>
-    </UserControl.DataContext>
     
     <!-- Grid principal que organiza los elementos en filas con un margen de 20 píxeles alrededor. -->
     <Grid Margin="20">
@@ -54,7 +49,7 @@
                  SelectedItem="{Binding ClienteSeleccionado}">
                 <DataGrid.Columns>
                     <!-- Columna que muestra el ID único del cliente. -->
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding ID}" Width="50"/>
 
                     <!-- Columna que muestra el Nombre; el ancho '*' hace que ocupe el espacio flexible restante. -->
                     <DataGridTextColumn Header="NOMBRE" Binding="{Binding Nombre}" Width="*"/>
