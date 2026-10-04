@@ -39,7 +39,7 @@ namespace TillasDesktop.UI.Modelos
         }
 
         // Propiedad bindeada al campo de talle en la pantalla.
-        public decimal Talle
+        public int Talle
         {
             get => _movimiento.Talle;
             set { _movimiento.Talle = value; OnPropertyChanged(); }

@@ -16,6 +16,8 @@ namespace TillasDesktop.UI.Modelos
         // Instancia del servicio que maneja la lógica de negocio y las transacciones de venta.
         private readonly VentasService _ventasService;
 
+        private readonly int _idUsuarioActual = Proyecto_TillasDesktop.App.IdUsuarioActual;
+
         // Colección observable del catálogo izquierdo: muestra todos los talles de zapatillas disponibles para vender.
         public ObservableCollection<ProductoDisponibleViewModel> ListaCatalogo { get; set; }
 
@@ -24,6 +26,9 @@ namespace TillasDesktop.UI.Modelos
 
         // Lista de clientes disponibles para asociar a la factura.
         public ObservableCollection<string> ClientesTotales { get; set; }
+
+        // Colección con las formas de pago habilitadas en el sistema.
+        public ObservableCollection<string> MetodosPago { get; set; }
 
         // Vista especial de colección para filtrar el catálogo en tiempo real sin romper la lista original.
         public ICollectionView VistaFiltroCatalogo { get; set; }
@@ -65,9 +70,6 @@ namespace TillasDesktop.UI.Modelos
             set { _metodoPagoSeleccionado = value; OnPropertyChanged(); }
         }
 
-        // Colección con las formas de pago habilitadas en el sistema.
-        public ObservableCollection<string> MetodosPago { get; set; }
-
         // Monto monetario total a cobrar por todos los productos del carrito.
         private decimal _totalCobrar;
         public decimal TotalCobrar
@@ -86,6 +88,9 @@ namespace TillasDesktop.UI.Modelos
         public PuntoVentaViewModel()
         {
             _ventasService = new VentasService();
+
+            // Liberamos reservas colgadas al abrir la caja.
+            _ventasService.LimpiarReservasPendientes();
 
             FechaActual = DateTime.Now.ToString("dd/MM/yyyy");
 
@@ -112,7 +117,7 @@ namespace TillasDesktop.UI.Modelos
             QuitarDelCarritoCommand = new RelayCommand(QuitarDelCarrito);
             CobrarCommand = new RelayCommand(ConfirmarCobro);
 
-            CargarDatosDePrueba();
+            CargarCatalogo();
         }
 
         // Limpia el cuadro de texto de búsqueda para volver a mostrar todo el catálogo completo.
@@ -139,32 +144,41 @@ namespace TillasDesktop.UI.Modelos
             return false;
         }
 
-        
 
-        // Evento disparado al hacer doble clic en una zapatilla del catálogo o al presionar su botón "+".
+
+        // Evento disparado al presionar el botón "+"
         private void AgregarAlCarrito(object parametro)
         {
-            // El parámetro trae la zapatilla seleccionada desde el XAML.
+            // Verificamos que el parámetro recibido sea realmente un producto de la lista visual
             if (parametro is ProductoDisponibleViewModel productoCatalogo)
             {
-                // Control de seguridad para evitar vender más de lo que hay en stock físico.
-                if (productoCatalogo.Stock_Actual <= 0)
+                // Intentamos bloquear 1 unidad física en SQL Server ANTES de sumarla a la pantalla.
+                // Le pasamos el ID del cajero, el ID del talle físico (ProductoID) y la cantidad requerida (1).
+                bool reservaExitosa = _ventasService.AgregarAlCarrito(_idUsuarioActual, productoCatalogo.ProductoID, 1);
+
+                // Si SQL rechaza la reserva (ej: alguien más lo reservó en este milisegundo o no hay stock real)
+                if (!reservaExitosa)
                 {
-                    MessageBox.Show("No hay stock suficiente de este talle.", "Sin Stock", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
+                    MessageBox.Show("Stock insuficiente o producto retenido por otro cajero en este momento.", "Sin Stock", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return; // Cortamos la ejecución, el carrito visual queda intacto.
                 }
 
-                // Verificamos si el cliente ya había agregado un par exactamente igual (mismo modelo y talle) al carrito.
+                // Si la base de datos nos da luz verde, procedemos a actualizar el carrito visual.
+                // Buscamos si el cliente ya tenía este mismo producto y talle en su lista.
                 var itemEnCarrito = Carrito.FirstOrDefault(c => c.ProductoID == productoCatalogo.ProductoID && c.Talle == productoCatalogo.Talle);
 
                 if (itemEnCarrito != null)
                 {
-                    // Si ya estaba en el carrito, solo aumenta la cantidad del renglón (Evita líneas duplicadas en el ticket).
+                    // Si ya existía, simplemente le sumamos 1 a la cantidad que ya iba a llevar
                     itemEnCarrito.Cantidad++;
+
+                    // Reemplazamos la fila en su misma posición para forzar a la grilla a repintar el número actualizado
+                    int index = Carrito.IndexOf(itemEnCarrito);
+                    Carrito[index] = itemEnCarrito;
                 }
                 else
                 {
-                    // Si es nuevo, lo agrega como renglón independiente.
+                    // Si es un producto completamente nuevo en el carrito, creamos un renglón desde cero
                     Carrito.Add(new LineaCarritoViewModel
                     {
                         ProductoID = productoCatalogo.ProductoID,
@@ -175,10 +189,10 @@ namespace TillasDesktop.UI.Modelos
                     });
                 }
 
-                // Descuenta "visualmente" el stock del catálogo para que el vendedor sepa cuántos quedan.
+                // Descontamos "visualmente" el stock del catálogo izquierdo para que el vendedor sepa que queda 1 menos
                 productoCatalogo.Stock_Actual--;
 
-                // Recalculamos el total a cobrar de la venta.
+                // Finalmente, recalculamos el total monetario a cobrar
                 RecalcularTotal();
             }
         }
@@ -186,27 +200,42 @@ namespace TillasDesktop.UI.Modelos
         // Evento disparado al presionar el botón "-" en el renglón del carrito.
         private void QuitarDelCarrito(object parametro)
         {
+            // Verificamos que el parámetro recibido sea un renglón válido de nuestro carrito
             if (parametro is LineaCarritoViewModel itemCarrito)
             {
-                // Busca el producto original en el catálogo de la izquierda.
-                var productoCatalogo = ListaCatalogo.FirstOrDefault(p => p.ProductoID == itemCarrito.ProductoID && p.Talle == itemCarrito.Talle);
+                // Le pedimos a SQL Server que devuelva 1 unidad a la estantería virtual
+                bool liberado = _ventasService.QuitarDelCarrito(_idUsuarioActual, itemCarrito.ProductoID, 1);
 
-                if (productoCatalogo != null)
+                // Solo si la base de datos confirmó la liberación sin errores, actualizamos la pantalla
+                if (liberado)
                 {
-                    // Le devuelve "visualmente" el stock disponible.
-                    productoCatalogo.Stock_Actual++;
+                    // Buscamos el producto original en el catálogo de la izquierda para devolverle su número
+                    var productoCatalogo = ListaCatalogo.FirstOrDefault(p => p.ProductoID == itemCarrito.ProductoID && p.Talle == itemCarrito.Talle);
+
+                    if (productoCatalogo != null)
+                    {
+                        // Le devolvemos "visualmente" el stock que el cliente acaba de soltar
+                        productoCatalogo.Stock_Actual++;
+                    }
+
+                    // Restamos 1 a la cantidad que el cliente llevaba en este renglón
+                    itemCarrito.Cantidad--;
+
+                    if (itemCarrito.Cantidad == 0)
+                    {
+                        // Si la cantidad llega a 0, significa que el cliente ya no lleva este talle en absoluto, borramos la fila.
+                        Carrito.Remove(itemCarrito);
+                    }
+                    else
+                    {
+                        // Si aún quedan unidades (ej: llevaba 2 pares iguales y ahora lleva 1), forzamos a la grilla a repintar.
+                        int index = Carrito.IndexOf(itemCarrito);
+                        Carrito[index] = itemCarrito;
+                    }
+
+                    // Recalculamos el monto final con la nueva cantidad de productos
+                    RecalcularTotal();
                 }
-
-                // Resta la cantidad que el cliente iba a llevarse.
-                itemCarrito.Cantidad--;
-
-                if (itemCarrito.Cantidad == 0)
-                {
-                    // Si la cantidad llega a 0, destruye el renglón del carrito.
-                    Carrito.Remove(itemCarrito);
-                }
-
-                RecalcularTotal();
             }
         }
 
@@ -225,47 +254,62 @@ namespace TillasDesktop.UI.Modelos
             TotalCobrar = _ventasService.CalcularTotalVenta(detallesVenta);
         }
 
-
-        // Valida los datos y procesa el cobro y registro definitivo de la venta
+        // Valida los datos finales y procesa el cobro y registro definitivo de la venta en la base de datos
         private void ConfirmarCobro(object parametro)
         {
-            // Validaciones preventivas para asegurar que la venta esté completa y correcta.
+            // Evita enviar peticiones inútiles a la base de datos si falta información básica.
             if (!Carrito.Any())
             {
                 MessageBox.Show("El carrito está vacío. Agrega productos antes de cobrar.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(ClienteSeleccionado))
+            if (string.IsNullOrWhiteSpace(ClienteSeleccionado) || string.IsNullOrWhiteSpace(MetodoPagoSeleccionado))
             {
-                MessageBox.Show("Debes seleccionar un cliente válido para la facturación.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Selecciona un cliente y un método de pago válidos.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(MetodoPagoSeleccionado))
+            // Traducimos los datos visuales de la pantalla a las "Entidades" que entiende la Capa de Negocios y Datos.
+            var nuevaVenta = new Venta
             {
-                MessageBox.Show("Por favor, selecciona un método de pago antes de confirmar el cobro.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+                Fecha_Hora = DateTime.Now,
+                Usuario_ID = _idUsuarioActual, // El cajero que está facturando
+                Cliente_ID = 1, // MOCK
+                Total = TotalCobrar
+            };
 
-            // Convertimos los ítems del carrito a una lista de entidades puras para enviarlas a la base de datos.
+            var nuevoPago = new Pago
+            {
+                Tipo_Pago_ID = 1, // MOCK
+                Monto = TotalCobrar,
+                Fecha_Pago = DateTime.Now,
+                Activo = true
+            };
+
+            // Convertimos nuestra lista visual 'LineaCarritoViewModel' a una lista de 'DetalleVenta'
             var detallesVenta = Carrito.Select(c => new DetalleVenta
             {
                 Producto_Talle_ID = c.ProductoID,
                 Cantidad = c.Cantidad,
-                Precio_Unitario = c.PrecioUnitario
+                Precio_Unitario = c.PrecioUnitario,
+                Subtotal = c.Cantidad * c.PrecioUnitario // Calculamos el subtotal que guardará el registro
             }).ToList();
 
-            //  Ejecuta la transacción (que debe restar los stocks físicos reales y generar la factura (en teoria)).
-            bool exito = _ventasService.RegistrarVenta(detallesVenta, out string mensaje);
+            // EJECUCIÓN DE LA TRANSACCIÓN
+            // Delegamos todo el paquete a la Capa de Negocios. El repositorio abrirá una SqlTransaction que:
+            // - Guardará el Pago
+            // - Guardará la Venta
+            // - Guardará los Detalles
+            // - Descontará el stock REAL y eliminará las reservas temporales
+            bool exito = _ventasService.RegistrarVenta(nuevaVenta, nuevoPago, detallesVenta, out string mensaje);
 
-            // Resolución según el resultado de la operación.
             if (exito)
             {
-                MessageBox.Show($"Cobro por {TotalCobrar:C} procesado con éxito.\nCliente: {ClienteSeleccionado}\nPago: {MetodoPagoSeleccionado}\n\n{mensaje}",
+                MessageBox.Show($"Cobro por {TotalCobrar:C} procesado con éxito.\n\n{mensaje}",
                                 "Venta Registrada", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                // Limpiamos el carrito y reseteamos los campos para dejar la pantalla lista para la siguiente venta.
+                // Si la base de datos confirmó todo, limpiamos la pantalla para el siguiente cliente
                 Carrito.Clear();
                 TotalCobrar = 0;
                 BusquedaRapida = string.Empty;
@@ -274,19 +318,36 @@ namespace TillasDesktop.UI.Modelos
             }
             else
             {
+                // Si falló (ej. se cortó la conexión en medio del cobro), mostramos el error y el carrito queda intacto
                 MessageBox.Show(mensaje, "Error al registrar la venta", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void CargarDatosDePrueba()
+        private void CargarCatalogo()
         {
-            // Talles iniciales para el Air Force 1 (ID = 1): 39 (Stock: 20) y 42 (Stock: 25)
-            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 1, Codigo_Modelo = "NK-AF1-01", Nombre = "Nike Air Force 1", NombreMarca = "Nike", Talle = 39, Stock_Actual = 20, Precio_Venta = 125000 });
-            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 1, Codigo_Modelo = "NK-AF1-01", Nombre = "Nike Air Force 1", NombreMarca = "Nike", Talle = 42, Stock_Actual = 25, Precio_Venta = 125000 });
+            ListaCatalogo.Clear();
 
-            // Talles iniciales para el Samba OG (ID = 2): 35 (Stock: 10) y 40 (Stock: 15)
-            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 2, Codigo_Modelo = "AD-SM-02", Nombre = "Adidas Samba OG", NombreMarca = "Adidas", Talle = 35, Stock_Actual = 10, Precio_Venta = 110000 });
-            ListaCatalogo.Add(new ProductoDisponibleViewModel { ProductoID = 2, Codigo_Modelo = "AD-SM-02", Nombre = "Adidas Samba OG", NombreMarca = "Adidas", Talle = 40, Stock_Actual = 15, Precio_Venta = 110000 });
+            // 1. Pedimos el catálogo fresco a la base de datos
+            var productosDb = _ventasService.ObtenerCatalogoPuntoVenta();
+
+            // 2. Transformamos la entidad pura al ViewModel que entiende el XAML de tu pantalla
+            foreach (var p in productosDb)
+            {
+                ListaCatalogo.Add(new ProductoDisponibleViewModel
+                {
+                    ProductoID = p.ProductoTalle_ID, // Es crítico que este sea el ID de ProductoTalles
+                    Codigo_Modelo = p.Codigo_Modelo,
+                    Nombre = p.Nombre,
+                    NombreMarca = p.NombreMarca,
+                    NombreCategoria = p.NombreCategoria,
+                    Talle = p.Talle,
+                    Stock_Actual = p.Stock_Disponible, // Asignamos el stock ya restado con las reservas
+                    Precio_Venta = p.Precio_Venta
+                });
+            }
+
+            // Refrescamos el filtro visual por si había texto escrito en el buscador
+            VistaFiltroCatalogo?.Refresh();
         }
     }
 }

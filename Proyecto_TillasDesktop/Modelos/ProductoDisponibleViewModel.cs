@@ -9,6 +9,7 @@
         public string Codigo_Modelo { get; set; }
         public string Nombre { get; set; }
         public string NombreMarca { get; set; }
+        public string NombreCategoria { get; set; }
         public decimal Precio_Venta { get; set; }
 
         // El talle específico de este artículo (ej: 42). En el catálogo de ventas, 

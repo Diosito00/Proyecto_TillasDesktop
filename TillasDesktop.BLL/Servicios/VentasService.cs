@@ -1,54 +1,96 @@
-﻿using TillasDesktop.Entities.Inventario;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using TillasDesktop.DAL.Repositorios;
 using TillasDesktop.Entities.Facturacion;
 
 namespace TillasDesktop.BLL.Services
 {
     public class VentasService
     {
-        // Catálogo temporal simulado para las pruebas iniciales del Punto de Venta.
-        private readonly List<Producto> _catalogoPrueba;
+        // Instancias de la capa de acceso a datos (DAL)
+        private readonly VentaRepository _ventaRepo;
 
         public VentasService()
         {
-            _catalogoPrueba = new List<Producto>
-            {
-                new Producto { Codigo_Modelo = "779001", Nombre = "Air Force 1 - Talle 42", Precio_Venta = 125000 },
-                new Producto { Codigo_Modelo = "779002", Nombre = "Samba OG - Talle 39", Precio_Venta = 110000 }
-            };
+            _ventaRepo = new VentaRepository();
         }
 
-        // Busca y devuelve un producto del catálogo interno según su código de modelo.
-        public Producto ObtenerProductoPorCodigo(string codigo)
+        public List<ProductoCatalogoDTO> ObtenerCatalogoPuntoVenta()
         {
-            if (string.IsNullOrWhiteSpace(codigo)) return null;
-
-            // LINQ: FirstOrDefault busca el primer elemento que coincide con la condición.
-            // Si no lo encuentra, devuelve null de forma segura en lugar de lanzar una excepción.
-            return _catalogoPrueba.FirstOrDefault(p => p.Codigo_Modelo == codigo);
+            try
+            {
+                return _ventaRepo.ObtenerCatalogoCaja();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Falla en la BD: " + ex.Message);
+                // Si hay error de conexión, devolvemos una lista vacía para que la caja no explote
+                return new List<ProductoCatalogoDTO>();
+            }
         }
 
-        // Recibe IEnumerable en lugar de List u ObservableCollection. Esto hace que el método sea mucho más 
-        // versátil, ya que puede aceptar cualquier tipo de colección que se pueda iterar.
+        // === GESTIÓN DE RESERVAS (CARRITO) ===
+
+        // Limpia cualquier reserva huérfana de sesiones anteriores o cortes de luz.
+        public void LimpiarReservasPendientes()
+        {
+            _ventaRepo.EjecutarLimpieza();
+        }
+
+        // Solicita a la base de datos bloquear el stock para este carrito.
+        public bool AgregarAlCarrito(int idUsuario, int idProductoTalle, int cantidad)
+        {
+            if (cantidad <= 0 || idProductoTalle <= 0) return false;
+
+            // Tiempo de validez de la reserva por defecto: 30 minutos
+            return _ventaRepo.ReservarProducto(idUsuario, idProductoTalle, cantidad, 30);
+        }
+
+        // Libera la reserva si el cliente se arrepiente y quita el producto.
+        public bool QuitarDelCarrito(int idUsuario, int idProductoTalle, int cantidad)
+        {
+            if (cantidad <= 0 || idProductoTalle <= 0) return false;
+
+            return _ventaRepo.LiberarReserva(idUsuario, idProductoTalle, cantidad);
+        }
+
+
+        // === GESTIÓN DE LA VENTA FINAL ===
+
+        // Método utilitario que mantiene su versatilidad al usar IEnumerable y LINQ.
         public decimal CalcularTotalVenta(IEnumerable<DetalleVenta> detalles)
         {
-            // LINQ: .Sum() recorre cada 'item' del carrito, multiplica el precio por la cantidad, 
-            // y suma todos los resultados en una sola línea de código.
+            if (detalles == null) return 0;
             return detalles.Sum(item => item.Precio_Unitario * item.Cantidad);
         }
 
-        // Valida que el carrito tenga elementos antes de procesar el cobro y registrar la venta.
-        public bool RegistrarVenta(IEnumerable<DetalleVenta> carrito, out string mensajeRespuesta)
+        // Valida las reglas de negocio antes de enviar la orden de cobro a la base de datos.
+        public bool RegistrarVenta(Venta nuevaVenta, Pago nuevoPago, List<DetalleVenta> carrito, out string mensajeRespuesta)
         {
-            // LINQ: .Any() verifica si la colección tiene al menos 1 elemento. 
-            // Al negarlo (!), verificamos rápidamente si el carrito está vacío.
-            if (!carrito.Any())
+            // Regla de Negocio 1: El carrito no puede estar vacío.
+            if (carrito == null || !carrito.Any())
             {
-                mensajeRespuesta = "No hay productos para cobrar.";
+                mensajeRespuesta = "No hay productos en el carrito para cobrar.";
                 return false;
             }
 
-            mensajeRespuesta = "Venta registrada exitosamente en el sistema.";
-            return true;
+            // Regla de Negocio 2: Integridad financiera.
+            if (nuevaVenta.Total <= 0 || nuevoPago.Monto <= 0)
+            {
+                mensajeRespuesta = "El monto total de la venta debe ser mayor a cero.";
+                return false;
+            }
+
+            // Regla de Negocio 3: Consistencia de datos del usuario y cliente.
+            if (nuevaVenta.Usuario_ID <= 0 || nuevaVenta.Cliente_ID <= 0)
+            {
+                mensajeRespuesta = "Faltan datos obligatorios del cajero o del cliente.";
+                return false;
+            }
+
+            // Si pasa las validaciones, delegamos la transacción a la capa de datos.
+            return _ventaRepo.RegistrarVenta(nuevaVenta, nuevoPago, carrito, out mensajeRespuesta);
         }
     }
 }
