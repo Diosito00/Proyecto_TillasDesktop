@@ -63,21 +63,9 @@ namespace TillasDesktop.BLL
             return true;
         }
 
-        // Método genérico para guardar (crear si es nuevo o actualizar si ya existe), conservando la compatibilidad previa.
-        public void Guardar(Cliente cliente)
-        {
-            if (cliente.ID == 0)
-            {
-                CrearCliente(cliente);
-            }
-            else
-            {
-                ActualizarCliente(cliente);
-            }
-        }
-
+       
         // Valida que el ID sea válido antes de gestionar la baja de un cliente.
-        public bool EliminarCliente(int idCliente)
+        public bool Eliminar(int idCliente)
         {
             if (idCliente <= 0)
             {
@@ -89,10 +77,5 @@ namespace TillasDesktop.BLL
             return true;
         }
 
-        // Sobrecarga de compatibilidad para el método eliminar anterior.
-        public void Eliminar(int id)
-        {
-            EliminarCliente(id);
-        }
     }
 }

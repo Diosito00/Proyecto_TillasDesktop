@@ -20,7 +20,7 @@ namespace TillasDesktop.DAL.Repositorios
             // El bloque 'using' asegura que la conexión se cierre y libere recursos automáticamente al terminar.
             using (var conexion = ObtenerConexion())
             {
-                string query = "SELECT ID, Apellido, Nombre, CUIT, Telefono, Email FROM Clientes";
+                string query = "SELECT * FROM Clientes";
 
                 // Abre físicamente el canal de comunicación con el servidor de base de datos.
                 conexion.Open();
@@ -38,12 +38,23 @@ namespace TillasDesktop.DAL.Repositorios
                             // Creamos una nueva instancia de la entidad Cliente para mapear los datos de la fila actual de forma segura.
                             var cliente = new Cliente
                             {
-                                ID = lector.GetInt32(lector.GetOrdinal("ID")),
-                                Apellido = lector.IsDBNull(lector.GetOrdinal("Apellido")) ? string.Empty : lector.GetString(lector.GetOrdinal("Apellido")),
-                                Nombre = lector.IsDBNull(lector.GetOrdinal("Nombre")) ? string.Empty : lector.GetString(lector.GetOrdinal("Nombre")),
-                                CUIT = lector.IsDBNull(lector.GetOrdinal("CUIT")) ? string.Empty : lector.GetString(lector.GetOrdinal("CUIT")),
-                                Telefono = lector.IsDBNull(lector.GetOrdinal("Telefono")) ? string.Empty : lector.GetString(lector.GetOrdinal("Telefono")),
-                                Email = lector.IsDBNull(lector.GetOrdinal("Email")) ? string.Empty : lector.GetString(lector.GetOrdinal("Email"))
+                                // Leemos la columna 0 (ID) asegurando que sea un entero.
+                                ID = lector.GetInt32(0),
+
+                                // Verificamos si la columna 1 (Apellido) es nula en la BD; si lo es, asignamos un string vacío, de lo contrario leemos el texto.
+                                Apellido = lector.IsDBNull(1) ? string.Empty : lector.GetString(1),
+
+                                // Verificamos si la columna 2 (Nombre) es nula; si es así, asignamos un string vacío.
+                                Nombre = lector.IsDBNull(2) ? string.Empty : lector.GetString(2),
+
+                                // Verificamos y leemos la columna 3 (CUIT).
+                                CUIT = lector.IsDBNull(3) ? string.Empty : lector.GetString(3),
+
+                                // Verificamos y leemos la columna 4 (Telefono).
+                                Telefono = lector.IsDBNull(4) ? string.Empty : lector.GetString(4),
+
+                                // Verificamos y leemos la columna 5 (Email).
+                                Email = lector.IsDBNull(5) ? string.Empty : lector.GetString(5)
                             };
 
                             // Agrega el cliente ya armado a nuestra lista de resultados.
@@ -60,14 +71,12 @@ namespace TillasDesktop.DAL.Repositorios
         // OBTENER POR ID
         public Cliente ObtenerPorId(int id)
         {
-            Cliente cliente = null;
-            string query = "SELECT ID, Apellido, Nombre, CUIT, Telefono, Email FROM Clientes WHERE ID = @ID";
+            Cliente cliente;
+            string query = "SELECT * FROM Clientes WHERE ID = @ID";
 
-            try
+            using (var con = ObtenerConexion())
+            using (var cmd = new SqlCommand(query, con))
             {
-                using (var con = ObtenerConexion())
-                using (var cmd = new SqlCommand(query, con))
-                {
                     cmd.Parameters.AddWithValue("@ID", id);
                     con.Open();
 
@@ -77,22 +86,30 @@ namespace TillasDesktop.DAL.Repositorios
                         {
                             cliente = new Cliente
                             {
-                                ID = lector.GetInt32(lector.GetOrdinal("ID")),
-                                Apellido = lector.IsDBNull(lector.GetOrdinal("Apellido")) ? string.Empty : lector.GetString(lector.GetOrdinal("Apellido")),
-                                Nombre = lector.IsDBNull(lector.GetOrdinal("Nombre")) ? string.Empty : lector.GetString(lector.GetOrdinal("Nombre")),
-                                CUIT = lector.IsDBNull(lector.GetOrdinal("CUIT")) ? string.Empty : lector.GetString(lector.GetOrdinal("CUIT")),
-                                Telefono = lector.IsDBNull(lector.GetOrdinal("Telefono")) ? string.Empty : lector.GetString(lector.GetOrdinal("Telefono")),
-                                Email = lector.IsDBNull(lector.GetOrdinal("Email")) ? string.Empty : lector.GetString(lector.GetOrdinal("Email"))
+                                // Leemos la columna 0 (ID) asegurando que sea un entero.
+                                ID = lector.GetInt32(0),
+
+                                // Verificamos si la columna 1 (Apellido) es nula en la BD; si lo es, asignamos un string vacío, de lo contrario leemos el texto.
+                                Apellido = lector.IsDBNull(1) ? string.Empty : lector.GetString(1),
+
+                                // Verificamos si la columna 2 (Nombre) es nula; si es así, asignamos un string vacío.
+                                Nombre = lector.IsDBNull(2) ? string.Empty : lector.GetString(2),
+
+                                // Verificamos y leemos la columna 3 (CUIT).
+                                CUIT = lector.IsDBNull(3) ? string.Empty : lector.GetString(3),
+
+                                // Verificamos y leemos la columna 4 (Telefono).
+                                Telefono = lector.IsDBNull(4) ? string.Empty : lector.GetString(4),
+
+                                // Verificamos y leemos la columna 5 (Email).
+                                Email = lector.IsDBNull(5) ? string.Empty : lector.GetString(5)
                             };
                             return cliente;
                         }
                     }
-                }
+                
             }
-            catch (Exception ex)
-            {
-                throw new Exception("Error al obtener el cliente por ID: " + ex.Message);
-            }
+           
 
             return null; // Retorna null si no se encuentra ningún registro con ese ID.
         }
@@ -114,13 +131,13 @@ namespace TillasDesktop.DAL.Repositorios
                     // Prepara el comando de SQL con la consulta y la conexión.
                     using (var comando = new SqlCommand(query, conexion))
                     {
-                        // Asigna los valores del objeto recibido a cada parámetro SQL, validando nulos con DBNull.
+                        // Asigna los valores del objeto recibido a cada parámetro SQL.
                         // Esto blinda la aplicación previniendo ataques de Inyección SQL.
-                        comando.Parameters.AddWithValue("@Apellido", nuevoCliente.Apellido ?? (object)DBNull.Value);
-                        comando.Parameters.AddWithValue("@Nombre", nuevoCliente.Nombre ?? (object)DBNull.Value);
-                        comando.Parameters.AddWithValue("@CUIT", nuevoCliente.CUIT ?? (object)DBNull.Value);
-                        comando.Parameters.AddWithValue("@Telefono", nuevoCliente.Telefono ?? (object)DBNull.Value);
-                        comando.Parameters.AddWithValue("@Email", nuevoCliente.Email ?? (object)DBNull.Value);
+                        comando.Parameters.AddWithValue("@Apellido", nuevoCliente.Apellido);
+                        comando.Parameters.AddWithValue("@Nombre", nuevoCliente.Nombre);
+                        comando.Parameters.AddWithValue("@CUIT", nuevoCliente.CUIT);
+                        comando.Parameters.AddWithValue("@Telefono", nuevoCliente.Telefono);
+                        comando.Parameters.AddWithValue("@Email", nuevoCliente.Email);
 
                         // Abre el canal de comunicación con el servidor.
                         conexion.Open();
@@ -188,11 +205,11 @@ namespace TillasDesktop.DAL.Repositorios
                     {
                         // Asigna los valores actualizados y el identificador único a los parámetros protegidos.
                         comando.Parameters.AddWithValue("@ID", clienteModificado.ID);
-                        comando.Parameters.AddWithValue("@Apellido", clienteModificado.Apellido ?? (object)DBNull.Value);
-                        comando.Parameters.AddWithValue("@Nombre", clienteModificado.Nombre ?? (object)DBNull.Value);
-                        comando.Parameters.AddWithValue("@CUIT", clienteModificado.CUIT ?? (object)DBNull.Value);
-                        comando.Parameters.AddWithValue("@Telefono", clienteModificado.Telefono ?? (object)DBNull.Value);
-                        comando.Parameters.AddWithValue("@Email", clienteModificado.Email ?? (object)DBNull.Value);
+                        comando.Parameters.AddWithValue("@Apellido", clienteModificado.Apellido);
+                        comando.Parameters.AddWithValue("@Nombre", clienteModificado.Nombre);
+                        comando.Parameters.AddWithValue("@CUIT", clienteModificado.CUIT);
+                        comando.Parameters.AddWithValue("@Telefono", clienteModificado.Telefono);
+                        comando.Parameters.AddWithValue("@Email", clienteModificado.Email);
 
                         // Abre la conexión con la base de datos.
                         conexion.Open();
