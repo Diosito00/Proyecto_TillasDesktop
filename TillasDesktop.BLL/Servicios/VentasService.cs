@@ -30,6 +30,17 @@ namespace TillasDesktop.BLL.Services
             }
         }
 
+        public List<TipoPago> ObtenerTiposPago()
+        {
+            return _ventaRepo.ObtenerTiposPago();
+        }
+
+        public List<ItemCarritoDTO> RecuperarCarritoAbierto(int idUsuario)
+        {
+            if (idUsuario <= 0) return new List<ItemCarritoDTO>();
+            return _ventaRepo.ObtenerReservasUsuario(idUsuario);
+        }
+
         // === GESTIÓN DE RESERVAS (CARRITO) ===
 
         // Limpia cualquier reserva huérfana de sesiones anteriores o cortes de luz.
@@ -43,8 +54,8 @@ namespace TillasDesktop.BLL.Services
         {
             if (cantidad <= 0 || idProductoTalle <= 0) return false;
 
-            // Tiempo de validez de la reserva por defecto: 30 minutos
-            return _ventaRepo.ReservarProducto(idUsuario, idProductoTalle, cantidad, 30);
+            // Tiempo de validez de la reserva por defecto: 10 minutos
+            return _ventaRepo.ReservarProducto(idUsuario, idProductoTalle, cantidad, 10);
         }
 
         // Libera la reserva si el cliente se arrepiente y quita el producto.

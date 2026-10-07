@@ -61,13 +61,13 @@
                     <DataGrid Grid.Row="1" ItemsSource="{Binding VistaFiltroCatalogo}" 
                           Style="{StaticResource DataGridTillas}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="MODELO" Binding="{Binding Nombre}" Width="2*"/>
-                            <DataGridTextColumn Header="MARCA" Binding="{Binding NombreMarca}" Width="*"/>
-                            <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="*"/>
-                            <DataGridTextColumn Header="STOCK" Binding="{Binding Stock_Actual}" Width="*"/>
-                            <DataGridTextColumn Header="PRECIO" Binding="{Binding Precio_Venta, StringFormat=C}" Width="*"/>
+                            <DataGridTextColumn Header="MODELO" Binding="{Binding Nombre}" Width="Auto"/>
+                            <DataGridTextColumn Header="MARCA" Binding="{Binding NombreMarca}" Width="Auto"/>
+                            <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="Auto"/>
+                            <DataGridTextColumn Header="STOCK" Binding="{Binding Stock_Actual}" Width="Auto"/>
+                            <DataGridTextColumn Header="PRECIO" Binding="{Binding Precio_Venta, StringFormat=C}" Width="Auto"/>
 
-                            <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
+                            <DataGridTemplateColumn Header="ACCIONES" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Button Content="➕" ToolTip="Agregar al carrito"
@@ -99,18 +99,24 @@
                           Style="{StaticResource DataGridTillas}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="CANT" Binding="{Binding Cantidad}" Width="Auto"/>
-                            <DataGridTextColumn Header="MODELO" Binding="{Binding Nombre}" Width="2*"/>
-                            <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="*"/>
-                            <DataGridTextColumn Header="P. UNIT" Binding="{Binding PrecioUnitario, StringFormat=C}" Width="*"/>
-                            <DataGridTextColumn Header="SUBTOTAL" Binding="{Binding Subtotal, StringFormat=C}" Width="*"/>
+                            <DataGridTextColumn Header="MODELO" Binding="{Binding Nombre}" Width="Auto"/>
+                            <DataGridTextColumn Header="TALLE" Binding="{Binding Talle}" Width="Auto"/>
+                            <DataGridTextColumn Header="P. UNIT" Binding="{Binding PrecioUnitario, StringFormat=C}" Width="Auto"/>
+                            <DataGridTextColumn Header="SUBTOTAL" Binding="{Binding Subtotal, StringFormat=C}" Width="Auto"/>
 
-                            <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
+                            <DataGridTemplateColumn Header="ACCIONES" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Button Content="❌" ToolTip="Quitar del carrito"
-                                            Command="{Binding DataContext.QuitarDelCarritoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                            CommandParameter="{Binding}"
-                                            Background="Transparent" BorderThickness="0" Cursor="Hand" Foreground="{StaticResource BrushRojo}" FontSize="12"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <Button Content="❌" ToolTip="Quitar del carrito"
+                                                    Command="{Binding DataContext.QuitarDelCarritoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}" Margin="0,0,10,0"
+                                                    Background="Transparent" BorderThickness="0" Cursor="Hand" Foreground="{StaticResource BrushRojo}" FontSize="12"/>
+
+                                            <Button Content="✏️" ToolTip="Editar Cantidad"
+                                                    Command="{Binding DataContext.EditarCantidadCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Cursor="Hand"/>
+                                        </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -154,15 +160,17 @@
                         <StackPanel Margin="0,0,20,0">
                             <TextBlock Text="Cliente" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
                             <ComboBox Width="200" 
-                              ItemsSource="{Binding ClientesTotales}" 
-                              SelectedItem="{Binding ClienteSeleccionado, UpdateSourceTrigger=PropertyChanged}"/>
+                                      ItemsSource="{Binding ClientesTotales}" 
+                                      SelectedItem="{Binding ClienteSeleccionado, UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMemberPath="NombreCompleto"/>
                         </StackPanel>
 
                         <StackPanel>
                             <TextBlock Text="Método de Pago" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
                             <ComboBox Width="200" 
-                              ItemsSource="{Binding MetodosPago}"
-                              SelectedItem="{Binding MetodoPagoSeleccionado, UpdateSourceTrigger=PropertyChanged}"/>
+                                      ItemsSource="{Binding MetodosPago}"
+                                      SelectedItem="{Binding MetodoPagoSeleccionado, UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMemberPath="Nombre"/>
                         </StackPanel>
                     </StackPanel>
 

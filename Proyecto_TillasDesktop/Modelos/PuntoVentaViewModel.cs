@@ -7,6 +7,8 @@ using System.Windows;
 using System.Windows.Input;
 using TillasDesktop.BLL.Services;
 using TillasDesktop.Entities.Facturacion;
+using TillasDesktop.BLL;
+using TillasDesktop.Entities.Clientes;
 
 namespace TillasDesktop.UI.Modelos
 {
@@ -15,6 +17,7 @@ namespace TillasDesktop.UI.Modelos
     {
         // Instancia del servicio que maneja la lógica de negocio y las transacciones de venta.
         private readonly VentasService _ventasService;
+        private readonly ClienteService _clienteService;
 
         private readonly int _idUsuarioActual = Proyecto_TillasDesktop.App.IdUsuarioActual;
 
@@ -25,10 +28,10 @@ namespace TillasDesktop.UI.Modelos
         public ObservableCollection<LineaCarritoViewModel> Carrito { get; set; }
 
         // Lista de clientes disponibles para asociar a la factura.
-        public ObservableCollection<string> ClientesTotales { get; set; }
+        public ObservableCollection<Cliente> ClientesTotales { get; set; }
 
         // Colección con las formas de pago habilitadas en el sistema.
-        public ObservableCollection<string> MetodosPago { get; set; }
+        public ObservableCollection<TipoPago> MetodosPago { get; set; }
 
         // Vista especial de colección para filtrar el catálogo en tiempo real sin romper la lista original.
         public ICollectionView VistaFiltroCatalogo { get; set; }
@@ -55,16 +58,16 @@ namespace TillasDesktop.UI.Modelos
         public string VendedorActual { get; set; }
 
         // Cliente seleccionado actualmente en el ComboBox de facturación.
-        private string _clienteSeleccionado;
-        public string ClienteSeleccionado
+        private Cliente _clienteSeleccionado;
+        public Cliente ClienteSeleccionado
         {
             get => _clienteSeleccionado;
             set { _clienteSeleccionado = value; OnPropertyChanged(); }
         }
 
         // Método de pago seleccionado actualmente (efectivo, transferencia, tarjeta, etc.).
-        private string _metodoPagoSeleccionado;
-        public string MetodoPagoSeleccionado
+        private TipoPago _metodoPagoSeleccionado;
+        public TipoPago MetodoPagoSeleccionado
         {
             get => _metodoPagoSeleccionado;
             set { _metodoPagoSeleccionado = value; OnPropertyChanged(); }
@@ -83,26 +86,21 @@ namespace TillasDesktop.UI.Modelos
         public ICommand AgregarAlCarritoCommand { get; }
         public ICommand QuitarDelCarritoCommand { get; }
         public ICommand CobrarCommand { get; }
+        public ICommand EditarCantidadCommand { get; }
 
         // Constructor principal: inicializa servicios, fechas, catálogos, comandos y datos de prueba.
         public PuntoVentaViewModel()
         {
             _ventasService = new VentasService();
+            _clienteService = new ClienteService();
 
             // Liberamos reservas colgadas al abrir la caja.
-            _ventasService.LimpiarReservasPendientes();
+            _ventasService.LimpiarReservasPendientes();         
 
             FechaActual = DateTime.Now.ToString("dd/MM/yyyy");
 
             // Conectamos con el nombre del usuario logueado almacenado en las variables globales de la aplicación.
             VendedorActual = $"Vendedor: {Proyecto_TillasDesktop.App.NombreUsuarioActual}"; // Conectar con el usuario logueado en App.xaml.
-
-            // Inicializamos las listas desplegables con las opciones estándar de pago y clientes.
-            MetodosPago = new ObservableCollection<string> { "Efectivo", "Tarjeta de Débito", "Tarjeta de Crédito", "Transferencia", "MercadoPago" };
-            ClientesTotales = new ObservableCollection<string> { "Consumidor Final", "Juan Pérez", "María Gómez" };
-
-            // Establecemos "Consumidor Final" por defecto por cuestiones fiscales obligatorias.
-            ClienteSeleccionado = "Consumidor Final"; 
 
             ListaCatalogo = new ObservableCollection<ProductoDisponibleViewModel>();
             Carrito = new ObservableCollection<LineaCarritoViewModel>();
@@ -116,8 +114,11 @@ namespace TillasDesktop.UI.Modelos
             AgregarAlCarritoCommand = new RelayCommand(AgregarAlCarrito);
             QuitarDelCarritoCommand = new RelayCommand(QuitarDelCarrito);
             CobrarCommand = new RelayCommand(ConfirmarCobro);
+            EditarCantidadCommand = new RelayCommand(EditarCantidad);
 
             CargarCatalogo();
+            RecuperarCarritoLocal();
+            CargarListasDesplegables();
         }
 
         // Limpia el cuadro de texto de búsqueda para volver a mostrar todo el catálogo completo.
@@ -264,7 +265,7 @@ namespace TillasDesktop.UI.Modelos
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(ClienteSeleccionado) || string.IsNullOrWhiteSpace(MetodoPagoSeleccionado))
+            if (ClienteSeleccionado == null || MetodoPagoSeleccionado == null)
             {
                 MessageBox.Show("Selecciona un cliente y un método de pago válidos.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -275,13 +276,14 @@ namespace TillasDesktop.UI.Modelos
             {
                 Fecha_Hora = DateTime.Now,
                 Usuario_ID = _idUsuarioActual, // El cajero que está facturando
-                Cliente_ID = 1, // MOCK
+                Cliente_ID = ClienteSeleccionado.ID,
                 Total = TotalCobrar
             };
 
+            // Preparamos el pago con el ID real
             var nuevoPago = new Pago
             {
-                Tipo_Pago_ID = 1, // MOCK
+                Tipo_Pago_ID = MetodoPagoSeleccionado.ID,
                 Monto = TotalCobrar,
                 Fecha_Pago = DateTime.Now,
                 Activo = true
@@ -313,13 +315,72 @@ namespace TillasDesktop.UI.Modelos
                 Carrito.Clear();
                 TotalCobrar = 0;
                 BusquedaRapida = string.Empty;
-                MetodoPagoSeleccionado = null;
-                ClienteSeleccionado = "Consumidor Final";
+                MetodoPagoSeleccionado = MetodosPago.FirstOrDefault(m => m.Nombre.Contains("Efectivo")) ?? MetodosPago.FirstOrDefault();
+                ClienteSeleccionado = ClientesTotales.FirstOrDefault(c => c.Nombre.Contains("Consumidor Final")) ?? ClientesTotales.FirstOrDefault();
             }
             else
             {
                 // Si falló (ej. se cortó la conexión en medio del cobro), mostramos el error y el carrito queda intacto
                 MessageBox.Show(mensaje, "Error al registrar la venta", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void EditarCantidad(object parametro)
+        {
+            if (parametro is LineaCarritoViewModel itemCarrito)
+            {
+                // Mostrar ventana de edición
+                string input = Microsoft.VisualBasic.Interaction.InputBox(
+                    $"Ingresa la nueva cantidad para:\n{itemCarrito.Nombre} (Talle {itemCarrito.Talle})",
+                    "Editar Cantidad",
+                    itemCarrito.Cantidad.ToString());
+
+                if (string.IsNullOrWhiteSpace(input) || !int.TryParse(input, out int nuevaCantidad) || nuevaCantidad < 0)
+                {
+                    return;
+                }
+
+                if (nuevaCantidad == itemCarrito.Cantidad) return; // Si se ingresa el mismo número no hacemos nada
+
+                // Calculamos la diferencia
+                int diferencia = nuevaCantidad - itemCarrito.Cantidad;
+                var productoCatalogo = ListaCatalogo.FirstOrDefault(p => p.ProductoID == itemCarrito.ProductoID && p.Talle == itemCarrito.Talle);
+
+                // Comprobamos si la diferencia es valida con la base de datos
+                if (diferencia > 0)
+                {
+                    bool reservaExitosa = _ventasService.AgregarAlCarrito(_idUsuarioActual, itemCarrito.ProductoID, diferencia);
+                    if (!reservaExitosa)
+                    {
+                        MessageBox.Show($"No hay stock suficiente para agregar {diferencia} unidades más.", "Stock Insuficiente", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                    if (productoCatalogo != null) productoCatalogo.Stock_Actual -= diferencia;
+                }
+                else if (diferencia < 0)
+                {
+                    int cantidadADevolver = Math.Abs(diferencia);
+                    bool liberado = _ventasService.QuitarDelCarrito(_idUsuarioActual, itemCarrito.ProductoID, cantidadADevolver);
+                    if (liberado && productoCatalogo != null)
+                    {
+                        productoCatalogo.Stock_Actual += cantidadADevolver;
+                    }
+                }
+
+                // Actualizamos la vista del carrito
+                itemCarrito.Cantidad = nuevaCantidad;
+
+                if (itemCarrito.Cantidad == 0)
+                {
+                    Carrito.Remove(itemCarrito);
+                }
+                else
+                {
+                    int index = Carrito.IndexOf(itemCarrito);
+                    Carrito[index] = itemCarrito;
+                }
+
+                RecalcularTotal();
             }
         }
 
@@ -348,6 +409,45 @@ namespace TillasDesktop.UI.Modelos
 
             // Refrescamos el filtro visual por si había texto escrito en el buscador
             VistaFiltroCatalogo?.Refresh();
+        }
+
+        private void RecuperarCarritoLocal()
+        {
+            // Pedimos a la BD los productos que el usuario dejó a cargados
+            var itemsRecuperados = _ventasService.RecuperarCarritoAbierto(_idUsuarioActual);
+
+            foreach (var item in itemsRecuperados)
+            {
+                Carrito.Add(new LineaCarritoViewModel
+                {
+                    ProductoID = item.Producto_Talle_ID,
+                    Nombre = item.Nombre,
+                    Talle = item.Talle,
+                    PrecioUnitario = item.Precio_Unitario,
+                    Cantidad = item.Cantidad
+                });
+            }
+
+            // Volvemos a calcular el monto a pagar
+            RecalcularTotal();
+        }
+
+        private void CargarListasDesplegables()
+        {
+            // Cargar Clientes
+            var listaClientes = _clienteService.ObtenerClientes();
+            ClientesTotales = new ObservableCollection<Cliente>(listaClientes);
+
+            // Establecemos "Consumidor Final" por defecto buscando su nombre en la lista
+            ClienteSeleccionado = ClientesTotales.FirstOrDefault(c => c.Nombre.Contains("Consumidor Final"))
+                                  ?? ClientesTotales.FirstOrDefault();
+
+            // Cargar Metodos de Pago
+            var listaPagos = _ventasService.ObtenerTiposPago();
+            MetodosPago = new ObservableCollection<TipoPago>(listaPagos);
+
+            MetodoPagoSeleccionado = MetodosPago.FirstOrDefault(m => m.Nombre.Contains("Efectivo"))
+                                     ?? MetodosPago.FirstOrDefault();
         }
     }
 }

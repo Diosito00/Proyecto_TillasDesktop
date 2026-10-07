@@ -88,6 +88,7 @@ namespace TillasDesktop.DAL.Repositorios
                             {
                                 cmdStock.Parameters.AddWithValue("@Cantidad", item.Cantidad);
                                 cmdStock.Parameters.AddWithValue("@Producto_Talle_ID", item.Producto_Talle_ID);
+                                cmdStock.Parameters.AddWithValue("@Usuario_ID", nuevaVenta.Usuario_ID);
 
                                 int filasAfectadas = cmdStock.ExecuteNonQuery();
 
@@ -215,7 +216,7 @@ namespace TillasDesktop.DAL.Repositorios
                     }
                 }
             }
-        }
+        }   
 
         // Llama al SP (procedimiento almacenado)
         public void EjecutarLimpieza()
@@ -278,6 +279,72 @@ namespace TillasDesktop.DAL.Repositorios
                 }
             }
             return catalogo;
+        }
+
+        public List<ItemCarritoDTO> ObtenerReservasUsuario(int idUsuario)
+        {
+            var carritoRecuperado = new List<ItemCarritoDTO>();
+            using (var conexion = ObtenerConexion())
+            {
+                string query = @"SELECT 
+                                    PT.ID, 
+                                    P.Nombre, 
+                                    PT.Talle, 
+                                    P.Precio_Venta, 
+                                    RT.Cantidad
+                                FROM Reservas_Temporales RT
+                                INNER JOIN Producto_Talles PT ON RT.Producto_Talle_ID = PT.ID
+                                INNER JOIN Productos P ON PT.Producto_ID = P.ID
+                                WHERE RT.Usuario_ID = @Usuario_ID AND RT.Fecha_Expiracion >= GETDATE()";
+
+                using (var cmd = new SqlCommand(query, conexion))
+                {
+                    cmd.Parameters.AddWithValue("@Usuario_ID", idUsuario);
+                    conexion.Open();
+                    using (var lector = cmd.ExecuteReader())
+                    {
+                        while (lector.Read())
+                        {
+                            carritoRecuperado.Add(new ItemCarritoDTO
+                            {
+                                Producto_Talle_ID = lector.GetInt32(0),
+                                Nombre = lector.GetString(1),
+                                Talle = lector.GetInt32(2),
+                                Precio_Unitario = lector.GetDecimal(3),
+                                Cantidad = lector.GetInt32(4)
+                            });
+                        }
+                    }
+                }
+            }
+            return carritoRecuperado;
+        }
+
+        public List<TipoPago> ObtenerTiposPago()
+        {
+            var lista = new List<TipoPago>();
+            using (var conexion = ObtenerConexion())
+            {
+                string query = "SELECT ID, Nombre, Descripcion, Activo FROM Tipo_Pago WHERE Activo = 1";
+                using (var cmd = new SqlCommand(query, conexion))
+                {
+                    conexion.Open();
+                    using (var lector = cmd.ExecuteReader())
+                    {
+                        while (lector.Read())
+                        {
+                            lista.Add(new TipoPago
+                            {
+                                ID = lector.GetInt32(0),
+                                Nombre = lector.GetString(1),
+                                Descripcion = lector.IsDBNull(2) ? "" : lector.GetString(2),
+                                Activo = lector.GetBoolean(3)
+                            });
+                        }
+                    }
+                }
+            }
+            return lista;
         }
     }
 }
