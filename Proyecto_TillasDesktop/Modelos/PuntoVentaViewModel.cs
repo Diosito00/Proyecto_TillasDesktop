@@ -9,6 +9,8 @@ using TillasDesktop.BLL.Services;
 using TillasDesktop.Entities.Facturacion;
 using TillasDesktop.BLL;
 using TillasDesktop.Entities.Clientes;
+using TillasDesktop.UI.Vistas;
+using TillasDesktop.BLL.Servicios;
 
 namespace TillasDesktop.UI.Modelos
 {
@@ -308,15 +310,37 @@ namespace TillasDesktop.UI.Modelos
 
             if (exito)
             {
-                MessageBox.Show($"Cobro por {TotalCobrar:C} procesado con éxito.\n\n{mensaje}",
-                                "Venta Registrada", MessageBoxButton.OK, MessageBoxImage.Information);
+                var copiaCarrito = Carrito.Select(c => new ItemCarritoDTO
+                {
+                    Nombre = c.Nombre,
+                    Talle = c.Talle,
+                    Cantidad = c.Cantidad,
+                    Precio_Unitario = c.PrecioUnitario
+                }).ToList();
+
+                string nombreCliente = ClienteSeleccionado.NombreCompleto;
+                string nombrePago = MetodoPagoSeleccionado.Nombre;
+                string nombreVendedor = Proyecto_TillasDesktop.App.NombreUsuarioActual;
+                decimal totalFacturado = TotalCobrar;
 
                 // Si la base de datos confirmó todo, limpiamos la pantalla para el siguiente cliente
                 Carrito.Clear();
+                VistaFiltroCatalogo.Refresh();
                 TotalCobrar = 0;
                 BusquedaRapida = string.Empty;
-                MetodoPagoSeleccionado = MetodosPago.FirstOrDefault(m => m.Nombre.Contains("Efectivo")) ?? MetodosPago.FirstOrDefault();
-                ClienteSeleccionado = ClientesTotales.FirstOrDefault(c => c.Nombre.Contains("Consumidor Final")) ?? ClientesTotales.FirstOrDefault();
+                MetodoPagoSeleccionado = (MetodosPago.FirstOrDefault(m => m.Nombre.Contains("Efectivo")) ?? MetodosPago.FirstOrDefault())!;
+                ClienteSeleccionado = (ClientesTotales.FirstOrDefault(c => c.Nombre.Contains("Consumidor Final")) ?? ClientesTotales.FirstOrDefault())!;
+
+                try
+                {
+                    var ticketPdfService = new TicketPdfService();
+                    ticketPdfService.GenerarYGuardarTicket(nombreVendedor, nombreCliente, nombrePago, totalFacturado, copiaCarrito);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("La venta se cobró correctamente, pero hubo un error al generar o mastrar el ticket PDF.\n\nDetalle: " + ex.Message, 
+                                    "Error de Impresión", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
             else
             {
@@ -330,15 +354,16 @@ namespace TillasDesktop.UI.Modelos
             if (parametro is LineaCarritoViewModel itemCarrito)
             {
                 // Mostrar ventana de edición
-                string input = Microsoft.VisualBasic.Interaction.InputBox(
-                    $"Ingresa la nueva cantidad para:\n{itemCarrito.Nombre} (Talle {itemCarrito.Talle})",
-                    "Editar Cantidad",
-                    itemCarrito.Cantidad.ToString());
+                var ventana = new EditarCantidadWindow(itemCarrito.Nombre, itemCarrito.Cantidad);
 
-                if (string.IsNullOrWhiteSpace(input) || !int.TryParse(input, out int nuevaCantidad) || nuevaCantidad < 0)
+                bool? resultado = ventana.ShowDialog();
+
+                if (resultado != true)
                 {
                     return;
                 }
+
+                int nuevaCantidad = ventana.NuevaCantidad;
 
                 if (nuevaCantidad == itemCarrito.Cantidad) return; // Si se ingresa el mismo número no hacemos nada
 
@@ -439,15 +464,15 @@ namespace TillasDesktop.UI.Modelos
             ClientesTotales = new ObservableCollection<Cliente>(listaClientes);
 
             // Establecemos "Consumidor Final" por defecto buscando su nombre en la lista
-            ClienteSeleccionado = ClientesTotales.FirstOrDefault(c => c.Nombre.Contains("Consumidor Final"))
-                                  ?? ClientesTotales.FirstOrDefault();
+            ClienteSeleccionado = (ClientesTotales.FirstOrDefault(c => c.Nombre.Contains("Consumidor Final"))
+                                  ?? ClientesTotales.FirstOrDefault())!;
 
             // Cargar Metodos de Pago
             var listaPagos = _ventasService.ObtenerTiposPago();
             MetodosPago = new ObservableCollection<TipoPago>(listaPagos);
 
-            MetodoPagoSeleccionado = MetodosPago.FirstOrDefault(m => m.Nombre.Contains("Efectivo"))
-                                     ?? MetodosPago.FirstOrDefault();
+            MetodoPagoSeleccionado = (MetodosPago.FirstOrDefault(m => m.Nombre.Contains("Efectivo"))
+                                     ?? MetodosPago.FirstOrDefault())!;
         }
     }
 }
