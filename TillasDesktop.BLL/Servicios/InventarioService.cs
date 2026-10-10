@@ -1,48 +1,244 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq; // Necesario para usar .Where() en la lista en memoria
+using TillasDesktop.DAL.Repositorios;
 using TillasDesktop.Entities.Inventario;
 
+// Definimos el espacio de nombres donde vive la capa de lógica de negocio (BLL).
 namespace TillasDesktop.BLL.Services
 {
+    // Servicio de negocio para gestionar el inventario, productos, talles, marcas y categorías.
     public class InventarioService
     {
-        // Devuelve las marcas activas disponibles. 
-        // Actualmente usa datos estáticos para simular la base de datos; más adelante se conectará mediante el repositorio.
+        // Variable privada que almacena la instancia del repositorio para comunicarse con la base de datos.
+        private readonly InventarioRepository _inventarioRepo;
+
+        // Constructor del servicio: inicializa el repositorio al crear el objeto.
+        public InventarioService()
+        {
+            _inventarioRepo = new InventarioRepository();
+        }
+
+        // Método para solicitar la lista de marcas que se encuentran activas en el sistema.
         public List<Marca> ObtenerMarcasActivas()
         {
-            return new List<Marca>
+            try
             {
-                new Marca { ID = 1, Nombre = "Nike" },
-                new Marca { ID = 2, Nombre = "Adidas" }
-            };
+                // Intenta traer las marcas activas desde el repositorio.
+                return _inventarioRepo.ObtenerMarcas();
+            }
+            catch (Exception)
+            {
+                // Si ocurre un error de conexión o base de datos, devuelve una lista vacía para que la app no se rompa.
+                return new List<Marca>();
+            }
         }
 
-        // Devuelve las categorías habilitadas para clasificar las zapatillas 
+        // Método para registrar una nueva marca validando primero que su nombre no esté vacío.
+        public bool RegistrarMarca(Marca marca, out string mensaje)
+        {
+            // Validamos que el nombre de la marca no sea nulo, esté vacío o tenga solo espacios.
+            if (string.IsNullOrWhiteSpace(marca.Nombre))
+            {
+                mensaje = "El nombre de la marca es obligatorio.";
+                return false;
+            }
+
+            try
+            {
+                // Por defecto, toda marca nueva se crea con estado activo (true).
+                marca.Activo = true;
+
+                // Intentamos guardarla en la base de datos a través del repositorio.
+                bool resultado = _inventarioRepo.InsertarMarca(marca);
+
+                // Preparamos el mensaje de respuesta según si el resultado fue exitoso o no.
+                mensaje = resultado ? "Marca registrada correctamente." : "No se pudo registrar la marca.";
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                // Si salta una excepción, devolvemos el detalle del error.
+                mensaje = "Error al registrar la marca: " + ex.Message;
+                return false;
+            }
+        }
+
+        // Método para dar de baja lógica una marca utilizando su ID.
+        public bool EliminarMarca(int idMarca, out string mensaje)
+        {
+            try
+            {
+                // Llamamos al repositorio para hacer la baja lógica (pasar Activo a 0).
+                bool resultado = _inventarioRepo.EliminarMarca(idMarca);
+                mensaje = resultado ? "Marca eliminada correctamente." : "No se encontró la marca especificada.";
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                mensaje = "Error al eliminar la marca: " + ex.Message;
+                return false;
+            }
+        }
+
+        // Método para obtener la lista de categorías activas desde la base de datos.
         public List<Categoria> ObtenerCategoriasActivas()
         {
-            return new List<Categoria>
+            try
             {
-                new Categoria { ID = 1, Nombre = "Urbano" },
-                new Categoria { ID = 2, Nombre = "Deportivo" }
-            };
+
+                return _inventarioRepo.ObtenerCategorias();
+            }
+            catch (Exception)
+            {
+                return new List<Categoria>();
+            }
         }
 
-        // Valida que el producto tenga un código de modelo válido antes de darlo de alta en el sistema.
+        // Método para registrar una nueva categoría validando que el nombre no esté en blanco.
+        public bool RegistrarCategoria(Categoria categoria, out string mensaje)
+        {
+            // Validamos que el nombre de la categoría sea válido.
+            if (string.IsNullOrWhiteSpace(categoria.Nombre))
+            {
+                mensaje = "El nombre de la categoría es obligatorio.";
+                return false;
+            }
+
+            try
+            {
+                // Asignamos estado activo por defecto.
+                categoria.Activo = true;
+                bool resultado = _inventarioRepo.InsertarCategoria(categoria);
+                mensaje = resultado ? "Categoría registrada correctamente." : "No se pudo registrar la categoría.";
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                mensaje = "Error al registrar la categoría: " + ex.Message;
+                return false;
+            }
+        }
+
+        // Método para dar de baja lógica una categoría mediante su ID.
+        public bool EliminarCategoria(int idCategoria, out string mensaje)
+        {
+            try
+            {
+                bool resultado = _inventarioRepo.EliminarCategoria(idCategoria);
+                mensaje = resultado ? "Categoría eliminada correctamente." : "No se encontró la categoría especificada.";
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                mensaje = "Error al eliminar la categoría: " + ex.Message;
+                return false;
+            }
+        }
+
+        // Método para consultar y obtener todos los productos activos del sistema.
+        public List<Producto> ObtenerProductos()
+        {
+            try
+            {
+                return _inventarioRepo.ObtenerTodos();
+            }
+            catch (Exception)
+            {
+                return new List<Producto>();
+            }
+        }
+
+        // Método de negocio para validar y registrar un nuevo producto en la base de datos.
         public bool RegistrarNuevoProducto(Producto nuevoProducto, out string mensajeRespuesta)
         {
-           
+            // Validamos que el código del modelo (SKU) sea obligatorio.
             if (string.IsNullOrWhiteSpace(nuevoProducto.Codigo_Modelo))
+            {
+                mensajeRespuesta = "El código del modelo (SKU) es obligatorio.";
+                return false;
+            }
+
+            try
+            {
+                bool resultado = _inventarioRepo.Insertar(nuevoProducto);
+                if (resultado)
+                {
+                    mensajeRespuesta = $"Modelo {nuevoProducto.Nombre} registrado correctamente.";
+                    return true;
+                }
+                mensajeRespuesta = "No se pudo registrar el producto.";
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // Capturamos cualquier excepción personalizada (como SKU duplicado) lanzada por el repositorio.
+                mensajeRespuesta = ex.Message;
+                return false;
+            }
+        }
+
+        // Método para validar y actualizar los datos de un producto ya existente.
+        public bool ActualizarProducto(Producto productoActualizado, out string mensajeRespuesta)
+        {
+            if (string.IsNullOrWhiteSpace(productoActualizado.Codigo_Modelo))
             {
                 mensajeRespuesta = "El código del modelo es obligatorio.";
                 return false;
             }
 
-            mensajeRespuesta = $"Modelo {nuevoProducto.Nombre} registrado correctamente en el sistema.";
-            return true;
+            try
+            {
+                bool resultado = _inventarioRepo.Actualizar(productoActualizado);
+                if (resultado)
+                {
+                    mensajeRespuesta = "Producto actualizado correctamente.";
+                    return true;
+                }
+                mensajeRespuesta = "No se encontró el producto a modificar.";
+                return false;
+            }
+            catch (Exception ex)
+            {
+                mensajeRespuesta = ex.Message;
+                return false;
+            }
         }
 
-        // Controla que al ingresar stock la cantidad y el talle sean mayores a cero.
+        // Método para realizar la baja lógica de un producto en el sistema.
+        public bool EliminarProducto(int productoId, out string mensajeRespuesta)
+        {
+            try
+            {
+                bool resultado = _inventarioRepo.Eliminar(productoId);
+                if (resultado)
+                {
+                    mensajeRespuesta = "Producto eliminado del sistema.";
+                    return true;
+                }
+                mensajeRespuesta = "No se pudo encontrar el producto.";
+                return false;
+            }
+            catch (Exception ex)
+            {
+                mensajeRespuesta = ex.Message;
+                return false;
+            }
+        }
+
+        // Método para obtener la lista de talles y stock asociados a un ID de producto determinado.
+        public List<ProductoTalle> ObtenerTallesPorProducto(int productoId)
+        {
+            try
+            {
+                return _inventarioRepo.ObtenerTallesPorProducto(productoId);
+            }
+            catch (Exception)
+            {
+                return new List<ProductoTalle>();
+            }
+        }
+
+        // Método para registrar un nuevo ingreso de stock por talle validando que los valores sean mayores a cero.
         public bool RegistrarIngresoStock(ProductoTalle nuevoStock, out string mensajeRespuesta)
         {
             if (nuevoStock.Talle <= 0 || nuevoStock.Stock_Actual <= 0)
@@ -51,64 +247,49 @@ namespace TillasDesktop.BLL.Services
                 return false;
             }
 
-            mensajeRespuesta = $"Se ingresaron {nuevoStock.Stock_Actual} unidades del talle {nuevoStock.Talle} exitosamente.";
-            return true;
+            try
+            {
+                bool resultado = _inventarioRepo.InsertarTalleStock(nuevoStock);
+                if (resultado)
+                {
+                    mensajeRespuesta = $"Se ingresaron {nuevoStock.Stock_Actual} unidades del talle {nuevoStock.Talle}.";
+                    return true;
+                }
+                mensajeRespuesta = "No se pudo registrar el ingreso de stock.";
+                return false;
+            }
+            catch (Exception ex)
+            {
+                mensajeRespuesta = ex.Message;
+                return false;
+            }
         }
 
-        // Actualiza el stock de un talle existente asegurando que no tome valores negativos.
+        // Método para actualizar la cantidad o número de un talle existente validando la coherencia de los datos.
         public bool ActualizarStockTalle(ProductoTalle talleActualizado, out string mensajeRespuesta)
         {
-            
             if (talleActualizado.Talle <= 0 || talleActualizado.Stock_Actual < 0)
             {
                 mensajeRespuesta = "El talle debe ser válido y el stock no puede ser negativo.";
                 return false;
             }
 
-            mensajeRespuesta = $"Stock del talle {talleActualizado.Talle} actualizado correctamente a {talleActualizado.Stock_Actual} unidades.";
-            return true;
-        }
-
-        // Modifica los datos generales de un producto validando que su código no quede vacío.
-        public bool ActualizarProducto(Producto productoActualizado, out string mensajeRespuesta)
-        {
-            if (string.IsNullOrWhiteSpace(productoActualizado.Codigo_Modelo))
+            try
             {
-                mensajeRespuesta = "El código no puede estar vacío.";
+                bool resultado = _inventarioRepo.ActualizarTalleStock(talleActualizado);
+                if (resultado)
+                {
+                    mensajeRespuesta = "Stock del talle actualizado correctamente.";
+                    return true;
+                }
+                mensajeRespuesta = "No se encontró el talle a actualizar.";
                 return false;
             }
-
-            mensajeRespuesta = "Producto actualizado correctamente.";
-            return true;
-        }
-
-
-        // Elimina un producto del sistema. 
-        // luego deberemos validar que no tenga ventas asociadas antes de borrarlo.
-        public bool EliminarProducto(int productoId, out string mensajeRespuesta)
-        {
-            
-            mensajeRespuesta = "Producto eliminado del sistema.";
-            return true;
-        }
-
-        // Guardamos los talles en una lista estática interna para que no se pierdan al cambiar de ventana
-        private static List<ProductoTalle> _tallesEnMemoria = new List<ProductoTalle>
-        {
-        // Talles iniciales para el Air Force 1 (ID = 1)
-        new ProductoTalle { ID = 1, Producto_ID = 1, Talle = 39, Stock_Actual = 20 },
-        new ProductoTalle { ID = 2, Producto_ID = 1, Talle = 42, Stock_Actual = 25 },
-        
-        // Talles iniciales para el Samba OG (ID = 2) 
-        new ProductoTalle { ID = 3, Producto_ID = 2, Talle = 35, Stock_Actual = 10 },
-        new ProductoTalle { ID = 4, Producto_ID = 2, Talle = 40, Stock_Actual = 15 }
-         };
-
-
-        // Filtra y devuelve los talles y stock que pertenecen a un producto específico usando su ID.
-        public List<ProductoTalle> ObtenerTallesPorProducto(int productoId)
-        {
-            return _tallesEnMemoria.Where(t => t.Producto_ID == productoId).ToList();
+            catch (Exception ex)
+            {
+                mensajeRespuesta = ex.Message;
+                return false;
+            }
         }
     }
 }

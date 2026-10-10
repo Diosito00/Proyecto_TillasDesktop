@@ -41,6 +41,8 @@ namespace TillasDesktop.UI.Modelos
         public ICommand VerDetalleStockCommand { get; }
         public ICommand ModificarModeloCommand { get; }
         public ICommand EliminarModeloCommand { get; }
+        public ICommand AdministrarMarcasCommand { get; }
+        public ICommand AdministrarCategoriasCommand { get; }
 
         // Constructor principal: inicializa el servicio, levanta los datos y arma los comandos.
         public InventarioViewModel()
@@ -48,14 +50,28 @@ namespace TillasDesktop.UI.Modelos
             _inventarioService = new InventarioService();
             ListaProductos = new ObservableCollection<ProductoViewModel>();
 
-            // Actualmente tiene datos hardcodeados para poder diseñar la pantalla. 
-            // En el futuro, esto se reemplazará por una llamada a la base de datos real.
-            var producto1 = new Producto { ID = 1, Codigo_Modelo = "NK-AF1-01", Nombre = "Air Force 1", Precio_Venta = 125000, Marca_ID = 1, Categoria_ID = 1, Activo = true };
-            var producto2 = new Producto { ID = 2, Codigo_Modelo = "AD-SM-02", Nombre = "Samba OG", Precio_Venta = 110000, Marca_ID = 2, Categoria_ID = 1, Activo = true };
+            // Cargamos los productos reales desde la Base de Datos a través del servicio
+            var productosDesdeDb = _inventarioService.ObtenerProductos();
+            var marcasDb = _inventarioService.ObtenerMarcasActivas();
+            var categoriasDb = _inventarioService.ObtenerCategoriasActivas();
 
-            ListaProductos.Add(new ProductoViewModel(producto1) { NombreMarca = "Nike", NombreCategoria = "Deportivo", StockTotal = 45 });
-            ListaProductos.Add(new ProductoViewModel(producto2) { NombreMarca = "Adidas", NombreCategoria = "Deportivo", StockTotal = 25 });
+            foreach (var prod in productosDesdeDb)
+            {
+                // Buscamos el nombre real de la marca y categoría basándonos en los IDs vinculados.
+                string nombreMarca = marcasDb.FirstOrDefault(m => m.ID == prod.Marca_ID)?.Nombre ?? "Sin Marca";
+                string nombreCategoria = categoriasDb.FirstOrDefault(c => c.ID == prod.Categoria_ID)?.Nombre ?? "Sin Categoría";
 
+                // Consultamos el stock total real sumando sus talles asociados
+                var talles = _inventarioService.ObtenerTallesPorProducto(prod.ID);
+                int stockCalculado = talles.Sum(t => t.Stock_Actual);
+
+                ListaProductos.Add(new ProductoViewModel(prod)
+                {
+                    NombreMarca = nombreMarca,
+                    NombreCategoria = nombreCategoria,
+                    StockTotal = stockCalculado
+                });
+            }
             // Configuramos la vista de filtrado tomando como base la lista observable de productos.
             VistaFiltroProductos = CollectionViewSource.GetDefaultView(ListaProductos);
 
@@ -67,6 +83,9 @@ namespace TillasDesktop.UI.Modelos
             VerDetalleStockCommand = new RelayCommand(AbrirVentanaDetalleStock);
             ModificarModeloCommand = new RelayCommand(AbrirVentanaModificar);
             EliminarModeloCommand = new RelayCommand(EliminarModelo);
+            AdministrarMarcasCommand = new RelayCommand(AbrirVentanaMarcas);
+            AdministrarCategoriasCommand = new RelayCommand(AbrirVentanaCategorias);
+        
         }
 
         // Abre el formulario en blanco para dar de alta un nuevo modelo de zapatilla
@@ -157,6 +176,23 @@ namespace TillasDesktop.UI.Modelos
                 VistaFiltroProductos.Refresh();
             }
         }
+
+        // Abre la ventana de gestión de marcas.
+        private void AbrirVentanaMarcas(object parametro)
+        {
+            var ventana = new Vistas.GestionMarcasWindow();
+            ventana.DataContext = new GestionMarcasViewModel();
+            ventana.ShowDialog();
+        }
+
+        // Abre la ventana de gestión de categorías.
+        private void AbrirVentanaCategorias(object parametro)
+        {
+            var ventana = new Vistas.GestionCategoriasWindow();
+            ventana.DataContext = new GestionCategoriasViewModel();
+            ventana.ShowDialog();
+        }
+
 
         // Da de baja un modelo de zapatilla tras pedir confirmación por seguridad.
         private void EliminarModelo(object parametro)
