@@ -20,7 +20,7 @@ namespace TillasDesktop.UI.Vistas
         }
 
         // =======================================================
-        // 1. ALTERNAR VISIBILIDAD (BOTÓN DEL OJO)
+        // ALTERNAR VISIBILIDAD (BOTÓN DEL OJO)
         // =======================================================
         private void BtnVerPassword_Click(object sender, RoutedEventArgs e)
         {
@@ -47,7 +47,7 @@ namespace TillasDesktop.UI.Vistas
         }
 
         // =======================================================
-        // 2. CUANDO EL USUARIO ESCRIBE EN LOS ASTERISCOS
+        // CUANDO EL USUARIO ESCRIBE EN LOS ASTERISCOS
         // =======================================================
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
@@ -64,7 +64,7 @@ namespace TillasDesktop.UI.Vistas
         }
 
         // =======================================================
-        // 3. CUANDO EL USUARIO ESCRIBE EN EL TEXTO VISIBLE
+        // CUANDO EL USUARIO ESCRIBE EN EL TEXTO VISIBLE
         // =======================================================
         private void TxtPasswordVisible_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -81,11 +81,11 @@ namespace TillasDesktop.UI.Vistas
         }
 
         // =======================================================
-        // 4. PUENTE HACIA EL VIEWMODEL
+        // PUENTE HACIA EL VIEWMODEL
         // =======================================================
         private void ActualizarViewModel(string claveActual)
         {
-            // Verificamos si la ventana ya tiene cargado nuestro UsuarioFormViewModel
+            // Verificamos si la ventana ya tiene cargado nuestro FormularioUsuarioViewModel
             if (this.DataContext is FormularioUsuarioViewModel viewModel)
             {
                 viewModel.NuevaPassword = claveActual;

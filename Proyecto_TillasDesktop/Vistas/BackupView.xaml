@@ -3,31 +3,105 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="#F5F6FA">
 
-    <Grid Margin="30" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Border Style="{StaticResource CardStyle}" Width="500" Padding="30">
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ENCABEZADO -->
+        <Border Background="White" CornerRadius="8" Margin="0,0,0,20" Padding="15">
             <Border.Effect>
                 <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
             </Border.Effect>
-            <StackPanel>
-                <!-- Icono representativo -->
-                <TextBlock Text="💾" FontSize="36" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-
-                <TextBlock Text="RESPALDO DE BASE DE DATOS" FontSize="18" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-
-                <TextBlock Text="Genera una copia de seguridad completa (dump) de todas las tablas, inventario, ventas y registros del sistema en formato SQL." 
-                           FontSize="13" Foreground="{StaticResource BrushTextoSecundario}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,25"/>
-
-                <!-- Estado o ruta del último respaldo -->
-                <Border Background="#F5F6FA" CornerRadius="6" Padding="12" Margin="0,0,0,25">
-                    <StackPanel>
-                        <TextBlock Text="Último respaldo realizado:" FontSize="11" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
-                        <TextBlock Text="{Binding UltimoBackupInfo}" FontSize="12" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,3,0,0"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Botón de acción principal -->
-                <Button Content="GENERAR NUEVA COPIA DE SEGURIDAD" Command="{Binding GenerarBackupCommand}" Style="{StaticResource BotonSecundario}" Height="45"/>
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock Text="COPIAS DE SEGURIDAD" FontSize="24" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                <TextBlock Text="Gestiona los respaldos de la base de datos para proteger la información del sistema." FontSize="14" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,5,0,0"/>
             </StackPanel>
         </Border>
+
+        <Grid Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="1000" MaxHeight="550" Width="Auto" Height="Auto">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- TARJETA IZQUIERDA: CREAR RESPALDO -->
+            <Border Grid.Column="0" Background="White" CornerRadius="8" Padding="40,30" Margin="0,0,15,0">
+                <Border.Effect>
+                    <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+                </Border.Effect>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="💾" FontSize="50" HorizontalAlignment="Center" Margin="0,0,0,15" Grid.Row="0"/>
+                    <TextBlock Text="CREAR RESPALDO" FontSize="18" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,10" Grid.Row="1"/>
+                    <TextBlock Text="Genera una copia de seguridad completa (dump) de todas las tablas, inventario, ventas y registros del sistema." 
+                           FontSize="14" Foreground="{StaticResource BrushTextoSecundario}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,25" Grid.Row="2"/>
+
+                    <Border Background="#F5F6FA" CornerRadius="6" Padding="15" Margin="0,0,0,25" Grid.Row="3" VerticalAlignment="Bottom">
+                        <StackPanel>
+                            <TextBlock Text="Último respaldo realizado:" FontSize="12" FontWeight="Bold" Foreground="{StaticResource BrushTextoSecundario}"/>
+                            <TextBlock Text="{Binding UltimoBackupInfo, FallbackValue='No se han registrado copias de seguridad en esta sesión.'}" 
+                                   FontSize="13" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Content="GENERAR NUEVA COPIA" Command="{Binding GenerarBackupCommand}" Height="50" Style="{StaticResource BotonSecundario}" Grid.Row="4">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- TARJETA DERECHA: RESTAURAR SISTEMA -->
+            <Border Grid.Column="1" Background="White" CornerRadius="8" Padding="40,30" Margin="15,0,0,0">
+                <Border.Effect>
+                    <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+                </Border.Effect>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="🔄" FontSize="50" HorizontalAlignment="Center" Margin="0,0,0,15" Grid.Row="0"/>
+                    <TextBlock Text="RESTAURAR SISTEMA" FontSize="18" FontWeight="ExtraBold" Foreground="{StaticResource BrushTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,10" Grid.Row="1"/>
+                    <TextBlock Text="Carga un archivo de respaldo previo (.bak) para devolver la base de datos a un estado anterior." 
+                           FontSize="14" Foreground="{StaticResource BrushTextoSecundario}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,25" Grid.Row="2"/>
+
+                    <Border Background="#FEF2F2" CornerRadius="6" Padding="15" Margin="0,0,0,25" Grid.Row="3" VerticalAlignment="Bottom">
+                        <StackPanel>
+                            <TextBlock Text="⚠️ Atención: Riesgo de sobreescritura" FontSize="12" FontWeight="Bold" Foreground="{StaticResource BrushRojo}"/>
+                            <TextBlock Text="Esta acción reemplazará todo los datos actuales en la base de datos por los del archivo seleccionado." 
+                                   FontSize="12" Foreground="{StaticResource BrushRojo}" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Content="RESTAURAR DESDE ARCHIVO" Command="{Binding RestaurarBackupCommand}" Height="50" Background="{StaticResource BrushRojo}" Foreground="White" FontWeight="Bold" Cursor="Hand" Grid.Row="4" BorderThickness="0">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
+
 </UserControl>

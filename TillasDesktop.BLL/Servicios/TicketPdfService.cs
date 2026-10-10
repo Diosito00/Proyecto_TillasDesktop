@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows.Data;
+using System.Globalization;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -17,6 +18,8 @@ namespace TillasDesktop.BLL.Servicios
         public void GenerarYGuardarTicket(string vendedor, string cliente, string metodoPago, decimal total, List<ItemCarritoDTO> carrito)
         {
             QuestPDF.Settings.License = LicenseType.Community;
+
+            var formatoMoneda = new CultureInfo("es-AR");
 
             string carpetaTickets = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Tickets");
             if (!Directory.Exists(carpetaTickets)) Directory.CreateDirectory(carpetaTickets);
@@ -50,7 +53,7 @@ namespace TillasDesktop.BLL.Servicios
                             {
                                 columns.ConstantColumn(15);
                                 columns.RelativeColumn();
-                                columns.ConstantColumn(50);
+                                columns.ConstantColumn(80);
                             });
 
                             tabla.Header(header =>
@@ -66,12 +69,12 @@ namespace TillasDesktop.BLL.Servicios
 
                                 tabla.Cell().Text(item.Cantidad.ToString());
                                 tabla.Cell().Text($"{item.Nombre} (T:{item.Talle})");
-                                tabla.Cell().AlignRight().Text(subtotal.ToString("C"));
+                                tabla.Cell().AlignRight().Text(subtotal.ToString("C", formatoMoneda));
                             }
                         });
 
                         col.Item().PaddingVertical(5).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
-                        col.Item().AlignRight().Text($"TOTAL: {total:C}").Bold().FontSize(12);
+                        col.Item().AlignRight().Text($"TOTAL: {total.ToString("C", formatoMoneda)}").Bold().FontSize(12);
                         col.Item().Text($"Pago: {metodoPago}");
                         col.Item().PaddingTop(10).Text("¡Gracias por su compra!").AlignCenter().Bold();                        
                     });
