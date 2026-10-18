@@ -14,9 +14,6 @@ using TillasDesktop.UI.Modelos;
 
 namespace TillasDesktop.UI.Vistas
 {
-    /// <summary>
-    /// Lógica de interacción para BackupView.xaml
-    /// </summary>
     public partial class BackupView : UserControl
     {
         public BackupView()

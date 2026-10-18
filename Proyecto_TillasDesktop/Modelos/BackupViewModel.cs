@@ -1,67 +1,107 @@
 ﻿using System;
-using System.IO;
-using System.Windows.Input;
 using System.Windows;
-using Microsoft.Win32;
+using System.Windows.Input;
+using Microsoft.Win32; // Necesario para invocar las ventanas nativas de Windows (Guardar/Abrir archivo)
+using TillasDesktop.BLL.Services;
 
 namespace TillasDesktop.UI.Modelos
 {
-    // Hereda de ViewModelBase para poder notificar a la interfaz gráfica (UI) cuando una propiedad cambia.
     public class BackupViewModel : ViewModelBase
     {
-        // Campo privado que almacena el texto con la información del último respaldo.
-        private string _ultimoBackupInfo;
+        // Instancia del servicio de la Capa de Negocios
+        private readonly BackupService _backupService;
 
-        // Propiedad pública vinculada (binding) a la vista. 
-        // El 'set' llama a OnPropertyChanged() para que la pantalla se actualice al instante si el texto cambia.
+        // Propiedad enlazada a la interfaz para mostrar cuándo se hizo el último respaldo
+        private string _ultimoBackupInfo;
         public string UltimoBackupInfo
         {
             get => _ultimoBackupInfo;
             set { _ultimoBackupInfo = value; OnPropertyChanged(); }
         }
 
-        // Comando que se ejecutará al presionar el botón "Generar Backup" en la interfaz.
         public ICommand GenerarBackupCommand { get; }
+        public ICommand RestaurarBackupCommand { get; }
 
         public BackupViewModel()
         {
-            // Estado inicial al abrir la pantalla de copias de seguridad.
+            _backupService = new BackupService();
             UltimoBackupInfo = "No se han registrado copias de seguridad en esta sesión.";
 
-            // Vinculamos el comando con el método 'GenerarBackup' definido más abajo.
             GenerarBackupCommand = new RelayCommand(GenerarBackup);
+            RestaurarBackupCommand = new RelayCommand(RestaurarBackup);
         }
 
         private void GenerarBackup(object parametro)
         {
-            // Instanciamos el cuadro de diálogo nativo de Windows para que el usuario elija dónde guardar el archivo.
-            var dialog = new SaveFileDialog
+            // Preparamos la ventana nativa de Windows para guardar archivos
+            SaveFileDialog dialogoGuardar = new SaveFileDialog
             {
-                Title = "Seleccionar ubicación para el Respaldo",
-                // Forzamos a que el archivo solo pueda ser .sql
-                Filter = "Archivos de Base de Datos SQL (*.sql)|*.sql",
-                // Sugerimos un nombre de archivo automático basado en la fecha y hora actual (ej: TillasDB_Backup_20260921_053700.sql)
-                FileName = $"TillasDB_Backup_{DateTime.Now:yyyyMMdd_HHmmss}.sql"
+                Title = "Guardar Copia de Seguridad",
+                Filter = "Archivo de Base de Datos SQL (*.bak)|*.bak", // Forzamos a que sea formato .bak
+                FileName = $"TillasDB_Backup_{DateTime.Now:yyyyMMdd_HHmm}.bak" // Nombre automático con fecha y hora
             };
 
-            // ShowDialog() abre la ventana. Si el usuario hace clic en "Guardar", devuelve 'true'.
-            if (dialog.ShowDialog() == true)
+            // Si el usuario elige una ruta y presiona "Guardar" (ShowDialog devuelve true)
+            if (dialogoGuardar.ShowDialog() == true)
             {
                 try
                 {
-                    // Escribe físicamente un archivo de texto en la ruta elegida por el usuario.
-                    // (Por ahora es una simulación de estructura SQL).
-                    File.WriteAllText(dialog.FileName, $"-- Respaldo de TillasDesktop generado el {DateTime.Now}\n-- Estructura y datos...");
+                    // Delegamos la acción a la capa de negocios enviando la ruta elegida
+                    _backupService.CrearRespaldo(dialogoGuardar.FileName);
 
-                    // Actualizamos la propiedad visual para mostrarle al usuario dónde quedó guardado.
-                    UltimoBackupInfo = $"{DateTime.Now:dd/MM/yyyy a las HH:mm} hs\nRuta: {dialog.FileName}";
-
-                    MessageBox.Show("La copia de seguridad se ha generado y guardado con éxito.", "Respaldo Completado", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Actualizamos la interfaz para mostrar el éxito
+                    UltimoBackupInfo = $"Éxito: {DateTime.Now:dd/MM/yyyy HH:mm} hs";
+                    MessageBox.Show("La copia de seguridad se ha guardado correctamente.", "Respaldo Exitoso", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    // Si falla (por ejemplo, si el usuario eligió una carpeta protegida donde no hay permisos de escritura).
-                    MessageBox.Show($"Ocurrió un error al intentar guardar el archivo: {ex.Message}", "Error de Escritura", MessageBoxButton.OK, MessageBoxImage.Error);
+                    // Atrapamos errores (ej. falta de permisos en el disco C:) y los mostramos al usuario
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void RestaurarBackup(object parametro)
+        {
+            // Advertencia inicial: Es una acción destructiva
+            var confirmacion = MessageBox.Show(
+                "⚠️ ADVERTENCIA CRÍTICA ⚠️\n\nAl restaurar la base de datos, SE BORRARÁN todas las ventas, productos y cambios registrados después de la fecha de la copia de seguridad.\n\n¿Estás completamente seguro de que deseas sobreescribir el sistema actual?",
+                "Confirmar Restauración", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (confirmacion != MessageBoxResult.Yes) return; // Si dice "No", cortamos la ejecución
+
+            // Solicitamos credenciales de un Gerente/Admin
+            var ventanaAutorizacion = new TillasDesktop.UI.Vistas.AutorizacionWindow();
+            bool? resultadoAuth = ventanaAutorizacion.ShowDialog(); // Abre modal bloqueante
+
+            // Verificamos si la autorización fue exitosa (el código cruzado lo maneja la ventana en sí)
+            if (resultadoAuth != true || !ventanaAutorizacion.EstaAutorizado)
+            {
+                return; // Cortamos si no se autorizó
+            }
+
+            // Si se autorizó, preparamos la ventana de Windows para buscar el archivo .bak
+            OpenFileDialog dialogoAbrir = new OpenFileDialog
+            {
+                Title = "Seleccionar Archivo de Respaldo",
+                Filter = "Archivo de Base de Datos SQL (*.bak)|*.bak"
+            };
+
+            if (dialogoAbrir.ShowDialog() == true)
+            {
+                try
+                {
+                    // Enviamos la ruta del archivo a la capa de negocios para restaurarlo
+                    _backupService.RestaurarSistema(dialogoAbrir.FileName);
+
+                    MessageBox.Show("El sistema se ha restaurado con éxito.\n\nPor motivos de seguridad y para refrescar los datos, el programa se cerrará. Por favor, vuelve a iniciar sesión.", "Restauración Completada", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // Como cambiamos toda la base de datos, cerramos programa para limpiar la memoria y evitar que los datos viejos causen conflictos.
+                    Application.Current.Shutdown();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error de Restauración", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

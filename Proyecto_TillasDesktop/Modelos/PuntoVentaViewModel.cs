@@ -413,15 +413,15 @@ namespace TillasDesktop.UI.Modelos
         {
             ListaCatalogo.Clear();
 
-            // 1. Pedimos el catálogo fresco a la base de datos
+            // Pedimos el catálogo a la base de datos
             var productosDb = _ventasService.ObtenerCatalogoPuntoVenta();
 
-            // 2. Transformamos la entidad pura al ViewModel que entiende el XAML de tu pantalla
+            // Transformamos la entidad pura al ViewModel
             foreach (var p in productosDb)
             {
                 ListaCatalogo.Add(new ProductoDisponibleViewModel
                 {
-                    ProductoID = p.ProductoTalle_ID, // Es crítico que este sea el ID de ProductoTalles
+                    ProductoID = p.ProductoTalle_ID,
                     Codigo_Modelo = p.Codigo_Modelo,
                     Nombre = p.Nombre,
                     NombreMarca = p.NombreMarca,
@@ -438,22 +438,38 @@ namespace TillasDesktop.UI.Modelos
 
         private void RecuperarCarritoLocal()
         {
-            // Pedimos a la BD los productos que el usuario dejó a cargados
+            // Pedimos a la BD los productos que el usuario dejó a medias
             var itemsRecuperados = _ventasService.RecuperarCarritoAbierto(_idUsuarioActual);
 
             foreach (var item in itemsRecuperados)
             {
-                Carrito.Add(new LineaCarritoViewModel
+                // Buscamos si este producto y talle ya están dibujados en el carrito
+                var itemExistente = Carrito.FirstOrDefault(c => c.ProductoID == item.Producto_Talle_ID && c.Talle == item.Talle);
+
+                if (itemExistente != null)
                 {
-                    ProductoID = item.Producto_Talle_ID,
-                    Nombre = item.Nombre,
-                    Talle = item.Talle,
-                    PrecioUnitario = item.Precio_Unitario,
-                    Cantidad = item.Cantidad
-                });
+                    // Si ya existe, le sumamos la cantidad de esta reserva
+                    itemExistente.Cantidad += item.Cantidad;
+
+                    // Refrescamos el renglón para que la interfaz gráfica note el cambio numérico
+                    int index = Carrito.IndexOf(itemExistente);
+                    Carrito[index] = itemExistente;
+                }
+                else
+                {
+                    // Si es la primera vez que vemos este producto en el bucle, creamos el renglón desde cero
+                    Carrito.Add(new LineaCarritoViewModel
+                    {
+                        ProductoID = item.Producto_Talle_ID,
+                        Nombre = item.Nombre,
+                        Talle = item.Talle,
+                        PrecioUnitario = item.Precio_Unitario,
+                        Cantidad = item.Cantidad
+                    });
+                }
             }
 
-            // Volvemos a calcular el monto a pagar
+            // Volvemos a calcular el monto total a pagar con los datos ya agrupados
             RecalcularTotal();
         }
 

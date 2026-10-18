@@ -12,9 +12,6 @@ using System.Windows.Shapes;
 
 namespace TillasDesktop.UI.Vistas
 {
-    /// <summary>
-    /// Lógica de interacción para EditarCantidadWindow.xaml
-    /// </summary>
     public partial class EditarCantidadWindow : Window
     {
         public int NuevaCantidad { get; private set; }
@@ -33,12 +30,6 @@ namespace TillasDesktop.UI.Vistas
         private void BtnAceptar_Click(object sender, RoutedEventArgs e)
         {
             Confirmar();
-        }
-
-        private void BtnCancelar_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-            Close();
         }
 
         private void TxtCantidad_KeyDown(object sender, KeyEventArgs e)

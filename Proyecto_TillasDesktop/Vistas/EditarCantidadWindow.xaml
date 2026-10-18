@@ -21,8 +21,7 @@
 
                 <TextBox x:Name="txtCantidad" FontSize="20" Padding="5" TextAlignment="Center" KeyDown="TxtCantidad_KeyDown" PreviewTextInput="SoloNumeros_PreviewTextInput"/>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
-                    <Button Content="Cancelar" Style="{StaticResource BotonSecundario}" Width="90" Height="30" Margin="0,0,10,0" Click="BtnCancelar_Click"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
                     <Button Content="Aceptar" Style="{StaticResource BotonPrimario}" Width="90" Height="30" Click="BtnAceptar_Click"/>
                 </StackPanel>
             </StackPanel>
