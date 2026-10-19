@@ -38,12 +38,17 @@ namespace TillasDesktop.UI.Modelos
             // Inicializamos el servicio de inventario
             _inventarioService = new InventarioService();
 
-            // Cargamos en la lista visual únicamente las categorías que están activas en la base de datos.
-            ListaCategorias = new ObservableCollection<Categoria>(_inventarioService.ObtenerCategoriasActivas());
+            CargarLista();
 
             // Asociamos los comandos con sus respectivos métodos de acción.
             GuardarCategoriaCommand = new RelayCommand(GuardarCategoria);
             EliminarCategoriaCommand = new RelayCommand(EliminarCategoria);
+        }
+
+        private void CargarLista()
+        {
+            ListaCategorias = new ObservableCollection<Categoria>(_inventarioService.ObtenerCategoriasActivas());
+            OnPropertyChanged(nameof(ListaCategorias));
         }
 
         // Método que se ejecuta al hacer clic en el botón de guardar una nueva categoría.
@@ -58,8 +63,7 @@ namespace TillasDesktop.UI.Modelos
             // Si la base de datos la guardó correctamente..
             if (exito)
             {
-                // La agregamos a la lista en memoria para que aparezca instantáneamente en la tabla.
-                ListaCategorias.Add(nuevaCat);
+                CargarLista(); // Refresca la lista visual
 
                 // Limpiamos el cuadro de texto para que quede en blanco.
                 NombreNuevaCategoria = string.Empty;

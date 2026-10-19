@@ -10,14 +10,14 @@ namespace TillasDesktop.DAL.Repositorios
     // Hereda de ConexionDb para administrar de forma segura los canales de comunicación con SQL Server.
     public class InventarioRepository : ConexionDb
     {
-        // Método para consultar y traer todos los productos que están activos (Activo = 1) en la base de datos.
-        public List<Producto> ObtenerTodos()
+        // Método unificado para consultar productos filtrando por su estado (activo o inactivo)
+        public List<Producto> ObtenerProductos(bool activos = true)
         {
             // Instanciamos una lista genérica donde iremos recolectando los registros mapeados.
             List<Producto> listaProductos = new List<Producto>();
 
-            // Definimos la sentencia de selección SQL filtrando únicamente aquellos productos cuyo estado sea activo (Activo = 1).
-            string query = "SELECT ID, Codigo_Modelo, Nombre, Marca_ID, Categoria_ID, Precio_Venta, Activo FROM Productos WHERE Activo = 1";
+            // Definimos la sentencia de selección SQL filtrando únicamente aquellos productos cuyo estado sea activo 
+            string query = "SELECT ID, Codigo_Modelo, Nombre, Marca_ID, Categoria_ID, Precio_Venta, Activo FROM Productos WHERE Activo = @Activo";
 
             // Solicitamos una conexión abierta a la base de datos utilizando el patrón using para garantizar la liberación de recursos.
             using (var conexion = ObtenerConexion())
@@ -25,6 +25,8 @@ namespace TillasDesktop.DAL.Repositorios
                 // Preparamos el comando SQL vinculando la instrucción y la conexión activa.
                 using (var comando = new SqlCommand(query, conexion))
                 {
+                    comando.Parameters.AddWithValue("@Activo", activos);
+
                     // Abrimos físicamente el canal con el motor de base de datos.
                     conexion.Open();
 
@@ -34,33 +36,17 @@ namespace TillasDesktop.DAL.Repositorios
                         // Iteramos renglón por renglón mientras existan registros devueltos por la base de datos.
                         while (lector.Read())
                         {
-                            // Mapeamos los campos relacionales de la fila actual hacia una nueva entidad Producto.
-                            var producto = new Producto
+                            listaProductos.Add(new Producto
                             {
-                                // Leemos la columna 0 (ID) asegurando que sea un entero.
                                 ID = lector.GetInt32(0),
-
-                                // Verificamos si la columna 1 (Codigo_Modelo) es nula en la BD; si lo es, asignamos un string vacío, de lo contrario leemos el texto.
                                 Codigo_Modelo = lector.IsDBNull(1) ? string.Empty : lector.GetString(1),
-
-                                // Verificamos si la columna 2 (Nombre) es nula; si es así, asignamos un string vacío.
                                 Nombre = lector.IsDBNull(2) ? string.Empty : lector.GetString(2),
-
-                                // Verificamos y leemos la columna 3 (Marca_ID).
                                 Marca_ID = lector.GetInt32(3),
-
-                                // Verificamos y leemos la columna 4 (Categoria_ID).
                                 Categoria_ID = lector.GetInt32(4),
-
-                                // Verificamos y leemos la columna 5 (Precio_Venta).
                                 Precio_Venta = lector.GetDecimal(5),
-
-                                // Verificamos y leemos la columna 6 (Activo).
                                 Activo = lector.GetBoolean(6)
-                            };
-
-                            // Incorporamos el objeto mapeado a nuestra lista de resultados.
-                            listaProductos.Add(producto);
+                            });
+                           
                         }
                     }
                 }
@@ -355,16 +341,17 @@ namespace TillasDesktop.DAL.Repositorios
             }
         }
 
-        // Método para obtener todas las marcas habilitadas del sistema.
+        // Método para obtener TODAS las marcas (activas e inactivas) para la validación y reactivación
         public List<Marca> ObtenerMarcas()
         {
             var lista = new List<Marca>();
-            string query = "SELECT ID, Nombre, Activo FROM Marca WHERE Activo = 1";
+            string query = "SELECT ID, Nombre, Activo FROM Marca";
 
             using (var conexion = ObtenerConexion())
             {
                 using (var comando = new SqlCommand(query, conexion))
                 {
+                   
                     conexion.Open();
                     using (var lector = comando.ExecuteReader())
                     {
@@ -438,16 +425,17 @@ namespace TillasDesktop.DAL.Repositorios
             }
         }
 
-        // Método para obtener todas las categorías activas del sistema.
+        // Método para obtener TODAS las categorías (activas e inactivas) para la validación y reactivación
         public List<Categoria> ObtenerCategorias()
         {
             var lista = new List<Categoria>();
-            string query = "SELECT ID, Nombre, Activo FROM Categoria WHERE Activo = 1";
+            string query = "SELECT ID, Nombre, Activo FROM Categoria";
 
             using (var conexion = ObtenerConexion())
             {
                 using (var comando = new SqlCommand(query, conexion))
                 {
+                    
                     conexion.Open();
                     using (var lector = comando.ExecuteReader())
                     {

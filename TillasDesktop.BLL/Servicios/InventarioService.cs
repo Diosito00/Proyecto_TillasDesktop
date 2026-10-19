@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using TillasDesktop.DAL.Repositorios;
 using TillasDesktop.Entities.Inventario;
@@ -18,13 +19,27 @@ namespace TillasDesktop.BLL.Services
             _inventarioRepo = new InventarioRepository();
         }
 
+        // Método unificado de lectura de productos (idéntico a UsuariosService.ObtenerTodos)
+        public List<Producto> ObtenerProductos(bool activos = true)
+        {
+            try
+            {
+                return _inventarioRepo.ObtenerProductos(activos);
+            }
+            catch (Exception)
+            {
+                return new List<Producto>();
+            }
+        }
+
+
         // Método para solicitar la lista de marcas que se encuentran activas en el sistema.
         public List<Marca> ObtenerMarcasActivas()
         {
             try
             {
-                // Intenta traer las marcas activas desde el repositorio.
-                return _inventarioRepo.ObtenerMarcas();
+                // Trae todas del repositorio y filtra en memoria las que están activas
+                return _inventarioRepo.ObtenerMarcas().Where(m => m.Activo).ToList();
             }
             catch (Exception)
             {
@@ -45,19 +60,43 @@ namespace TillasDesktop.BLL.Services
 
             try
             {
-                // Por defecto, toda marca nueva se crea con estado activo (true).
-                marca.Activo = true;
+                // Obtenemos todas las marcas guardadas en la BD
+                List<Marca> todasLasMarcas = _inventarioRepo.ObtenerMarcas();
 
-                // Intentamos guardarla en la base de datos a través del repositorio.
-                bool resultado = _inventarioRepo.InsertarMarca(marca);
+                // Buscamos coincidencia exacta por nombre (ignorando mayúsculas/minúsculas)
+                Marca marcaExistente = todasLasMarcas.FirstOrDefault(m => m.Nombre.Trim().Equals(marca.Nombre.Trim(), StringComparison.OrdinalIgnoreCase));
 
-                // Preparamos el mensaje de respuesta según si el resultado fue exitoso o no.
-                mensaje = resultado ? "Marca registrada correctamente." : "No se pudo registrar la marca.";
-                return resultado;
+                if (marcaExistente != null)
+                {
+                    if (marcaExistente.Activo)
+                    {
+                        mensaje = $"La marca '{marcaExistente.Nombre}' ya existe y está activa.";
+                        return false;
+                    }
+                    else
+                    {
+                        // Si ya existía pero estaba inactiva, la reactivamos
+                        marcaExistente.Activo = true;
+                        bool reactivada = _inventarioRepo.ActualizarMarca(marcaExistente);
+
+                        marca.ID = marcaExistente.ID;
+                        marca.Activo = true;
+
+                        mensaje = reactivada ? $"La marca '{marcaExistente.Nombre}' fue reactivada exitosamente." : "No se pudo reactivar la marca.";
+                        return reactivada;
+                    }
+                }
+                else
+                {
+                    // Si no existía, la insertamos como nueva
+                    marca.Activo = true;
+                    bool resultado = _inventarioRepo.InsertarMarca(marca);
+                    mensaje = resultado ? "Marca registrada correctamente." : "No se pudo registrar la marca.";
+                    return resultado;
+                }
             }
             catch (Exception ex)
             {
-                // Si salta una excepción, devolvemos el detalle del error.
                 mensaje = "Error al registrar la marca: " + ex.Message;
                 return false;
             }
@@ -85,8 +124,8 @@ namespace TillasDesktop.BLL.Services
         {
             try
             {
-
-                return _inventarioRepo.ObtenerCategorias();
+                // Trae todas del repositorio y filtra en memoria las que están activas
+                return _inventarioRepo.ObtenerCategorias().Where(c => c.Activo).ToList();
             }
             catch (Exception)
             {
@@ -106,11 +145,40 @@ namespace TillasDesktop.BLL.Services
 
             try
             {
-                // Asignamos estado activo por defecto.
-                categoria.Activo = true;
-                bool resultado = _inventarioRepo.InsertarCategoria(categoria);
-                mensaje = resultado ? "Categoría registrada correctamente." : "No se pudo registrar la categoría.";
-                return resultado;
+                // Obtenemos todas las categorías guardadas en la BD
+                List<Categoria> todasLasCategorias = _inventarioRepo.ObtenerCategorias();
+
+                // Buscamos coincidencia exacta por nombre
+                Categoria categoriaExistente = todasLasCategorias.FirstOrDefault(c => c.Nombre.Trim().Equals(categoria.Nombre.Trim(), StringComparison.OrdinalIgnoreCase));
+
+                if (categoriaExistente != null)
+                {
+                    if (categoriaExistente.Activo)
+                    {
+                        mensaje = $"La categoría '{categoriaExistente.Nombre}' ya existe y está activa.";
+                        return false;
+                    }
+                    else
+                    {
+                        // Si ya existía pero estaba inactiva, la reactivamos
+                        categoriaExistente.Activo = true;
+                        bool reactivada = _inventarioRepo.ActualizarCategoria(categoriaExistente);
+
+                        categoria.ID = categoriaExistente.ID;
+                        categoria.Activo = true;
+
+                        mensaje = reactivada ? $"La categoría '{categoriaExistente.Nombre}' fue reactivada exitosamente." : "No se pudo reactivar la categoría.";
+                        return reactivada;
+                    }
+                }
+                else
+                {
+                    // Si no existía, la insertamos nueva
+                    categoria.Activo = true;
+                    bool resultado = _inventarioRepo.InsertarCategoria(categoria);
+                    mensaje = resultado ? "Categoría registrada correctamente." : "No se pudo registrar la categoría.";
+                    return resultado;
+                }
             }
             catch (Exception ex)
             {
@@ -135,18 +203,7 @@ namespace TillasDesktop.BLL.Services
             }
         }
 
-        // Método para consultar y obtener todos los productos activos del sistema.
-        public List<Producto> ObtenerProductos()
-        {
-            try
-            {
-                return _inventarioRepo.ObtenerTodos();
-            }
-            catch (Exception)
-            {
-                return new List<Producto>();
-            }
-        }
+
 
         // Método de negocio para validar y registrar un nuevo producto en la base de datos.
         public bool RegistrarNuevoProducto(Producto nuevoProducto, out string mensajeRespuesta)

@@ -17,6 +17,15 @@ namespace TillasDesktop.UI.Modelos
         /// Campo privado que almacena el texto que va escribiendo el usuario en el buscador.
         private string _textoBusqueda = string.Empty;
 
+        private bool _mostrandoInactivos = false;
+
+        private string _textoBotonInactivos = "Mostrar Inactivos";
+        public string TextoBotonInactivos
+        {
+            get => _textoBotonInactivos;
+            set { _textoBotonInactivos = value; OnPropertyChanged(); }
+        }
+
         // Colección observable que notifica a la tabla visual (DataGrid) cuando se agregan o eliminan productos.
         public ObservableCollection<ProductoViewModel> ListaProductos { get; set; }
 
@@ -44,24 +53,44 @@ namespace TillasDesktop.UI.Modelos
         public ICommand AdministrarMarcasCommand { get; }
         public ICommand AdministrarCategoriasCommand { get; }
 
+        public ICommand ToggleInactivosCommand { get; }
+
+
         // Constructor principal: inicializa el servicio, levanta los datos y arma los comandos.
         public InventarioViewModel()
         {
             _inventarioService = new InventarioService();
             ListaProductos = new ObservableCollection<ProductoViewModel>();
 
-            // Cargamos los productos reales desde la Base de Datos a través del servicio
-            var productosDesdeDb = _inventarioService.ObtenerProductos();
+            NuevoModeloCommand = new RelayCommand(AbrirVentanaNuevoModelo);
+            VerDetalleStockCommand = new RelayCommand(AbrirVentanaDetalleStock);
+            ModificarModeloCommand = new RelayCommand(AbrirVentanaModificar);
+            EliminarModeloCommand = new RelayCommand(EliminarModelo);
+            AdministrarMarcasCommand = new RelayCommand(AbrirVentanaMarcas);
+            AdministrarCategoriasCommand = new RelayCommand(AbrirVentanaCategorias);
+            ToggleInactivosCommand = new RelayCommand(AlternarInactivos);
+
+            VistaFiltroProductos = CollectionViewSource.GetDefaultView(ListaProductos);
+            VistaFiltroProductos.Filter = FiltrarCriterios;
+
+            CargarProductos();
+
+        }
+
+        private void CargarProductos()
+        {
+            ListaProductos.Clear();
+
+            // Pasamos '!_mostrandoInactivos' para que si estamos mostrando inactivos solicite activos=false
+            var productosDesdeDb = _inventarioService.ObtenerProductos(!_mostrandoInactivos);
             var marcasDb = _inventarioService.ObtenerMarcasActivas();
             var categoriasDb = _inventarioService.ObtenerCategoriasActivas();
 
             foreach (var prod in productosDesdeDb)
             {
-                // Buscamos el nombre real de la marca y categoría basándonos en los IDs vinculados.
                 string nombreMarca = marcasDb.FirstOrDefault(m => m.ID == prod.Marca_ID)?.Nombre ?? "Sin Marca";
                 string nombreCategoria = categoriasDb.FirstOrDefault(c => c.ID == prod.Categoria_ID)?.Nombre ?? "Sin Categoría";
 
-                // Consultamos el stock total real sumando sus talles asociados
                 var talles = _inventarioService.ObtenerTallesPorProducto(prod.ID);
                 int stockCalculado = talles.Sum(t => t.Stock_Actual);
 
@@ -72,20 +101,15 @@ namespace TillasDesktop.UI.Modelos
                     StockTotal = stockCalculado
                 });
             }
-            // Configuramos la vista de filtrado tomando como base la lista observable de productos.
-            VistaFiltroProductos = CollectionViewSource.GetDefaultView(ListaProductos);
 
-            // Asignamos el método que decide qué filas se muestran y cuáles se ocultan según la búsqueda.
-            VistaFiltroProductos.Filter = FiltrarCriterios;
+            VistaFiltroProductos?.Refresh();
+        }
 
-            // Inicialización de comandos vinculados a sus respectivos métodos.
-            NuevoModeloCommand = new RelayCommand(AbrirVentanaNuevoModelo);
-            VerDetalleStockCommand = new RelayCommand(AbrirVentanaDetalleStock);
-            ModificarModeloCommand = new RelayCommand(AbrirVentanaModificar);
-            EliminarModeloCommand = new RelayCommand(EliminarModelo);
-            AdministrarMarcasCommand = new RelayCommand(AbrirVentanaMarcas);
-            AdministrarCategoriasCommand = new RelayCommand(AbrirVentanaCategorias);
-        
+        private void AlternarInactivos(object parametro)
+        {
+            _mostrandoInactivos = !_mostrandoInactivos;
+            TextoBotonInactivos = _mostrandoInactivos ? "Mostrar Activos" : "Mostrar Inactivos";
+            CargarProductos();
         }
 
         // Abre el formulario en blanco para dar de alta un nuevo modelo de zapatilla
@@ -99,8 +123,7 @@ namespace TillasDesktop.UI.Modelos
             formViewModel.CerrarVentana = () => ventana.Close();
             formViewModel.OnModeloGuardado = () =>
             {
-                ListaProductos.Add(formViewModel.ProductoActual);
-                VistaFiltroProductos.Refresh();
+                CargarProductos();
             };
 
             ventana.DataContext = formViewModel;
@@ -150,8 +173,7 @@ namespace TillasDesktop.UI.Modelos
                     // También actualizamos los nombres en texto de la marca y categoría para que se vean en la tabla.
                     productoFila.NombreMarca = formViewModel.MarcaSeleccionada.Nombre;
                     productoFila.NombreCategoria = formViewModel.CategoriaSeleccionada.Nombre;
-
-                    VistaFiltroProductos.Refresh();
+                    CargarProductos();
                 };
 
                 ventana.DataContext = formViewModel;
@@ -172,8 +194,7 @@ namespace TillasDesktop.UI.Modelos
                 ventana.DataContext = detalleViewModel;
                 ventana.ShowDialog();
 
-                // Al cerrar la ventana de stock, refrescamos la tabla principal por si hubo cambios en las cantidades totales.
-                VistaFiltroProductos.Refresh();
+                CargarProductos();
             }
         }
 
@@ -183,6 +204,7 @@ namespace TillasDesktop.UI.Modelos
             var ventana = new Vistas.GestionMarcasWindow();
             ventana.DataContext = new GestionMarcasViewModel();
             ventana.ShowDialog();
+            CargarProductos();
         }
 
         // Abre la ventana de gestión de categorías.
@@ -191,6 +213,7 @@ namespace TillasDesktop.UI.Modelos
             var ventana = new Vistas.GestionCategoriasWindow();
             ventana.DataContext = new GestionCategoriasViewModel();
             ventana.ShowDialog();
+            CargarProductos();
         }
 
 
@@ -213,8 +236,7 @@ namespace TillasDesktop.UI.Modelos
 
                     if (exito)
                     {
-                        /// Si la base de datos confirmó la baja, lo sacamos de nuestra lista y la tabla se actualiza sola.
-                        ListaProductos.Remove(productoFila);
+                        CargarProductos();
                     }
                     else
                     {

@@ -37,12 +37,16 @@ namespace TillasDesktop.UI.Modelos
             // Inicializamos el servicio de inventario.
             _inventarioService = new InventarioService();
 
-            // Cargamos en la lista visual únicamente las marcas que se encuentran activas en la base de datos.
-            ListaMarcas = new ObservableCollection<Marca>(_inventarioService.ObtenerMarcasActivas());
+            CargarLista();
 
             // Vinculamos cada comando con su respectivo método de acción.
             GuardarMarcaCommand = new RelayCommand(GuardarMarca);
             EliminarMarcaCommand = new RelayCommand(EliminarMarca);
+        }
+        private void CargarLista()
+        {
+            ListaMarcas = new ObservableCollection<Marca>(_inventarioService.ObtenerMarcasActivas());
+            OnPropertyChanged(nameof(ListaMarcas));
         }
 
         // Método que se ejecuta al hacer clic en el botón para guardar una nueva marca.
@@ -57,8 +61,7 @@ namespace TillasDesktop.UI.Modelos
             // Si la base de datos confirmó el guardado con éxito...
             if (exito)
             {
-                // Agregamos la marca a la lista en memoria para que se vea reflejada instantáneamente en la tabla.
-                ListaMarcas.Add(nuevaMarca);
+                CargarLista(); // Refresca la lista para mostrar la marca recién creada o reactivada
 
                 // Vaciamos el cuadro de texto del formulario para dejarlo limpio.
                 NombreNuevaMarca = string.Empty;

@@ -28,8 +28,19 @@
 
                 <!-- Buscador y Botón alineados a la derecha -->
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+
+                    <!-- Switch ToggleButton idéntico al de Usuarios (Estilo BotonGris, ubicado a la izquierda del TextBox) -->
+                    <ToggleButton Content="Mostrar Inactivos" 
+                                  IsChecked="{Binding MostrarInactivos, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                  Command="{Binding ToggleInactivosCommand}"
+                                  Height="35" Margin="0,0,15,0" 
+                                  Style="{DynamicResource BotonGris}"/>
+                    
+                    <!-- Buscador -->
                     <TextBox Width="350" Height="40" Margin="0,0,10,0" VerticalContentAlignment="Center"
                              Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <!-- Botón Nuevo Modelo -->
                     <Button Content="+ NUEVO MODELO" Command="{Binding NuevoModeloCommand}" Height="35" Width="150" Style="{StaticResource BotonSecundario}"/>
                 </StackPanel>
             </DockPanel>
@@ -79,11 +90,22 @@
             </DataGrid>
         </Border>
 
-        <!-- PANEL INFERIOR: Botones de Gestión de Marcas y Categorías alineados a la derecha -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
-            <Button Content="GESTIONAR MARCAS" Command="{Binding AdministrarMarcasCommand}" Height="35" Width="170" Margin="0,0,10,0" Style="{StaticResource BotonSecundario}"/>
-            <Button Content="GESTIONAR CATEGORÍAS" Command="{Binding AdministrarCategoriasCommand}" Height="35" Width="190" Style="{StaticResource BotonSecundario}"/>
-        </StackPanel>
+       
+            <!-- PANEL INFERIOR: Botones de Gestión de Marcas y Categorías alineados a la derecha -->
+        <Border Grid.Row="2" Background="White" CornerRadius="8" Margin="0,15,0,0" Padding="15">
+            <Border.Effect>
+                <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
+            </Border.Effect>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="GESTIONAR MARCAS" Command="{Binding AdministrarMarcasCommand}" 
+                Height="35" Width="170" Margin="0,0,15,0" Style="{StaticResource BotonSecundario}"/>
+
+                <Button Content="GESTIONAR CATEGORÍAS" Command="{Binding AdministrarCategoriasCommand}" 
+                Height="35" Width="190" Style="{StaticResource BotonSecundario}"/>
+            </StackPanel>
+        </Border>
+
 
     </Grid>
 </UserControl>
