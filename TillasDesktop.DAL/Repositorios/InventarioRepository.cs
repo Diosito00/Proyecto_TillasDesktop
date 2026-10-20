@@ -319,13 +319,15 @@ namespace TillasDesktop.DAL.Repositorios
             }
         }
 
-        // Método para eliminar un registro de talle de la base de datos.
+        // Método para realizar la baja lógica de un talle (o eliminarlo si no tiene ventas asociadas)
         public bool EliminarTalleStock(int idTalle)
         {
             try
             {
                 using (var conexion = ObtenerConexion())
                 {
+                    // Intentamos hacer un DELETE por si nunca se vendió. 
+                    // Si tiene ventas asociadas, SQL Server lanzará la excepción de FK que capturaremos abajo.
                     string query = "DELETE FROM Producto_Talles WHERE ID = @ID";
                     using (var comando = new SqlCommand(query, conexion))
                     {
@@ -334,6 +336,15 @@ namespace TillasDesktop.DAL.Repositorios
                         return comando.ExecuteNonQuery() > 0;
                     }
                 }
+            }
+            catch (SqlException sqlEx)
+            {
+                // Si hay conflicto de clave foránea (número 547), significa que el talle tiene ventas y debemos aplicar baja lógica o avisar
+                if (sqlEx.Number == 547)
+                {
+                    throw new Exception("No se puede eliminar el talle porque posee registros históricos de ventas asociados. Puede dejar su stock en 0.");
+                }
+                throw new Exception("Error al eliminar el talle: " + sqlEx.Message);
             }
             catch (Exception ex)
             {

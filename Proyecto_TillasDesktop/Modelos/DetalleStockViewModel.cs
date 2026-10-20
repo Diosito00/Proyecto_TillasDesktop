@@ -77,9 +77,7 @@ namespace TillasDesktop.UI.Modelos
             // Definimos qué pasa cuando se guarda con éxito en la ventana secundaria
             formViewModel.OnStockIngresado = (movimientoStock) =>
             {
-                //  Actualizamos el stock total del modelo en la tabla principal.
-                _productoVMOriginal.StockTotal += movimientoStock.Stock_Actual;
-
+                
                 //  Buscamos si el talle ingresado ya existía en nuestra lista.
                 var talleExistente = ListaTalles.FirstOrDefault(t => t.Talle == movimientoStock.Talle);
 
@@ -92,7 +90,7 @@ namespace TillasDesktop.UI.Modelos
                         ID = talleExistente.ID,
                         Producto_ID = talleExistente.Producto_ID,
                         Talle = talleExistente.Talle,
-                        Stock_Actual = talleExistente.Stock_Actual + movimientoStock.Stock_Actual
+                        Stock_Actual = movimientoStock.Stock_Actual // Valor exacto ya sumado en la BLL
                     };
                 }
                 else
@@ -100,6 +98,7 @@ namespace TillasDesktop.UI.Modelos
                     // Si es un talle que no teníamos, agregamos una fila completamente nueva a la colección.
                     ListaTalles.Add(new ProductoTalle
                     {
+                        ID = movimientoStock.ID,
                         Producto_ID = movimientoStock.Producto_ID,
                         Talle = movimientoStock.Talle,
                         Stock_Actual = movimientoStock.Stock_Actual
@@ -165,11 +164,19 @@ namespace TillasDesktop.UI.Modelos
 
                 if (respuesta == MessageBoxResult.Yes)
                 {
-                    // Al removerlo de la ObservableCollection, desaparece instantáneamente de la grilla.
-                    ListaTalles.Remove(talleSeleccionado);
+                    // Declaramos la variable out 
+                    bool exito = _inventarioService.EliminarTalle(talleSeleccionado.ID, out string mensaje);
 
-                    // Recalculamos el total al eliminar un talle
-                    RecalcularStockTotal();
+                    if (exito)
+                    {
+                        ListaTalles.Remove(talleSeleccionado);
+                        RecalcularStockTotal();
+                        MessageBox.Show(mensaje, "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show(mensaje, "Error al Eliminar", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
                 }
             }
         }

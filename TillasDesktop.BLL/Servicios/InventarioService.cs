@@ -266,18 +266,32 @@ namespace TillasDesktop.BLL.Services
         {
             try
             {
+                //  Obtenemos todos los talles asociados a este producto
+                List<ProductoTalle> talles = _inventarioRepo.ObtenerTallesPorProducto(productoId);
+
+                // Comprobamos si al menos un talle tiene stock físico actual mayor a 0
+                bool tieneStockPendiente = talles.Any(t => t.Stock_Actual > 0);
+
+                if (tieneStockPendiente)
+                {
+                    mensajeRespuesta = "No se puede dar de baja el modelo porque todavía cuenta con talles con stock físico disponible.";
+                    return false;
+                }
+
+                //  Si no tiene stock en ningún talle, procedemos con la baja lógica
                 bool resultado = _inventarioRepo.Eliminar(productoId);
                 if (resultado)
                 {
-                    mensajeRespuesta = "Producto eliminado del sistema.";
+                    mensajeRespuesta = "Producto dado de baja correctamente.";
                     return true;
                 }
+
                 mensajeRespuesta = "No se pudo encontrar el producto.";
                 return false;
             }
             catch (Exception ex)
             {
-                mensajeRespuesta = ex.Message;
+                mensajeRespuesta = "Error al intentar dar de baja el producto: " + ex.Message;
                 return false;
             }
         }
@@ -306,14 +320,36 @@ namespace TillasDesktop.BLL.Services
 
             try
             {
-                bool resultado = _inventarioRepo.InsertarTalleStock(nuevoStock);
-                if (resultado)
+                // Obtenemos los talles actuales de este producto desde la base de datos
+                var tallesExistentes = _inventarioRepo.ObtenerTallesPorProducto(nuevoStock.Producto_ID);
+
+                //  Verificamos si ya existe una fila con el mismo número de talle
+                var talleEnDb = tallesExistentes.FirstOrDefault(t => t.Talle == nuevoStock.Talle);
+
+                bool resultado;
+
+                if (talleEnDb != null)
                 {
-                    mensajeRespuesta = $"Se ingresaron {nuevoStock.Stock_Actual} unidades del talle {nuevoStock.Talle}.";
-                    return true;
+                    // Si ya existe, sumamos la cantidad nueva al stock actual que ya tenía
+                    talleEnDb.Stock_Actual += nuevoStock.Stock_Actual;
+
+                    // Actualizamos en la base de datos
+                    resultado = _inventarioRepo.ActualizarTalleStock(talleEnDb);
+
+                    // Sincronizamos el objeto en memoria para que la interfaz se actualice bien
+                    nuevoStock.ID = talleEnDb.ID;
+                    nuevoStock.Stock_Actual = talleEnDb.Stock_Actual;
+
+                    mensajeRespuesta = resultado ? $"Se actualizó el talle {nuevoStock.Talle} (Stock total: {nuevoStock.Stock_Actual})." : "No se pudo actualizar el stock.";
                 }
-                mensajeRespuesta = "No se pudo registrar el ingreso de stock.";
-                return false;
+                else
+                {
+                    // Si no existe, lo insertamos como una fila completamente nueva
+                    resultado = _inventarioRepo.InsertarTalleStock(nuevoStock);
+                    mensajeRespuesta = resultado ? $"Se ingresaron {nuevoStock.Stock_Actual} unidades del talle {nuevoStock.Talle}." : "No se pudo registrar el ingreso de stock.";
+                }
+
+                return resultado;
             }
             catch (Exception ex)
             {
@@ -345,6 +381,21 @@ namespace TillasDesktop.BLL.Services
             catch (Exception ex)
             {
                 mensajeRespuesta = ex.Message;
+                return false;
+            }
+        }
+
+        public bool EliminarTalle(int idTalle, out string mensaje)
+        {
+            try
+            {
+                bool exito = _inventarioRepo.EliminarTalleStock(idTalle);
+                mensaje = exito ? "Talle eliminado correctamente." : "No se pudo encontrar el talle a eliminar.";
+                return exito;
+            }
+            catch (Exception ex)
+            {
+                mensaje = "Error al eliminar el talle: " + ex.Message;
                 return false;
             }
         }
