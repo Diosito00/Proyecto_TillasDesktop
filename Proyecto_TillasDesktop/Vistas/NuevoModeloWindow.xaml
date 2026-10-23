@@ -36,7 +36,7 @@
                       Foreground="{StaticResource BrushTextoSecundario}" 
                       Margin="0,0,0,20"/>
             
-            <Button Content="GUARDAR MODELO" Command="{Binding GuardarCommand}" IsDefault="True" Height="45" Style="{StaticResource BotonSecundario}"/>
+            <Button Content="GUARDAR MODELO" Command="{Binding GuardarCommand}" IsDefault="True" Height="45" Style="{StaticResource BotonPrimario}"/>
         </StackPanel>
     </Border>
 </Window>

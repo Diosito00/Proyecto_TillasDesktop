@@ -1,7 +1,7 @@
 ﻿<Window x:Class="TillasDesktop.UI.Vistas.GestionMarcasWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Gestión de Marcas" Height="450" Width="400"
+        Title="Gestión de Marcas" Height="550" Width="400"
         WindowStartupLocation="CenterScreen" Background="#F0F4F8" ResizeMode="NoResize">
 
     <Border Background="White" CornerRadius="10" Margin="20" Padding="20">
@@ -21,7 +21,7 @@
             <StackPanel Grid.Row="1" Margin="0,0,0,15">
                 <TextBlock Text="Nombre de la Nueva Marca" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
                 <TextBox Text="{Binding NombreNuevaMarca, UpdateSourceTrigger=PropertyChanged}" Height="35" Margin="0,0,0,10" VerticalContentAlignment="Center"/>
-                <Button Content="GUARDAR MARCA" Command="{Binding GuardarMarcaCommand}" Height="40" Style="{StaticResource BotonPrimario}"/>
+                <Button Content="GUARDAR MARCA" IsDefault="True" Command="{Binding GuardarMarcaCommand}" Height="40" Style="{StaticResource BotonPrimario}"/>
             </StackPanel>
 
             <!-- Lista de marcas existentes -->

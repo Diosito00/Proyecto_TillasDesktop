@@ -76,7 +76,7 @@
             <CheckBox  Content="Usuario Activo" IsChecked="{Binding UsuarioActual.Activo}" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,20"/>
                         
             <!-- Botón principal de acción para guardar la información, vinculado al evento de clic y a un estilo visual predefinido. -->
-            <Button Content="GUARDAR" Command="{Binding GuardarCommand}"  Height="40" Style="{StaticResource BotonSecundario}"/>
+            <Button Content="GUARDAR" Command="{Binding GuardarCommand}" IsDefault="True" Height="40" Style="{StaticResource BotonPrimario}"/>
         </StackPanel>
     </Border>
 </Window>
