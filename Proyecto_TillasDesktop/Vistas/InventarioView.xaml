@@ -30,8 +30,7 @@
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
 
                     <!-- Switch ToggleButton idéntico al de Usuarios (Estilo BotonGris, ubicado a la izquierda del TextBox) -->
-                    <ToggleButton Content="Mostrar Inactivos" 
-                                  IsChecked="{Binding MostrarInactivos, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                    <ToggleButton Content="{Binding TextoBotonInactivos}"
                                   Command="{Binding ToggleInactivosCommand}"
                                   Height="35" Margin="0,0,15,0" 
                                   Style="{DynamicResource BotonGris}"/>

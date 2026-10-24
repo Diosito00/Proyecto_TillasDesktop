@@ -296,6 +296,28 @@ namespace TillasDesktop.BLL.Services
             }
         }
 
+        // Método para eliminación permanente (baja física)
+        public bool EliminarPermanenteProducto(int productoId, out string mensajeRespuesta)
+        {
+            try
+            {
+                bool resultado = _inventarioRepo.EliminarPermanente(productoId);
+                if (resultado)
+                {
+                    mensajeRespuesta = "Producto eliminado permanentemente de la base de datos.";
+                    return true;
+                }
+
+                mensajeRespuesta = "No se encontró el producto a eliminar.";
+                return false;
+            }
+            catch (Exception ex)
+            {
+                mensajeRespuesta = ex.Message;
+                return false;
+            }
+        }
+
         // Método para obtener la lista de talles y stock asociados a un ID de producto determinado.
         public List<ProductoTalle> ObtenerTallesPorProducto(int productoId)
         {

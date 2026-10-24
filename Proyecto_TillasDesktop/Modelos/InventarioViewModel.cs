@@ -217,30 +217,59 @@ namespace TillasDesktop.UI.Modelos
         }
 
 
-        // Da de baja un modelo de zapatilla tras pedir confirmación por seguridad.
+        // Da de baja lógica o elimina permanentemente un modelo según su estado actual.
         private void EliminarModelo(object parametro)
         {
             if (parametro is ProductoViewModel productoFila)
             {
-                // Mensaje de advertencia para evitar borrados por accidente.
-                var respuesta = MessageBox.Show($"¿Estás seguro de que deseas eliminar permanentemente el modelo '{productoFila.Nombre}'?",
-                                                "Confirmar Eliminación",
-                                                MessageBoxButton.YesNo,
-                                                MessageBoxImage.Warning);
+                int idReal = productoFila.ObtenerEntidadPura().ID;
 
-                if (respuesta == MessageBoxResult.Yes)
+                // Si el producto está ACTIVO  Hacemos BAJA LÓGICA (Desactivar)
+                if (productoFila.Activo)
                 {
-                    // Delegamos la eliminación física o lógica a la capa de servicios.
-                    int idReal = productoFila.ObtenerEntidadPura().ID;
-                    bool exito = _inventarioService.EliminarProducto(idReal, out string mensaje);
+                    var respuesta = MessageBox.Show(
+                        $"¿Estás seguro de dar de baja el modelo '{productoFila.Nombre}'?\nEl producto dejará de estar disponible en el sistema.",
+                        "Confirmar Baja Lógica",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
 
-                    if (exito)
+                    if (respuesta == MessageBoxResult.Yes)
                     {
-                        CargarProductos();
+                        bool exito = _inventarioService.EliminarProducto(idReal, out string mensaje);
+
+                        if (exito)
+                        {
+                            MessageBox.Show(mensaje, "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
+                            CargarProductos();
+                        }
+                        else
+                        {
+                            MessageBox.Show(mensaje, "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
                     }
-                    else
+                }
+                // Si el producto está INACTIVO Hacemos BAJA FÍSICA (Eliminar Permanentemente)
+                else
+                {
+                    var respuesta = MessageBox.Show(
+                        $"¿Estás seguro de ELIMINAR PERMANENTEMENTE el modelo '{productoFila.Nombre}'?\nEsta acción no se puede deshacer.",
+                        "Confirmar Eliminación Permanente",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+
+                    if (respuesta == MessageBoxResult.Yes)
                     {
-                        MessageBox.Show(mensaje, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        bool exito = _inventarioService.EliminarPermanenteProducto(idReal, out string mensaje);
+
+                        if (exito)
+                        {
+                            MessageBox.Show(mensaje, "Eliminación Completada", MessageBoxButton.OK, MessageBoxImage.Information);
+                            CargarProductos();
+                        }
+                        else
+                        {
+                            MessageBox.Show(mensaje, "No se pudo eliminar", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
                     }
                 }
             }

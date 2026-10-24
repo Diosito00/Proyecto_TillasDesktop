@@ -225,6 +225,33 @@ namespace TillasDesktop.DAL.Repositorios
             }
         }
 
+        // Método para realizar la baja física (eliminación permanente) de la base de datos
+        public bool EliminarPermanente(int idProducto)
+        {
+            try
+            {
+                using (var conexion = ObtenerConexion())
+                {
+                    string query = "DELETE FROM Productos WHERE ID = @ID";
+                    using (var comando = new SqlCommand(query, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@ID", idProducto);
+                        conexion.Open();
+                        return comando.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (SqlException sqlEx)
+            {
+                // Si el producto ya se vendió en el pasado o tiene registros asociados, SQL bloqueará el DELETE por Clave Foránea
+                if (sqlEx.Number == 547)
+                {
+                    throw new Exception("No se puede eliminar permanentemente este producto porque posee historial registrado en ventas o reservas.");
+                }
+                throw new Exception("Error al eliminar el producto: " + sqlEx.Message);
+            }
+        }
+
         // Método para consultar todos los talles y stock físico vinculados a un ID de producto específico.
         public List<ProductoTalle> ObtenerTallesPorProducto(int productoId)
         {
