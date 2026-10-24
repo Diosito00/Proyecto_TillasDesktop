@@ -29,60 +29,65 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <!-- Título -->
                     <RowDefinition Height="15"/>
-                    <!-- Espaciador -->
                     <RowDefinition Height="Auto"/>
-                    <!-- Controles -->
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="Auto"/>
+                    <!-- Nueva fila para filtros secundarios -->
                 </Grid.RowDefinitions>
 
-                <!-- Título unificado -->
                 <TextBlock Grid.Row="0" Text="REPORTES Y ESTADÍSTICAS" FontSize="20" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}"/>
 
-                <!-- Contenedor de Filtros -->
-                <Grid Grid.Row="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Periodo -->
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Desde -->
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Hasta -->
-                        <ColumnDefinition Width="*"/>
-                        <!-- Espacio flexible que empuja el botón a la derecha -->
-                        <ColumnDefinition Width="Auto"/>
-                        <!-- Botones -->
-                    </Grid.ColumnDefinitions>
+                <!-- Filtros Principales -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal">
+                    <StackPanel Margin="0,0,20,0">
+                        <TextBlock Text="TIPO DE REPORTE" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <ComboBox Width="200" ItemsSource="{Binding OpcionesTipoReporte}" SelectedItem="{Binding TipoReporteSeleccionado, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
 
-                    <!-- Filtro: Período -->
-                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                    <StackPanel Margin="0,0,20,0">
                         <TextBlock Text="PERÍODO" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <ComboBox Width="150" ItemsSource="{Binding OpcionesPeriodo}" SelectedItem="{Binding PeriodoSeleccionado, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
 
-                    <!-- Filtro: Fecha Inicio -->
-                    <StackPanel Grid.Column="1" Margin="0,0,20,0">
-                        <TextBlock Text="FECHA INICIO" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                        <DatePicker SelectedDate="{Binding FechaInicio, UpdateSourceTrigger=PropertyChanged}" Width="150" Height="30" VerticalContentAlignment="Center"/>
+                    <StackPanel Margin="0,0,20,0">
+                        <TextBlock Text="DESDE" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <DatePicker SelectedDate="{Binding FechaInicio, UpdateSourceTrigger=PropertyChanged}" Width="130" Height="30"/>
                     </StackPanel>
 
-                    <!-- Filtro: Fecha Fin -->
-                    <StackPanel Grid.Column="2" Margin="0,0,20,0">
-                        <TextBlock Text="FECHA FIN" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                        <DatePicker SelectedDate="{Binding FechaFin, UpdateSourceTrigger=PropertyChanged}" Width="150" Height="30" VerticalContentAlignment="Center"/>
+                    <StackPanel Margin="0,0,20,0">
+                        <TextBlock Text="HASTA" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <DatePicker SelectedDate="{Binding FechaFin, UpdateSourceTrigger=PropertyChanged}" Width="130" Height="30"/>
                     </StackPanel>
 
-                    <!-- Panel de Botones (Alineado a la derecha) -->
-                    <StackPanel Grid.Column="5" VerticalAlignment="Bottom">
-                        <Button Content="GENERAR REPORTE" Command="{Binding GenerarReporteCommand}" Style="{StaticResource BotonSecundario}"
-                            Height="35" Width="150"/>
-
-                        <Button Content="📄 EXPORTAR PDF / EXCEL" Command="{Binding ExportarCommand}"
-                            Background="Transparent" Foreground="{StaticResource BrushPrimario}" BorderThickness="0" 
-                            Cursor="Hand" FontSize="10" FontWeight="SemiBold" 
-                            Margin="0,5,0,0" HorizontalAlignment="Center"/>
+                    <StackPanel VerticalAlignment="Bottom">
+                        <Button Content="GENERAR REPORTE" Command="{Binding GenerarReportePdfCommand}" Style="{StaticResource BotonSecundario}" Height="35" Width="150"/>
                     </StackPanel>
-                </Grid>
+                </StackPanel>
+
+                <!-- Filtros Secundarios (Se ocultan automáticamente si no se selecciona 'Productos Más Vendidos') -->
+                <StackPanel Grid.Row="4" Orientation="Horizontal">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding TipoReporteSeleccionado}" Value="Productos Más Vendidos">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <StackPanel Margin="0,0,20,0">
+                        <TextBlock Text="FILTRAR MARCA" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <ComboBox Width="150" ItemsSource="{Binding OpcionesMarcas}" SelectedItem="{Binding MarcaSeleccionada}"/>
+                    </StackPanel>
+
+                    <StackPanel>
+                        <TextBlock Text="FILTRAR CATEGORÍA" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <ComboBox Width="150" ItemsSource="{Binding OpcionesCategorias}" SelectedItem="{Binding CategoriaSeleccionada}"/>
+                    </StackPanel>
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -104,10 +109,10 @@
                     <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
                 </Border.Effect>
                 <StackPanel>
-                    <TextBlock Text="INGRESOS TOTALES (TRIMESTRE)" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding KpiTituloIngresos}" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold"/>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Bottom">
-                        <TextBlock Text="$320,500" FontSize="24" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}"/>
-                        <TextBlock Text="📈 +8.4%" Foreground="{StaticResource BrushVerde}" FontSize="12" FontWeight="Bold" Margin="10,0,0,4" VerticalAlignment="Bottom"/>
+                        <TextBlock Text="{Binding KpiIngresos}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}"/>
+                        <!-- Ocultamos el crecimiento por ahora hasta tener lógica de comparación contra el mes anterior -->
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -119,7 +124,7 @@
                 </Border.Effect>
                 <StackPanel>
                     <TextBlock Text="VENTAS REALIZADAS" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold"/>
-                    <TextBlock Text="1,250" FontSize="24" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,5,0,0"/>
+                    <TextBlock Text="{Binding KpiVentas}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,5,0,0"/>
                 </StackPanel>
             </Border>
 
@@ -130,8 +135,8 @@
                 </Border.Effect>
                 <StackPanel>
                     <TextBlock Text="PRODUCTO ESTRELLA" Foreground="{StaticResource BrushTextoSecundario}" FontSize="11" FontWeight="SemiBold"/>
-                    <TextBlock Text="Sneaker Modelo X" FontSize="16" FontWeight="Bold" Foreground="{StaticResource BrushPrimario}" Margin="0,5,0,0"/>
-                    <TextBlock Text="480 pares vendidos" FontSize="12" Foreground="{StaticResource BrushTextoSecundario}"/>
+                    <TextBlock Text="{Binding KpiProductoEstrellaNombre}" FontSize="16" FontWeight="Bold" Foreground="{StaticResource BrushPrimario}" Margin="0,5,0,0"/>
+                    <TextBlock Text="{Binding KpiProductoEstrellaDetalle}" FontSize="12" Foreground="{StaticResource BrushTextoSecundario}"/>
                 </StackPanel>
             </Border>
         </Grid>
@@ -139,40 +144,68 @@
         <!-- ========================================== -->
         <!-- FILA 2: DATAGRID DE HISTORIAL DE VENTAS    -->
         <!-- ========================================== -->
-        <Border Grid.Row="2" Background="White" CornerRadius="8" Padding="15">
+        <Border Grid.Row="2" Background="White" CornerRadius="8" Padding="20">
             <Border.Effect>
                 <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
             </Border.Effect>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="ÚLTIMAS VENTAS REALIZADAS" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
-                
-                <DataGrid Grid.Row="1" ItemsSource="{Binding HistorialVentas}" Style="{StaticResource DataGridTillas}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="N° TICKET" Binding="{Binding ID}" Width="*"/>
-                        <!-- El StringFormat=g formatea la fecha y hora de manera legible -->
-                        <DataGridTextColumn Header="FECHA Y HORA" Binding="{Binding Fecha_Hora, StringFormat=g}" Width="2*"/>
-                        <DataGridTextColumn Header="CAJERO" Binding="{Binding NombreVendedor}" Width="2*"/>
-                        <DataGridTextColumn Header="CLIENTE" Binding="{Binding NombreCliente}" Width="2*"/>
-                        <DataGridTextColumn Header="MÉTODO PAGO" Binding="{Binding MetodoPago}" Width="2*"/>
-                        <DataGridTextColumn Header="TOTAL" Binding="{Binding Total, StringFormat=C}" Width="*"/>
-                        <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content="👁️" ToolTip="Ver Detalle de Venta"
-                                            Command="{Binding DataContext.VerDetalleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}"
-                                            Background="Transparent" BorderThickness="0" Cursor="Hand" FontSize="14"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+            <Grid>
+                <TextBlock Text="{Binding TipoReporteSeleccionado}" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15" VerticalAlignment="Top"/>
+
+                <!-- GRÁFICO 1: REPORTE DE VENTAS (Línea de tiempo) -->
+                <lvc:CartesianChart Series="{Binding GraficoVentas}" Margin="0,35,0,0">
+                    <lvc:CartesianChart.Style>
+                        <Style TargetType="lvc:CartesianChart">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding TipoReporteSeleccionado}" Value="Reporte de Ventas">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </lvc:CartesianChart.Style>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="Días" Labels="{Binding EtiquetasVentas}" />
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="Ingresos" LabelFormatter="{Binding FormatoMoneda}" />
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
+
+                <!-- GRÁFICO 2: RENDIMIENTO DE VENDEDORES (Barras) -->
+                <lvc:CartesianChart Series="{Binding GraficoVendedores}" Margin="0,35,0,0">
+                    <lvc:CartesianChart.Style>
+                        <Style TargetType="lvc:CartesianChart">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding TipoReporteSeleccionado}" Value="Rendimiento de Vendedores">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </lvc:CartesianChart.Style>
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="Cajeros / Vendedores" Labels="{Binding EtiquetasVendedores}" />
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="Total Recaudado" LabelFormatter="{Binding FormatoMoneda}" />
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
+
+                <!-- GRÁFICO 3: PRODUCTOS MÁS VENDIDOS (Torta/Pie) -->
+                <lvc:PieChart Series="{Binding GraficoProductos}" LegendLocation="Right" Margin="0,35,0,0">
+                    <lvc:PieChart.Style>
+                        <Style TargetType="lvc:PieChart">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding TipoReporteSeleccionado}" Value="Productos Más Vendidos">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </lvc:PieChart.Style>
+                </lvc:PieChart>
             </Grid>
         </Border>
-
     </Grid>
 </UserControl>

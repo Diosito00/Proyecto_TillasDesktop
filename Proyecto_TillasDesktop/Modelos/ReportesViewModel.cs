@@ -1,111 +1,140 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using LiveCharts;
+using LiveCharts.Wpf;
+using TillasDesktop.BLL.Services;
 using TillasDesktop.Entities.Reportes;
 
 namespace TillasDesktop.UI.Modelos
 {
-    // Hereda de ViewModelBase para que la interfaz reaccione a los cambios de fechas o filtros.
     public class ReportesViewModel : ViewModelBase
     {
-       
-        // Colección reactiva que mostrará el listado de ventas en la grilla principal.
-        public ObservableCollection<VentaResumenDTO> HistorialVentas { get; set; }
+        private readonly ReportesService _reportesService;
 
-        // Opciones estáticas para el ComboBox de filtrado rápido.
+        private bool _inicializando = true;
+
+        public SeriesCollection GraficoVentas { get; set; }
+        public List<string> EtiquetasVentas { get; set; }
+        public SeriesCollection GraficoVendedores { get; set; }
+        public List<string> EtiquetasVendedores { get; set; }
+        public SeriesCollection GraficoProductos { get; set; }
+        public Func<double, string> FormatoMoneda { get; set; }
+
         public List<string> OpcionesPeriodo { get; set; }
+        public List<string> OpcionesTipoReporte { get; set; }
+        public List<string> OpcionesMarcas { get; set; }
+        public List<string> OpcionesCategorias { get; set; }
 
-        
+        // PROPIEDADES REACTIVAS
+        private string _tipoReporteSeleccionado;
+        public string TipoReporteSeleccionado
+        {
+            get => _tipoReporteSeleccionado;
+            set { _tipoReporteSeleccionado = value; OnPropertyChanged(); ActualizarGraficos(); }
+        }
+
         private string _periodoSeleccionado;
         public string PeriodoSeleccionado
         {
             get => _periodoSeleccionado;
-            set
-            {
-                _periodoSeleccionado = value;
-                OnPropertyChanged();
-
-                // Cada vez que el usuario elige una nueva opción (ej: "Este Mes"), 
-                // se dispara automáticamente el recálculo de las fechas de inicio y fin.
-                ActualizarFechasPorPeriodo();
-            }
+            set { _periodoSeleccionado = value; OnPropertyChanged(); ActualizarFechasPorPeriodo(); }
         }
 
-        // Fechas vinculadas a los controles DatePicker de la interfaz.
         private DateTime _fechaInicio;
         public DateTime FechaInicio
         {
             get => _fechaInicio;
-            set { _fechaInicio = value; OnPropertyChanged(); }
+            set { _fechaInicio = value; OnPropertyChanged(); ActualizarGraficos(); }
         }
 
         private DateTime _fechaFin;
         public DateTime FechaFin
         {
             get => _fechaFin;
-            set { _fechaFin = value; OnPropertyChanged(); }
+            set { _fechaFin = value; OnPropertyChanged(); ActualizarGraficos(); }
         }
 
-        
-        public ICommand GenerarReporteCommand { get; }
-        public ICommand ExportarCommand { get; }
+        private string _marcaSeleccionada;
+        public string MarcaSeleccionada
+        {
+            get => _marcaSeleccionada;
+            set { _marcaSeleccionada = value; OnPropertyChanged(); ActualizarGraficos(); }
+        }
+
+        private string _categoriaSeleccionada;
+        public string CategoriaSeleccionada
+        {
+            get => _categoriaSeleccionada;
+            set { _categoriaSeleccionada = value; OnPropertyChanged(); ActualizarGraficos(); }
+        }
+
+        // Propiedades para las tarjetas (KPIs)
+        private string _kpiTituloIngresos;
+        public string KpiTituloIngresos { get => _kpiTituloIngresos; set { _kpiTituloIngresos = value; OnPropertyChanged(); } }
+
+        private string _kpiIngresos;
+        public string KpiIngresos { get => _kpiIngresos; set { _kpiIngresos = value; OnPropertyChanged(); } }
+
+        private string _kpiVentas;
+        public string KpiVentas { get => _kpiVentas; set { _kpiVentas = value; OnPropertyChanged(); } }
+
+        private string _kpiProductoEstrellaNombre;
+        public string KpiProductoEstrellaNombre { get => _kpiProductoEstrellaNombre; set { _kpiProductoEstrellaNombre = value; OnPropertyChanged(); } }
+
+        private string _kpiProductoEstrellaDetalle;
+        public string KpiProductoEstrellaDetalle { get => _kpiProductoEstrellaDetalle; set { _kpiProductoEstrellaDetalle = value; OnPropertyChanged(); } }
+
+        // COMANDOS
+        public ICommand GenerarReportePdfCommand { get; }
         public ICommand VerDetalleCommand { get; }
 
         public ReportesViewModel()
         {
+            _reportesService = new ReportesService();
+
+            GraficoVentas = new SeriesCollection();
+            EtiquetasVentas = new List<string>();
+            GraficoVendedores = new SeriesCollection();
+            EtiquetasVendedores = new List<string>();
+            GraficoProductos = new SeriesCollection();
+            FormatoMoneda = valor => valor.ToString("C");
+
             OpcionesPeriodo = new List<string> { "Último Trimestre", "Este Mes", "Esta Semana" };
-            HistorialVentas = new ObservableCollection<VentaResumenDTO>();
+            OpcionesTipoReporte = new List<string> { "Reporte de Ventas", "Rendimiento de Vendedores", "Productos Más Vendidos" };
 
-            // Valores por defecto al abrir la pantalla.
-            PeriodoSeleccionado = "Último Trimestre";
-            FechaFin = DateTime.Now;
-            FechaInicio = DateTime.Now.AddMonths(-3);
+            CargarFiltrosDesdeBD();
 
-            CargarHistorialSimulado();
-            GenerarReporteCommand = new RelayCommand(GenerarReporte);
-            ExportarCommand = new RelayCommand(ExportarReporte);
-            VerDetalleCommand = new RelayCommand(VerDetalle);
+            _tipoReporteSeleccionado = "Reporte de Ventas";
+            _marcaSeleccionada = "Todas";
+            _categoriaSeleccionada = "Todas";
+
+            PeriodoSeleccionado = "Este Mes";
+
+            GenerarReportePdfCommand = new RelayCommand(GenerarPdf);
+
+            _inicializando = false;
+            ActualizarGraficos();
         }
 
-        private void GenerarReporte(object parametro)
-        {
-            // Validación básica para evitar que el usuario busque rangos ilógicos (ej: desde el 20 de mayo hasta el 10 de mayo).
-            if (FechaInicio > FechaFin)
-            {
-                MessageBox.Show("La fecha de inicio no puede ser mayor a la fecha de fin.", "Error de fechas", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                MessageBox.Show($"Generando reporte desde {FechaInicio.ToShortDateString()} hasta {FechaFin.ToShortDateString()}...", "Procesando");
-            }
-        }
-
-        private void ExportarReporte(object parametro)
-        {
-            // Integración futura con librerías como iTextSharp o PDFsharp para generar el PDF.
-            MessageBox.Show("El reporte se ha exportado exitosamente a PDF.", "Exportación Completa", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        // Método auxiliar que traduce el texto del ComboBox en fechas matemáticas reales.
+        // MÉTODOS DE ACTUALIZACIÓN
         private void ActualizarFechasPorPeriodo()
         {
             DateTime hoy = DateTime.Now;
-
             switch (PeriodoSeleccionado)
             {
                 case "Esta Semana":
-                    // Fórmula matemática para encontrar el lunes de la semana actual.
                     int diasDesdeLunes = (7 + (hoy.DayOfWeek - DayOfWeek.Monday)) % 7;
                     FechaInicio = hoy.AddDays(-diasDesdeLunes).Date;
                     FechaFin = hoy.Date;
                     break;
-
                 case "Este Mes":
-                    // Crea una fecha forzando el día a '1' manteniendo el año y mes actual.
                     FechaInicio = new DateTime(hoy.Year, hoy.Month, 1);
                     FechaFin = hoy.Date;
                     break;
-
                 case "Último Trimestre":
                     FechaInicio = hoy.AddMonths(-3).Date;
                     FechaFin = hoy.Date;
@@ -113,45 +142,132 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
-        // Método que se ejecuta al presionar el botón "Ver" (el ojo) en una fila de la grilla de ventas.
-        private void VerDetalle(object parametro)
+        private void ActualizarGraficos()
         {
-            // Se asegura de que el parámetro enviado desde el XAML sea un resumen de venta válido.
-            if (parametro is VentaResumenDTO ventaSeleccionada)
+            if (_inicializando || FechaInicio > FechaFin) return;
+
+            ActualizarKpis();
+
+            GraficoVentas.Clear(); EtiquetasVentas.Clear();
+            GraficoVendedores.Clear(); EtiquetasVendedores.Clear();
+            GraficoProductos.Clear();
+
+            try
             {
-                // Instancia la ventana hija (diseñada para ser un ticket de solo lectura).
-                var ventanaDetalle = new Vistas.DetalleVentaView();
+                switch (TipoReporteSeleccionado)
+                {
+                    case "Reporte de Ventas":
+                        var ventas = _reportesService.GenerarReporteVentas(FechaInicio, FechaFin);
+                        var ventasPorDia = ventas.GroupBy(v => v.Fecha_Hora.Date).OrderBy(g => g.Key).ToList();
+                        var valoresVentas = new ChartValues<decimal>();
 
-                // Le inyecta la venta seleccionada al ViewModel de esa ventana hija.
-                ventanaDetalle.DataContext = new DetalleVentaViewModel(ventaSeleccionada);
+                        foreach (var grupo in ventasPorDia)
+                        {
+                            valoresVentas.Add(grupo.Sum(v => v.Total));
+                            EtiquetasVentas.Add(grupo.Key.ToString("dd/MMM"));
+                        }
 
-                // ShowDialog() oscurece el fondo y bloquea la ventana principal hasta que el usuario cierre el ticket.
-                ventanaDetalle.ShowDialog();
+                        GraficoVentas.Add(new LineSeries { Title = "Recaudación Diaria", Values = valoresVentas, PointGeometrySize = 15 });
+                        break;
+
+                    case "Rendimiento de Vendedores":
+                        var vendedores = _reportesService.GenerarReporteVendedores(FechaInicio, FechaFin);
+                        var valoresVendedores = new ChartValues<decimal>();
+
+                        foreach (var v in vendedores)
+                        {
+                            valoresVendedores.Add(v.TotalRecaudado);
+                            EtiquetasVendedores.Add(v.Vendedor);
+                        }
+
+                        GraficoVendedores.Add(new ColumnSeries { Title = "Total Vendido", Values = valoresVendedores, DataLabels = true });
+                        break;
+
+                    case "Productos Más Vendidos":
+                        var productos = _reportesService.GenerarReporteProductos(FechaInicio, FechaFin, MarcaSeleccionada, CategoriaSeleccionada);
+                        var topProductos = productos.Take(5).ToList();
+
+                        foreach (var p in topProductos)
+                        {
+                            GraficoProductos.Add(new PieSeries { Title = p.Nombre, Values = new ChartValues<decimal> { p.TotalGenerado }, DataLabels = true });
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al actualizar gráficos: " + ex.Message, "Error de DB", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void CargarHistorialSimulado()
+        // GENERACIÓN DE PDF
+        private void GenerarPdf(object parametro)
         {
-            // Datos de prueba para poder visualizar el diseño de la grilla.
-            HistorialVentas.Add(new VentaResumenDTO
+            if (FechaInicio > FechaFin)
             {
-                ID = 1045,
-                Fecha_Hora = DateTime.Now.AddHours(-2),
-                NombreVendedor = "Admin",
-                NombreCliente = "Consumidor Final",
-                MetodoPago = "Efectivo",
-                Total = 125000m
-            });
+                MessageBox.Show("Rango de fechas inválido.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
-            HistorialVentas.Add(new VentaResumenDTO
+            MessageBox.Show($"Generando PDF completo para el reporte: {TipoReporteSeleccionado}\nDesde: {FechaInicio:dd/MM/yyyy} Hasta: {FechaFin:dd/MM/yyyy}",
+                            "Exportación Iniciada", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            // Aca escribis la lógica de QuestPDF.
+        }
+
+        private void CargarFiltrosDesdeBD()
+        {
+            try
             {
-                ID = 1044,
-                Fecha_Hora = DateTime.Now.AddDays(-1),
-                NombreVendedor = "Cajero_1",
-                NombreCliente = "Juan Pérez",
-                MetodoPago = "Tarjeta Débito",
-                Total = 235000m
-            });
+                var marcasDB = _reportesService.ObtenerMarcasParaFiltro();
+                marcasDB.Insert(0, "Todas");
+                OpcionesMarcas = marcasDB;
+
+                var categoriasDB = _reportesService.ObtenerCategoriasParaFiltro();
+                categoriasDB.Insert(0, "Todas");
+                OpcionesCategorias = categoriasDB;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("No se pudieron cargar los filtros de Marcas y Categorías.\n\nDetalle: " + ex.Message, "Advertencia", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                OpcionesMarcas = new List<string> { "Todas" };
+                OpcionesCategorias = new List<string> { "Todas" };
+            }
+        }
+
+        private void ActualizarKpis()
+        {
+            if (_inicializando || FechaInicio > FechaFin) return;
+
+            try
+            {
+                var ventasPeriodo = _reportesService.GenerarReporteVentas(FechaInicio, FechaFin);
+
+                KpiTituloIngresos = $"INGRESOS TOTALES ({PeriodoSeleccionado.ToUpper()})";
+                KpiIngresos = ventasPeriodo.Sum(v => v.Total).ToString("C");
+                KpiVentas = ventasPeriodo.Count.ToString();
+
+                var productosVendidos = _reportesService.GenerarReporteProductos(FechaInicio, FechaFin, "Todas", "Todas");
+                var productoEstrella = productosVendidos.FirstOrDefault();
+
+                if (productoEstrella != null)
+                {
+                    KpiProductoEstrellaNombre = productoEstrella.Nombre;
+                    KpiProductoEstrellaDetalle = $"{productoEstrella.CantidadVendida} pares vendidos";
+                }
+                else
+                {
+                    KpiProductoEstrellaNombre = "Sin movimientos";
+                    KpiProductoEstrellaDetalle = "0 pares vendidos";
+                }
+            }
+            catch (Exception)
+            {
+                KpiIngresos = "$0,00";
+                KpiVentas = "0";
+                KpiProductoEstrellaNombre = "Error de conexión";
+            }
         }
     }
 }
