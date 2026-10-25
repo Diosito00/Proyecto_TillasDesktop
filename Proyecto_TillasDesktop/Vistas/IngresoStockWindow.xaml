@@ -15,10 +15,10 @@
             <TextBlock Text="{Binding ProductoResumen}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource BrushPrimario}" TextWrapping="Wrap" Margin="0,0,0,25"/>
 
             <TextBlock Text="Talle" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding Talle, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding EsModoEdicion}" Margin="0,0,0,15"/>
+            <TextBox Text="{Binding Talle, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding EsModoEdicion}" PreviewTextInput="SoloNumeros_PreviewTextInput" Margin="0,0,0,15"/>
 
             <TextBlock Text="Cantidad a Ingresar" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-            <TextBox Text="{Binding Cantidad, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,25"/>
+            <TextBox Text="{Binding Cantidad, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="SoloNumeros_PreviewTextInput" Margin="0,0,0,25"/>
 
             <Button Content="{Binding TextoBoton}" Command="{Binding GuardarCommand}" IsDefault="True" Height="45" Style="{StaticResource BotonPrimario}"/>
         </StackPanel>

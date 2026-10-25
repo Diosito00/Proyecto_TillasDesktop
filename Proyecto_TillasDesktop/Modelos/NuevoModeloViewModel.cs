@@ -22,6 +22,18 @@ namespace TillasDesktop.UI.Modelos
         // Objeto que envuelve la entidad del producto y avisa a la pantalla cuando alguna de sus propiedades se modifica.
         public ProductoViewModel ProductoActual { get; set; }
 
+        // Propiedad de texto para liberar la escritura en el TextBox del precio (permite puntos y comas)
+        private string _precioVentaTexto;
+        public string PrecioVentaTexto
+        {
+            get => _precioVentaTexto;
+            set
+            {
+                _precioVentaTexto = value;
+                OnPropertyChanged();
+            }
+        }
+
         // Campo privado y propiedad pública para la marca que el usuario selecciona en el ComboBox de la interfaz.
         private Marca _marcaSeleccionada;
         public Marca MarcaSeleccionada { get => _marcaSeleccionada; set { _marcaSeleccionada = value; OnPropertyChanged(); } }
@@ -78,12 +90,27 @@ namespace TillasDesktop.UI.Modelos
             MarcasDisponibles = new ObservableCollection<Marca>(_inventarioService.ObtenerMarcasActivas());
             CategoriasDisponibles = new ObservableCollection<Categoria>(_inventarioService.ObtenerCategoriasActivas());
 
+            // Inicializamos el texto del precio con el valor numérico actual del producto
+            PrecioVentaTexto = ProductoActual.Precio_Venta.ToString();
+
             GuardarCommand = new RelayCommand(Guardar);
         }
 
         // Lógica que se ejecuta al hacer clic en el botón de guardar.
         private void Guardar(object parametro)
         {
+            // Convertimos el texto libre del precio a decimal antes de validar
+            string precioLimpio = PrecioVentaTexto?.Replace(',', '.') ?? string.Empty;
+            if (decimal.TryParse(precioLimpio, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal precioParsed))
+            {
+                ProductoActual.Precio_Venta = precioParsed;
+            }
+            else
+            {
+                ProductoActual.Precio_Venta = -1; // Asignamos un valor inválido para que la validación de abajo lo capture
+            }
+
+
             //  Validaciones explícitas de campos requeridos y coherencia de datos (precio mayor a 0).
             if (string.IsNullOrWhiteSpace(ProductoActual.Codigo_Modelo) ||
                 string.IsNullOrWhiteSpace(ProductoActual.Nombre) ||

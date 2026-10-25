@@ -20,7 +20,7 @@
             <!-- Formulario de carga rápida -->
             <StackPanel Grid.Row="1" Margin="0,0,0,15">
                 <TextBlock Text="Nombre de la Nueva Categoría" FontWeight="SemiBold" Foreground="{StaticResource BrushTextoSecundario}" Margin="0,0,0,5"/>
-                <TextBox Text="{Binding NombreNuevaCategoria, UpdateSourceTrigger=PropertyChanged}" Height="35" Margin="0,0,0,10" VerticalContentAlignment="Center"/>
+                <TextBox Text="{Binding NombreNuevaCategoria, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="SoloLetras_PreviewTextInput" Height="35" Margin="0,0,0,10" VerticalContentAlignment="Center"/>
                 <Button Content="GUARDAR CATEGORÍA" IsDefault="True" Command="{Binding GuardarCategoriaCommand}" Height="40" Style="{StaticResource BotonPrimario}"/>
             </StackPanel>
 
