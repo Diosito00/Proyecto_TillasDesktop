@@ -15,6 +15,9 @@ namespace TillasDesktop.UI.Modelos
     {
         private readonly ReportesService _reportesService;
 
+        private readonly ReportesPdfService _pdfService; // Servicio de PDFs integrado
+
+
         private bool _inicializando = true;
 
         public SeriesCollection GraficoVentas { get; set; }
@@ -28,6 +31,9 @@ namespace TillasDesktop.UI.Modelos
         public List<string> OpcionesTipoReporte { get; set; }
         public List<string> OpcionesMarcas { get; set; }
         public List<string> OpcionesCategorias { get; set; }
+
+        // Delegado para solicitar la captura de pantalla del gráfico desde la Vista
+        public Func<byte[]> SolicitarCapturaGrafico { get; set; }
 
         // PROPIEDADES REACTIVAS
         private string _tipoReporteSeleccionado;
@@ -95,6 +101,8 @@ namespace TillasDesktop.UI.Modelos
         public ReportesViewModel()
         {
             _reportesService = new ReportesService();
+
+            _pdfService = new ReportesPdfService(); // Inicialización del servicio PDF
 
             GraficoVentas = new SeriesCollection();
             EtiquetasVentas = new List<string>();
@@ -209,10 +217,33 @@ namespace TillasDesktop.UI.Modelos
                 return;
             }
 
-            MessageBox.Show($"Generando PDF completo para el reporte: {TipoReporteSeleccionado}\nDesde: {FechaInicio:dd/MM/yyyy} Hasta: {FechaFin:dd/MM/yyyy}",
-                            "Exportación Iniciada", MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                // Obtenemos la imagen del gráfico actual en formato byte[]
+                byte[] graficoBytes = SolicitarCapturaGrafico?.Invoke();
 
-            // Aca escribis la lógica de QuestPDF.
+                switch (TipoReporteSeleccionado)
+                {
+                    case "Reporte de Ventas":
+                        var ventas = _reportesService.GenerarReporteVentas(FechaInicio, FechaFin);
+                        _pdfService.GenerarReporteVentasPdf(FechaInicio, FechaFin, ventas, graficoBytes); // <--- Agregado graficoBytes
+                        break;
+
+                    case "Rendimiento de Vendedores":
+                        var vendedores = _reportesService.GenerarReporteVendedores(FechaInicio, FechaFin);
+                        _pdfService.GenerarReporteVendedoresPdf(FechaInicio, FechaFin, vendedores, graficoBytes); // <--- Agregado graficoBytes
+                        break;
+
+                    case "Productos Más Vendidos":
+                        var productos = _reportesService.GenerarReporteProductos(FechaInicio, FechaFin, MarcaSeleccionada, CategoriaSeleccionada);
+                        _pdfService.GenerarReporteProductosPdf(FechaInicio, FechaFin, MarcaSeleccionada, CategoriaSeleccionada, productos, graficoBytes); // <--- Agregado graficoBytes
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al generar el documento PDF: " + ex.Message, "Error de Exportación", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CargarFiltrosDesdeBD()

@@ -153,7 +153,7 @@
                 <TextBlock Text="{Binding TipoReporteSeleccionado}" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15" VerticalAlignment="Top"/>
 
                 <!-- GRÁFICO 1: REPORTE DE VENTAS (Línea de tiempo) -->
-                <lvc:CartesianChart Series="{Binding GraficoVentas}" Margin="0,35,0,0">
+                <lvc:CartesianChart x:Name="GraficoVentasControl" Series="{Binding GraficoVentas}" Margin="0,35,0,0">
                     <lvc:CartesianChart.Style>
                         <Style TargetType="lvc:CartesianChart">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -173,7 +173,7 @@
                 </lvc:CartesianChart>
 
                 <!-- GRÁFICO 2: RENDIMIENTO DE VENDEDORES (Barras) -->
-                <lvc:CartesianChart Series="{Binding GraficoVendedores}" Margin="0,35,0,0">
+                <lvc:CartesianChart x:Name="GraficoVendedoresControl" Series="{Binding GraficoVendedores}" Margin="0,35,0,0">
                     <lvc:CartesianChart.Style>
                         <Style TargetType="lvc:CartesianChart">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -193,7 +193,7 @@
                 </lvc:CartesianChart>
 
                 <!-- GRÁFICO 3: PRODUCTOS MÁS VENDIDOS (Torta/Pie) -->
-                <lvc:PieChart Series="{Binding GraficoProductos}" LegendLocation="Right" Margin="0,35,0,0">
+                <lvc:PieChart x:Name="GraficoProductosControl" Series="{Binding GraficoProductos}" LegendLocation="Right" Margin="0,35,0,0">
                     <lvc:PieChart.Style>
                         <Style TargetType="lvc:PieChart">
                             <Setter Property="Visibility" Value="Collapsed"/>
