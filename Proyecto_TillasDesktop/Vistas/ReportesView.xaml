@@ -142,7 +142,7 @@
         </Grid>
 
         <!-- ========================================== -->
-        <!-- FILA 2: DATAGRID DE HISTORIAL DE VENTAS    -->
+        <!-- FILA 2: GRAFICOS    -->
         <!-- ========================================== -->
         <Border Grid.Row="2" Background="White" CornerRadius="8" Padding="20">
             <Border.Effect>
@@ -153,9 +153,10 @@
                 <TextBlock Text="{Binding TipoReporteSeleccionado}" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15" VerticalAlignment="Top"/>
 
                 <!-- GRÁFICO 1: REPORTE DE VENTAS (Línea de tiempo) -->
-                <lvc:CartesianChart x:Name="GraficoVentasControl" Series="{Binding GraficoVentas}" Margin="0,35,0,0">
-                    <lvc:CartesianChart.Style>
-                        <Style TargetType="lvc:CartesianChart">
+                <!-- Zona segura con Border -->
+                <Border x:Name="GraficoVentasControl" Background="White" Margin="0,35,0,0" Padding="20">
+                    <Border.Style>
+                        <Style TargetType="Border">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding TipoReporteSeleccionado}" Value="Reporte de Ventas">
@@ -163,19 +164,23 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </lvc:CartesianChart.Style>
-                    <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Días" Labels="{Binding EtiquetasVentas}" />
-                    </lvc:CartesianChart.AxisX>
-                    <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="Ingresos" LabelFormatter="{Binding FormatoMoneda}" />
-                    </lvc:CartesianChart.AxisY>
-                </lvc:CartesianChart>
+                    </Border.Style>
+
+                    <lvc:CartesianChart Series="{Binding GraficoVentas}" Height="600" FontSize="22">
+                        <lvc:CartesianChart.AxisX>
+                            <lvc:Axis Title="Días" Labels="{Binding EtiquetasVentas}" />
+                        </lvc:CartesianChart.AxisX>
+                        <lvc:CartesianChart.AxisY>
+                            <lvc:Axis Title="Ingresos" LabelFormatter="{Binding FormatoMoneda}" />
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+                </Border>
 
                 <!-- GRÁFICO 2: RENDIMIENTO DE VENDEDORES (Barras) -->
-                <lvc:CartesianChart x:Name="GraficoVendedoresControl" Series="{Binding GraficoVendedores}" Margin="0,35,0,0">
-                    <lvc:CartesianChart.Style>
-                        <Style TargetType="lvc:CartesianChart">
+                <!-- Zona segura con Border -->
+                <Border x:Name="GraficoVendedoresControl" Background="White" Margin="0,35,0,0" Padding="20">
+                    <Border.Style>
+                        <Style TargetType="Border">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding TipoReporteSeleccionado}" Value="Rendimiento de Vendedores">
@@ -183,19 +188,23 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </lvc:CartesianChart.Style>
-                    <lvc:CartesianChart.AxisX>
-                        <lvc:Axis Title="Cajeros / Vendedores" Labels="{Binding EtiquetasVendedores}" />
-                    </lvc:CartesianChart.AxisX>
-                    <lvc:CartesianChart.AxisY>
-                        <lvc:Axis Title="Total Recaudado" LabelFormatter="{Binding FormatoMoneda}" />
-                    </lvc:CartesianChart.AxisY>
-                </lvc:CartesianChart>
+                    </Border.Style>
+
+                    <lvc:CartesianChart Series="{Binding GraficoVendedores}" Height="600" FontSize="22">
+                        <lvc:CartesianChart.AxisX>
+                            <lvc:Axis Title="Cajeros / Vendedores" Labels="{Binding EtiquetasVendedores}" />
+                        </lvc:CartesianChart.AxisX>
+                        <lvc:CartesianChart.AxisY>
+                            <lvc:Axis Title="Total Recaudado" LabelFormatter="{Binding FormatoMoneda}" />
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+                </Border>
 
                 <!-- GRÁFICO 3: PRODUCTOS MÁS VENDIDOS (Torta/Pie) -->
-                <lvc:PieChart x:Name="GraficoProductosControl" Series="{Binding GraficoProductos}" LegendLocation="Right" Margin="0,35,0,0">
-                    <lvc:PieChart.Style>
-                        <Style TargetType="lvc:PieChart">
+                <!-- Le damos el x:Name al Border y un Padding de 20 para crear una "zona segura" para la captura -->
+                <Border x:Name="GraficoProductosControl" Background="White" Margin="0,35,0,0" Padding="20">
+                    <Border.Style>
+                        <Style TargetType="Border">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding TipoReporteSeleccionado}" Value="Productos Más Vendidos">
@@ -203,8 +212,10 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </lvc:PieChart.Style>
-                </lvc:PieChart>
+                    </Border.Style>
+
+                    <lvc:PieChart Series="{Binding GraficoProductos}" LegendLocation="Right" Height="550" FontSize="22"/>
+                </Border>
             </Grid>
         </Border>
     </Grid>

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Globalization;
 using LiveCharts;
 using LiveCharts.Wpf;
 using TillasDesktop.BLL.Services;
@@ -109,7 +110,7 @@ namespace TillasDesktop.UI.Modelos
             GraficoVendedores = new SeriesCollection();
             EtiquetasVendedores = new List<string>();
             GraficoProductos = new SeriesCollection();
-            FormatoMoneda = valor => valor.ToString("C");
+            FormatoMoneda = valor => valor.ToString("C", new CultureInfo("es-AR"));
 
             OpcionesPeriodo = new List<string> { "Último Trimestre", "Este Mes", "Esta Semana" };
             OpcionesTipoReporte = new List<string> { "Reporte de Ventas", "Rendimiento de Vendedores", "Productos Más Vendidos" };
@@ -172,7 +173,7 @@ namespace TillasDesktop.UI.Modelos
                         foreach (var grupo in ventasPorDia)
                         {
                             valoresVentas.Add(grupo.Sum(v => v.Total));
-                            EtiquetasVentas.Add(grupo.Key.ToString("dd/MMM"));
+                            EtiquetasVentas.Add(grupo.Key.ToString("dd/MMM/yy"));
                         }
 
                         GraficoVentas.Add(new LineSeries { Title = "Recaudación Diaria", Values = valoresVentas, PointGeometrySize = 15 });
@@ -194,10 +195,19 @@ namespace TillasDesktop.UI.Modelos
                     case "Productos Más Vendidos":
                         var productos = _reportesService.GenerarReporteProductos(FechaInicio, FechaFin, MarcaSeleccionada, CategoriaSeleccionada);
                         var topProductos = productos.Take(5).ToList();
+                        var formatoAr = new CultureInfo("es-AR");
 
                         foreach (var p in topProductos)
                         {
-                            GraficoProductos.Add(new PieSeries { Title = p.Nombre, Values = new ChartValues<decimal> { p.TotalGenerado }, DataLabels = true });
+                            GraficoProductos.Add(new PieSeries
+                            {
+                                Title = $"{p.Nombre} ({p.CantidadVendida} pares - ${p.TotalGenerado.ToString("N2", formatoAr)})",
+
+                                Values = new ChartValues<decimal> { p.TotalGenerado },
+                                DataLabels = true,
+
+                                LabelPoint = chartPoint => chartPoint.Y.ToString("C", formatoAr)
+                            });
                         }
                         break;
                 }
