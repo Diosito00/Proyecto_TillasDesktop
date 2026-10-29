@@ -17,7 +17,7 @@ namespace TillasDesktop.DAL.Repositorios
                     SELECT 
                         v.ID, 
                         v.Fecha_Hora, 
-                        u.nombre_usuario AS Vendedor, 
+                        CONCAT(u.nombre, ' ', u.apellido) AS Vendedor, 
                         ISNULL(c.Nombre + ' ' + c.Apellido, 'Consumidor Final') AS Cliente, 
                         tp.Nombre AS MetodoPago, 
                         v.Total 
@@ -62,13 +62,13 @@ namespace TillasDesktop.DAL.Repositorios
             {
                 string query = @"
                     SELECT 
-                        u.nombre_usuario AS Vendedor, 
+                        CONCAT(u.nombre, ' ', u.apellido) AS Vendedor, 
                         COUNT(v.ID) AS CantidadVentas, 
                         SUM(v.Total) AS TotalRecaudado 
                     FROM Ventas v
                     INNER JOIN Usuarios u ON v.Usuario_ID = u.id_usuario
                     WHERE v.Fecha_Hora >= @Inicio AND v.Fecha_Hora <= @Fin
-                    GROUP BY u.nombre_usuario
+                    GROUP BY u.nombre, u.apellido
                     ORDER BY TotalRecaudado DESC";
 
                 using (var cmd = new SqlCommand(query, conexion))

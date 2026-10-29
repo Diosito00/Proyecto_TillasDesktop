@@ -166,7 +166,7 @@
                         </Style>
                     </Border.Style>
 
-                    <lvc:CartesianChart Series="{Binding GraficoVentas}" Height="600" FontSize="22">
+                    <lvc:CartesianChart Series="{Binding GraficoVentas}" MinHeight="250" MaxHeight="600" FontSize="14">
                         <lvc:CartesianChart.AxisX>
                             <lvc:Axis Title="Días" Labels="{Binding EtiquetasVentas}" />
                         </lvc:CartesianChart.AxisX>
@@ -190,7 +190,7 @@
                         </Style>
                     </Border.Style>
 
-                    <lvc:CartesianChart Series="{Binding GraficoVendedores}" Height="600" FontSize="22">
+                    <lvc:CartesianChart Series="{Binding GraficoVendedores}" MinHeight="250" MaxHeight="600" FontSize="14">
                         <lvc:CartesianChart.AxisX>
                             <lvc:Axis Title="Cajeros / Vendedores" Labels="{Binding EtiquetasVendedores}" />
                         </lvc:CartesianChart.AxisX>
@@ -214,7 +214,7 @@
                         </Style>
                     </Border.Style>
 
-                    <lvc:PieChart Series="{Binding GraficoProductos}" LegendLocation="Right" Height="550" FontSize="22"/>
+                    <lvc:PieChart Series="{Binding GraficoProductos}" LegendLocation="Right" MinHeight="250" MaxHeight="550" FontSize="14"/>
                 </Border>
             </Grid>
         </Border>
