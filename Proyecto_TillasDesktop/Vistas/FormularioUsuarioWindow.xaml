@@ -5,7 +5,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Gestión de Usuario" Height="750" Width="400" 
-        WindowStartupLocation="CenterScreen" Background="#F0F4F8" ResizeMode="NoResize">
+        WindowStartupLocation="CenterScreen" Background="#F0F4F8" ResizeMode="NoResize"
+        Icon="pack://application:,,,/Recursos/Tillas.ico">
 
     <!-- Contenedor visual Border que genera una tarjeta blanca con esquinas redondeadas y márgenes decorativos. -->
     <Border Background="White" CornerRadius="10" Margin="20" Padding="20">

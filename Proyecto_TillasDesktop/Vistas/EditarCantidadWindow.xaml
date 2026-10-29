@@ -8,8 +8,9 @@
         Title="Editar Cantidad" Height="280" Width="320"
         WindowStartupLocation="CenterScreen" 
         ResizeMode="NoResize"
-        Topmost="True">
-    
+        Topmost="True"
+        Icon="pack://application:,,,/Recursos/Tillas.ico">
+
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
         <Border Background="White" CornerRadius="10" Margin="10" Padding="20">
             <Border.Effect>

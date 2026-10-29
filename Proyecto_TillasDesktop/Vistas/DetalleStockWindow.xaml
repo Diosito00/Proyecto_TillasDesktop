@@ -4,7 +4,9 @@
         Title="{Binding TituloVentana}" 
         Height="650" Width="600"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-        Background="#F5F6FA">
+        Background="#F5F6FA"
+        Icon="pack://application:,,,/Recursos/Tillas.ico">
+    
     <!-- Un gris muy sutil para el fondo -->
     <Border Background="White" CornerRadius="10" Margin="20" Padding="20">
         <Border.Effect>

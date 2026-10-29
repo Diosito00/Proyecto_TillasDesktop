@@ -9,10 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Recursos\**" />
-    <EmbeddedResource Remove="Recursos\**" />
-    <None Remove="Recursos\**" />
-    <Page Remove="Recursos\**" />
+    <None Remove="Recursos\Tillas.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +20,10 @@
   <ItemGroup>
     <ProjectReference Include="..\TillasDesktop.BLL\TillasDesktop.BLL.csproj" />
     <ProjectReference Include="..\TillasDesktop.Entities\TillasDesktop.Entities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Recursos\Tillas.ico" />
   </ItemGroup>
 
   <ItemGroup>

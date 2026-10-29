@@ -4,7 +4,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Gestión de Cliente" Height="550" Width="400"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
-        Background="#F0F4F8">
+        Background="#F0F4F8"
+        Icon="pack://application:,,,/Recursos/Tillas.ico">
 
     <!-- Contenedor visual Border que genera una tarjeta blanca con esquinas redondeadas y márgenes decorativos. -->
     <Border Background="White" CornerRadius="10" Margin="20" Padding="20">

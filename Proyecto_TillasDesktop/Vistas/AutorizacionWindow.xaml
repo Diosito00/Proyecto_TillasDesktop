@@ -4,7 +4,8 @@
         Title="Autorización Requerida" Height="360" Width="350"
         WindowStartupLocation="CenterScreen" 
         ResizeMode="NoResize" 
-        Topmost="True" Background="#F5F6FA">
+        Topmost="True" Background="#F5F6FA"
+        Icon="pack://application:,,,/Recursos/Tillas.ico">
 
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
         <Border Background="White" CornerRadius="10" Margin="10" Padding="20">
