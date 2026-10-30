@@ -32,7 +32,6 @@ namespace TillasDesktop.UI.Vistas
             var vm = this.DataContext as ReportesViewModel;
             if (vm == null) return null;
 
-            // Identificamos cuál gráfico está visible según el reporte seleccionado
             if (vm.TipoReporteSeleccionado == "Reporte de Ventas")
                 chartControl = GraficoVentasControl;
             else if (vm.TipoReporteSeleccionado == "Rendimiento de Vendedores")
@@ -40,25 +39,52 @@ namespace TillasDesktop.UI.Vistas
             else if (vm.TipoReporteSeleccionado == "Productos Más Vendidos")
                 chartControl = GraficoProductosControl;
 
-            if (chartControl == null || chartControl.ActualWidth <= 0 || chartControl.ActualHeight <= 0)
-                return null;
+            if (chartControl == null) return null;
 
-            // Forzamos actualización de diseño y renderizamos a mapa de bits
-            chartControl.UpdateLayout();
+            // DEFINIMOS UN TAMAÑO FIJO PARA LA EXPORTACIÓN
+            // Esto evita los cortes por redimensionamiento dinámico
+            int width = 1100;
+            int height = 380;
 
-            int width = (int)chartControl.ActualWidth;
-            int height = (int)chartControl.ActualHeight;
+            // Guardamos los valores originales para restaurarlos después
+            var originalWidth = chartControl.Width;
+            var originalHeight = chartControl.Height;
 
-            var rtb = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
-            rtb.Render(chartControl);
-
-            var encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(rtb));
-
-            using (var ms = new MemoryStream())
+            try
             {
-                encoder.Save(ms);
-                return ms.ToArray();
+                // Desacoplamos temporalmente el control forzando un tamaño fijo
+                chartControl.Width = width;
+                chartControl.Height = height;
+
+                // Forzamos al sistema de WPF a medir y dibujar el control con este nuevo tamaño exacto
+                chartControl.Measure(new Size(width, height));
+                chartControl.Arrange(new Rect(new Size(width, height)));
+                chartControl.UpdateLayout();
+
+                // Capturamos el mapa de bits
+                var rtb = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+                rtb.Render(chartControl);
+
+                // Codificamos a PNG
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(rtb));
+
+                using (var ms = new MemoryStream())
+                {
+                    encoder.Save(ms);
+                    return ms.ToArray();
+                }
+            }
+            finally
+            {
+                // Devolvemos el control a su estado normal
+                chartControl.Width = originalWidth;
+                chartControl.Height = originalHeight;
+
+                // Devolvemos el diseño a la normalidad en la vista
+                chartControl.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                chartControl.Arrange(new Rect(new Size(chartControl.ActualWidth, chartControl.ActualHeight)));
+                chartControl.UpdateLayout();
             }
         }
     }
