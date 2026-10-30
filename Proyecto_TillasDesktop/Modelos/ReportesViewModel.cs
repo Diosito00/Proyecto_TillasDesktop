@@ -227,6 +227,19 @@ namespace TillasDesktop.UI.Modelos
                 return;
             }
 
+            // Cuadro de diálogo de confirmación para el usuario
+            var resultado = MessageBox.Show(
+                $"¿Desea generar el documento PDF correspondiente al reporte de '{TipoReporteSeleccionado}'?\n\nPeríodo: {FechaInicio:dd/MM/yyyy} al {FechaFin:dd/MM/yyyy}",
+                "Confirmar Generación de PDF",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (resultado != MessageBoxResult.Yes)
+            {
+                return; // Si el usuario selecciona "No", se cancela la operación
+            }
+
+
             try
             {
                 // Obtenemos la imagen del gráfico actual en formato byte[]
