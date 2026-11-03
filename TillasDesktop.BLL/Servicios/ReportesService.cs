@@ -1,5 +1,8 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
+using System.Configuration;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 using TillasDesktop.DAL.Repositorios;
 using TillasDesktop.Entities.Reportes;
@@ -58,6 +61,28 @@ namespace TillasDesktop.BLL.Services
             catch (Exception ex)
             {
                 throw new Exception("Error al cargar categorías desde el inventario: " + ex.Message);
+            }
+        }
+        public int ObtenerCantidadProductosBajoStock(int limiteStockMinimo = 5)
+        {
+            try
+            {
+                string conexionStr = ConfigurationManager.ConnectionStrings["ConexionTillas"].ConnectionString;
+
+                // Consulta a la tabla real de talles y stock
+                string query = "SELECT COUNT(*) FROM Producto_Talles WHERE Stock_Actual <= @Limite";
+
+                using (var con = new SqlConnection(conexionStr))
+                using (var cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@Limite", limiteStockMinimo);
+                    con.Open();
+                    return Convert.ToInt32(cmd.ExecuteScalar());
+                }
+            }
+            catch
+            {
+                return 0;
             }
         }
     }
