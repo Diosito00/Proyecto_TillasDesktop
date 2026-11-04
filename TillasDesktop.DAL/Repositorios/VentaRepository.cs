@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using TillasDesktop.DAL.Base;
 using TillasDesktop.Entities.Facturacion;
+using TillasDesktop.Entities.Reportes;
 
 namespace TillasDesktop.DAL.Repositorios
 {
@@ -345,6 +346,52 @@ namespace TillasDesktop.DAL.Repositorios
                 }
             }
             return lista;
+        }
+
+        public List<LineaDetalleVentaDTO> ObtenerDetallesPorVenta(int ventaId)
+        {
+            var listaDetalles = new List<LineaDetalleVentaDTO>();
+
+            using (var conexion = ObtenerConexion())
+            {
+                // Cruzamos Detalle_Ventas con Producto_Talles, Productos y Marca
+                string query = @"SELECT 
+                            P.Codigo_Modelo,
+                            P.Nombre AS NombreProducto,
+                            M.Nombre AS Marca,
+                            PT.Talle,
+                            DV.Cantidad,
+                            DV.Precio_Unitario
+                         FROM Detalle_Ventas DV
+                         INNER JOIN Producto_Talles PT ON DV.Producto_Talle_ID = PT.ID
+                         INNER JOIN Productos P ON PT.Producto_ID = P.ID
+                         INNER JOIN Marca M ON P.Marca_ID = M.ID
+                         WHERE DV.Venta_ID = @Venta_ID";
+
+                using (var comando = new SqlCommand(query, conexion))
+                {
+                    comando.Parameters.AddWithValue("@Venta_ID", ventaId);
+                    conexion.Open();
+
+                    using (var lector = comando.ExecuteReader())
+                    {
+                        while (lector.Read())
+                        {
+                            listaDetalles.Add(new LineaDetalleVentaDTO
+                            {
+                                CodigoModelo = lector.GetString(0),
+                                NombreProducto = lector.GetString(1),
+                                Marca = lector.GetString(2),                               
+                                Talle = Convert.ToDecimal(lector.GetValue(3)),
+                                Cantidad = lector.GetInt32(4),
+                                PrecioUnitario = lector.GetDecimal(5)
+                            });
+                        }
+                    }
+                }
+            }
+
+            return listaDetalles;
         }
     }
 }

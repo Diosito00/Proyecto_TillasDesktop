@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TillasDesktop.DAL.Repositorios;
 using TillasDesktop.Entities.Facturacion;
+using TillasDesktop.Entities.Reportes;
 
 namespace TillasDesktop.BLL.Services
 {
@@ -102,6 +103,21 @@ namespace TillasDesktop.BLL.Services
 
             // Si pasa las validaciones, delegamos la transacción a la capa de datos.
             return _ventaRepo.RegistrarVenta(nuevaVenta, nuevoPago, carrito, out mensajeRespuesta);
+        }
+
+        public List<LineaDetalleVentaDTO> ObtenerDetallesVenta(int ventaId)
+        {
+            try
+            {
+                if (ventaId <= 0) return new List<LineaDetalleVentaDTO>();
+
+                return _ventaRepo.ObtenerDetallesPorVenta(ventaId);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Error al obtener los detalles de la venta: " + ex.Message, "Error BD", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return new List<LineaDetalleVentaDTO>();
+            }
         }
     }
 }

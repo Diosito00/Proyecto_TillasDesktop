@@ -45,7 +45,7 @@ namespace TillasDesktop.UI.Vistas
             // Forzar que el layout esté al día antes de capturar
             chartControl.UpdateLayout();
 
-            // DPI real del monitor
+            // DPI del monitor
             var dpi = VisualTreeHelper.GetDpi(chartControl);
             double dpiX = dpi.PixelsPerInchX;
             double dpiY = dpi.PixelsPerInchY;

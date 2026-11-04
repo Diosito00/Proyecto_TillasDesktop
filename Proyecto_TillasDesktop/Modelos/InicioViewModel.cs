@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using TillasDesktop.UI.Vistas;
 using TillasDesktop.BLL.Services;
 using TillasDesktop.Entities.Reportes;
 
@@ -34,8 +35,7 @@ namespace TillasDesktop.UI.Modelos
 
         // VISIBILIDAD Y TEXTOS DINÁMICOS
         // Controlan la estructura de la pantalla sin necesidad de tocar el Code-Behind.
-        // Visibility es un enumerador de WPF (Visible, Collapsed, Hidden).
-        public Visibility VisibilidadGrafico { get; set; }
+        // Visibility es un enumerador de WPF (Visible, Collapsed, Hidden).      
         public Visibility VisibilidadObjetivos { get; set; }
         public string TituloTablaVentas { get; set; }
 
@@ -59,6 +59,8 @@ namespace TillasDesktop.UI.Modelos
         // ObservableCollection avisa al DataGrid (Tabla) si un nuevo registro se añade o elimina en tiempo real (aun no hay conexion con la tabla Ventas).
         // Reutilizamos la entidad VentaResumenDTO de la capa de reportes.
         public ObservableCollection<VentaResumenDTO> UltimasVentasList { get; set; }
+
+        public ICommand VerDetallesCommand { get; }
 
         public InicioViewModel()
         {
@@ -85,6 +87,8 @@ namespace TillasDesktop.UI.Modelos
 
             // CARGAR DATOS REALES DESDE LA BASE DE DATOS
             CargarDatosDesdeBaseDeDatos(nombre);
+
+            VerDetallesCommand = new RelayCommand(AbrirDetallesVenta);
         }
 
 
@@ -135,8 +139,7 @@ namespace TillasDesktop.UI.Modelos
                     Kpi3Titulo = "RECAUDACIÓN HOY";
                     Kpi3Valor = recaudacionVendedorHoy.ToString("C0");
 
-                    TituloTablaVentas = "MIS ÚLTIMAS VENTAS";
-                    VisibilidadGrafico = Visibility.Collapsed;
+                    TituloTablaVentas = "MIS ÚLTIMAS VENTAS";                   
                     VisibilidadObjetivos = Visibility.Visible;
 
                     // Lógica para la barra de objetivos (ejemplo basado en metas de 40 pares mensuales)
@@ -164,40 +167,26 @@ namespace TillasDesktop.UI.Modelos
                     Kpi3Valor = $"{alertasStock} Modelos";
 
                     TituloTablaVentas = "ÚLTIMAS VENTAS";
-                    VisibilidadGrafico = Visibility.Visible;
                     VisibilidadObjetivos = Visibility.Collapsed;
-
-                    // CONSTRUCCIÓN DEL GRÁFICO SEMANAL REAL (Últimos 7 días)
-                    var valoresSumaDias = new ChartValues<double>();
-                    var listaEtiquetas = new List<string>();
-
-                    for (int i = 6; i >= 0; i--)
-                    {
-                        DateTime diaIteracion = hoy.AddDays(-i);
-                        decimal sumaDia = todasLasVentas
-                            .Where(v => v.Fecha_Hora.Date == diaIteracion.Date)
-                            .Sum(v => v.Total);
-
-                        valoresSumaDias.Add((double)sumaDia);
-                        listaEtiquetas.Add(diaIteracion.ToString("ddd")); 
-                    }
-
-                    SeriesCollectionVentas.Clear();
-                    SeriesCollectionVentas.Add(new LineSeries
-                    {
-                        Title = "Recaudación",
-                        Values = valoresSumaDias,
-                        PointGeometrySize = 10,
-                        LineSmoothness = 0.6
-                    });
-
-                    LabelsDias = listaEtiquetas.ToArray();
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error al conectar con la base de datos para cargar el inicio: " + ex.Message,
                                 "Error de Conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void AbrirDetallesVenta(object parametro)
+        {
+            // El parámetro es el objeto de la fila seleccionada en el DataGrid
+            if (parametro != null)
+            {
+                // Instanciamos la nueva vista pasándole la venta completa
+                var ventanaDetalle = new DetalleVentaWindow(parametro);
+
+                // ShowDialog() abre la ventana de forma modal (bloquea el fondo hasta que se cierre)
+                ventanaDetalle.ShowDialog();
             }
         }
     }

@@ -83,37 +83,8 @@
             </Border>
         </UniformGrid>
 
-        <!-- ZONA CENTRAL: GRÁFICO (Admin) O OBJETIVOS (Vendedor) -->
+        <!-- ZONA CENTRAL: OBJETIVOS (Vendedor) -->
         <Grid Grid.Row="2" Margin="0,0,0,10">
-
-            <!-- PANEL DE RENDIMIENTO (Admin/Gerente) -->
-            <Border Visibility="{Binding VisibilidadGrafico}" Background="White" CornerRadius="8" Padding="20">
-                <Border.Effect>
-                    <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
-                </Border.Effect>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="250"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="RENDIMIENTO SEMANAL" FontSize="13" FontWeight="Bold" Foreground="{StaticResource BrushTextoPrincipal}" Margin="0,0,0,15"/>
-
-                    <lvc:CartesianChart Grid.Row="1" Series="{Binding SeriesCollectionVentas}" LegendLocation="None">
-                        <lvc:CartesianChart.AxisX>
-                            <lvc:Axis Labels="{Binding LabelsDias}">
-                                <lvc:Axis.Separator>
-                                    <lvc:Separator Step="1" />
-                                </lvc:Axis.Separator>
-                            </lvc:Axis>
-                        </lvc:CartesianChart.AxisX>
-                        <lvc:CartesianChart.AxisY>
-                            <lvc:Axis LabelFormatter="{Binding FormatterMoneda}" />
-                        </lvc:CartesianChart.AxisY>
-                    </lvc:CartesianChart>
-                </Grid>
-            </Border>
-
-            <!-- PANEL DE OBJETIVOS (Vendedor) -->
             <Border Visibility="{Binding VisibilidadObjetivos}" Background="White" CornerRadius="8" Padding="30">
                 <Border.Effect>
                     <DropShadowEffect Color="#A0B0C0" Direction="270" ShadowDepth="3" BlurRadius="15" Opacity="0.2"/>
@@ -151,6 +122,15 @@
                         <DataGridTextColumn Header="PAGO" Width="*" Binding="{Binding MetodoPago}"/>
                         <DataGridTextColumn Header="TOTAL" Width="*" Binding="{Binding Total, StringFormat=C}"/>
                         <DataGridTextColumn Header="VENDEDOR" Width="*" Binding="{Binding NombreVendedor}"/>
+                        <DataGridTemplateColumn Header="ACCIONES" Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="👁" 
+                                            Command="{Binding DataContext.VerDetallesCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                            CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Cursor="Hand"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

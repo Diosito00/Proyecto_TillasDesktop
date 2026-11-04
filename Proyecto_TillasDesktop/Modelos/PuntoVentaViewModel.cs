@@ -97,7 +97,7 @@ namespace TillasDesktop.UI.Modelos
             _clienteService = new ClienteService();
 
             // Liberamos reservas colgadas al abrir la caja.
-            _ventasService.LimpiarReservasPendientes();         
+            // _ventasService.LimpiarReservasPendientes();
 
             FechaActual = DateTime.Now.ToString("dd/MM/yyyy");
 
@@ -142,7 +142,8 @@ namespace TillasDesktop.UI.Modelos
                 // Devuelve true si el filtro coincide con el Nombre, el Código SKU o la Marca.
                 return (producto.Nombre != null && producto.Nombre.ToLower().Contains(filtro)) ||
                        (producto.Codigo_Modelo != null && producto.Codigo_Modelo.ToLower().Contains(filtro)) ||
-                       (producto.NombreMarca != null && producto.NombreMarca.ToLower().Contains(filtro));
+                       (producto.NombreMarca != null && producto.NombreMarca.ToLower().Contains(filtro)) ||
+                       (producto.Talle.ToString().Contains(filtro));
             }
             return false;
         }
@@ -282,7 +283,7 @@ namespace TillasDesktop.UI.Modelos
                 Total = TotalCobrar
             };
 
-            // Preparamos el pago con el ID real
+            // Preparamos el pago con el ID
             var nuevoPago = new Pago
             {
                 Tipo_Pago_ID = MetodoPagoSeleccionado.ID,
