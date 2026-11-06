@@ -1,23 +1,26 @@
-﻿using System.ComponentModel;
+﻿// Importa las interfaces para la notificación de metadatos y componentes
+using System.ComponentModel;
+// Importa los atributos para la captura automática de miembros en tiempo de compilación
 using System.Runtime.CompilerServices;
 
+// Define el espacio de nombres (namespace) correspondiente a los modelos de vista de la interfaz gráfica del sistema
 namespace TillasDesktop.UI.Modelos
 {
-    // Es una clase abstracta porque nunca la instanciarás directamente (nunca harás 'new ViewModelBase()'). 
-    // Solo sirve para que otras clases la hereden.
-    // Implementa INotifyPropertyChanged, la interfaz nativa de WPF para detectar cambios.
+    // Declara la clase abstracta pública 'ViewModelBase' que implementa 'INotifyPropertyChanged', 
+    // la interfaz nativa fundamental de WPF para habilitar la reactividad y la sincronización de datos mediante enlace (Binding).
+    // Es abstracta porque nunca se instancia directamente (no se crea un "new ViewModelBase()"); solo sirve como clase base para heredar sus capacidades a todos los demás ViewModels.
     public abstract class ViewModelBase : INotifyPropertyChanged
     {
-        // Evento principal al que se suscribe el motor gráfico de WPF (XAML).
+        // Evento principal al que se suscribe automáticamente el motor gráfico de WPF (XAML) para enterarse cuando un valor se modifica en memoria.
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        // Método protegido que invocarán los hijos (como UsuarioViewModel o ReportesViewModel) cuando una propiedad cambie.
-        // [CallerMemberName] es un atributo de C# que detecta automáticamente el nombre de la propiedad 
-        // que llamó al método, evitando que tengas que escribir textos quemados como OnPropertyChanged("Nombre").
+        // Método protegido que invocarán las clases hijas (como UsuarioViewModel, InventarioViewModel, etc.) cada vez que una propiedad sufra cambios.
+        // El atributo [CallerMemberName] es una característica avanzada de C# que detecta de forma automática e implícita 
+        // el nombre exacto de la propiedad que invocó al método, evitando la necesidad de escribir cadenas de texto quemadas o propensas a errores (ej. OnPropertyChanged("Nombre")).
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            // Dispara el evento indicando exactamente qué propiedad cambió 
-            // para que WPF solo redibuje ese pedacito de la pantalla y no toda la ventana completa.
+            // Dispara el evento PropertyChanged indicando exactamente qué propiedad cambió, 
+            // permitiendo que el motor de WPF redibuje de manera optimizada únicamente ese control específico en la pantalla en lugar de recargar toda la ventana.
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }

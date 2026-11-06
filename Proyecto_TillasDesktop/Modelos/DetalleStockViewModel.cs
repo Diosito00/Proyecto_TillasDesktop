@@ -1,24 +1,42 @@
-﻿using System;
+﻿// Importa el espacio de nombres fundamental de .NET para tipos base y utilidades generales
+using System;
+// Importa las colecciones observables de WPF para actualizar automáticamente las grillas de la interfaz al agregar o quitar elementos
 using System.Collections.ObjectModel;
-using System.Linq; 
+// Importa las extensiones de LINQ para realizar consultas y operaciones sobre colecciones en memoria (como sumas o búsquedas)
+using System.Linq;
+// Importa las clases base de WPF para la gestión de la aplicación y cuadros de diálogo interactivos
 using System.Windows;
+// Importa las utilidades de comandos y eventos de entrada de la interfaz de usuario en WPF
 using System.Windows.Input;
+// Importa los servicios de la Capa de Negocios (BLL) encargados de gestionar las reglas e inventario de productos
 using TillasDesktop.BLL.Services;
+// Importa las entidades del dominio de inventario (como Producto y ProductoTalle)
 using TillasDesktop.Entities.Inventario;
+// Importa las vistas de la interfaz de usuario de la aplicación
 using TillasDesktop.UI.Vistas;
 
+
+// Define el espacio de nombres (namespace) correspondiente a los modelos de vista (ViewModels) de la interfaz de usuario del sistema
 namespace TillasDesktop.UI.Modelos
 {
+    // Declara la clase pública DetalleStockViewModel que hereda de ViewModelBase, encargada de administrar la lógica de talles y stock de un producto específico
     public class DetalleStockViewModel : ViewModelBase
     {
+        // Campo privado que almacena el título dinámico de la ventana de detalles de stock
         private string _tituloVentana;
+
+        // Referencia privada al modelo de datos puro del producto seleccionado
         private readonly Producto _productoPuro;
 
         // Guardamos la referencia del envoltorio original. Esto es clave: 
         // si modificamos el stock aquí, la tabla de la ventana principal de Inventario se actualizará automáticamente.
         private readonly ProductoViewModel _productoVMOriginal;
+
+        // Instancia de servicio de la Capa de Negocios para consultar y persistir operaciones de inventario y talles
         private readonly InventarioService _inventarioService;
 
+
+        // Propiedad pública enlazada a la interfaz para mostrar y actualizar el título dinámico de la ventana
         public string TituloVentana
         {
             get => _tituloVentana;
@@ -40,8 +58,11 @@ namespace TillasDesktop.UI.Modelos
         // El constructor recibe el producto seleccionado en la tabla principal.
         public DetalleStockViewModel(ProductoViewModel productoVM)
         {
+            // Instancia el servicio de inventario de la capa de negocio
             _inventarioService = new InventarioService();
+            // Guarda la referencia del ViewModel original para propagar cambios de stock globales
             _productoVMOriginal = productoVM;
+            // Extrae la entidad pura  del producto
             _productoPuro = productoVM.ObtenerEntidadPura();
 
             // Construimos el título dinámico usando las propiedades de la entidad.
@@ -69,9 +90,10 @@ namespace TillasDesktop.UI.Modelos
         }
 
 
+        // Método privado que maneja la apertura de la ventana secundaria para ingresar nuevo stock o talles
         private void AbrirVentanaIngreso(object parametro)
         {
-            // Instanciamos el ViewModel encargado del formulario para agregar stock.
+            // Instanciamos el ViewModel encargado del formulario para agregar stock, pasándole el producto original.
             var formViewModel = new IngresoStockViewModel(_productoVMOriginal);
 
             // Definimos qué pasa cuando se guarda con éxito en la ventana secundaria
@@ -116,19 +138,22 @@ namespace TillasDesktop.UI.Modelos
             ventana.ShowDialog();
         }
 
+        // Método privado que gestiona la edición de un talle y su stock existente
         private void EditarTalle(object parametro)
         {
             // Validamos que el parámetro que llega desde el botón de la grilla sea realmente un ProductoTalle.
             if (parametro is ProductoTalle talleSeleccionado)
             {
+                // Instanciamos la ventana de edición
                 var ventanaEdicion = new IngresoStockWindow();
 
                 // Le pasamos al ViewModel el producto y el talle puntual que queremos modificar.
                 var viewModelEdicion = new IngresoStockViewModel(_productoVMOriginal, talleSeleccionado);
 
+                // Configura la acción para cerrar la ventana hija
                 viewModelEdicion.CerrarVentana = () => ventanaEdicion.Close();
 
-                // Al guardar la edición, reemplazamos exactamente esa fila en nuestra colección.
+                // Al guardar la edición, reemplazamos exactamente esa fila en nuestra colección para reflejar los cambios.
                 viewModelEdicion.OnStockIngresado = (talleActualizado) =>
                 {
                     int index = ListaTalles.IndexOf(talleSeleccionado);
@@ -148,14 +173,17 @@ namespace TillasDesktop.UI.Modelos
                     //  Recalculamos el total al editar
                     RecalcularStockTotal();
                 };
-
+                // Asigna el DataContext y muestra la ventana modal de edición
                 ventanaEdicion.DataContext = viewModelEdicion;
                 ventanaEdicion.ShowDialog();
             }
         }
 
+
+        // Método privado que maneja la baja o eliminación física/lógica de un talle de producto
         private void EliminarTalle(object parametro)
         {
+            // Verifica que el parámetro recibido corresponda a un ProductoTalle
             if (parametro is ProductoTalle talleSeleccionado)
             {
                 // Validamos la intención del usuario antes de eliminar datos.
@@ -164,17 +192,21 @@ namespace TillasDesktop.UI.Modelos
 
                 if (respuesta == MessageBoxResult.Yes)
                 {
-                    // Declaramos la variable out 
+                    // Ejecuta la baja en la capa de servicios y recibe un parámetro booleano de éxito junto con un mensaje descriptivo (out)
                     bool exito = _inventarioService.EliminarTalle(talleSeleccionado.ID, out string mensaje);
 
                     if (exito)
                     {
+                        // Si se eliminó con éxito de la base de datos, lo quitamos de la colección observable local
                         ListaTalles.Remove(talleSeleccionado);
+                        // Recalculamos el total de stock del producto
                         RecalcularStockTotal();
+                        // Notificamos el éxito al operador mediante un cuadro de diálogo informativo
                         MessageBox.Show(mensaje, "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     else
                     {
+                        // Si ocurrió un inconveniente (ej. dependencias o restricciones), informamos mediante una advertencia
                         MessageBox.Show(mensaje, "Error al Eliminar", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                 }

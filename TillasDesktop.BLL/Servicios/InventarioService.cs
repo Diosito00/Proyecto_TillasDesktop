@@ -1,7 +1,12 @@
-﻿using System;
+﻿// Importa las clases fundamentales de .NET para manejo de excepciones y tipos básicos
+using System;
+// Importa LINQ (Language Integrated Query) para realizar consultas, filtros y búsquedas sobre listas en memoria (.Where, .FirstOrDefault, etc.)
 using System.Linq;
+// Importa las clases necesarias para trabajar con listas y colecciones genéricas (List<T>)
 using System.Collections.Generic;
+// Importa el espacio de nombres de la capa de acceso a datos (DAL) para usar el repositorio de inventario
 using TillasDesktop.DAL.Repositorios;
+// Importa las entidades o modelos de datos del inventario (Producto, Marca, Categoria, ProductoTalle)
 using TillasDesktop.Entities.Inventario;
 
 // Definimos el espacio de nombres donde vive la capa de lógica de negocio (BLL).
@@ -16,18 +21,21 @@ namespace TillasDesktop.BLL.Services
         // Constructor del servicio: inicializa el repositorio al crear el objeto.
         public InventarioService()
         {
+            // Crea una nueva instancia del repositorio de inventario para interactuar con SQL Server
             _inventarioRepo = new InventarioRepository();
         }
 
-        // Método unificado de lectura de productos (idéntico a UsuariosService.ObtenerTodos)
+        // Método unificado de lectura de productos (permite filtrar si están activos o inactivos por defecto en true)
         public List<Producto> ObtenerProductos(bool activos = true)
         {
             try
             {
+                // Llama al repositorio para obtener la lista de productos de la base de datos
                 return _inventarioRepo.ObtenerProductos(activos);
             }
             catch (Exception)
             {
+                // Si ocurre un error, retorna una lista vacía para evitar que la aplicación se rompa 
                 return new List<Producto>();
             }
         }
@@ -38,7 +46,7 @@ namespace TillasDesktop.BLL.Services
         {
             try
             {
-                // Trae todas del repositorio y filtra en memoria las que están activas
+                // Trae todas las marcas del repositorio y filtra en memoria mediante LINQ aquellas cuyo campo 'Activo' sea true
                 return _inventarioRepo.ObtenerMarcas().Where(m => m.Activo).ToList();
             }
             catch (Exception)
@@ -48,7 +56,7 @@ namespace TillasDesktop.BLL.Services
             }
         }
 
-        // Método para registrar una nueva marca validando primero que su nombre no esté vacío.
+        // Método para registrar una nueva marca validando primero que su nombre no esté vacío o duplicado.
         public bool RegistrarMarca(Marca marca, out string mensaje)
         {
             // Validamos que el nombre de la marca no sea nulo, esté vacío o tenga solo espacios.
@@ -60,14 +68,16 @@ namespace TillasDesktop.BLL.Services
 
             try
             {
-                // Obtenemos todas las marcas guardadas en la BD
+                // Obtenemos todas las marcas guardadas en la BD (activas e inactivas)
                 List<Marca> todasLasMarcas = _inventarioRepo.ObtenerMarcas();
 
-                // Buscamos coincidencia exacta por nombre (ignorando mayúsculas/minúsculas)
+                // Buscamos coincidencia exacta por nombre (ignorando mayúsculas/minúsculas y espacios sobrantes con Trim)
                 Marca marcaExistente = todasLasMarcas.FirstOrDefault(m => m.Nombre.Trim().Equals(marca.Nombre.Trim(), StringComparison.OrdinalIgnoreCase));
 
+                // Si se encontró una marca con el mismo nombre...
                 if (marcaExistente != null)
                 {
+                    // Si ya existe y está activa, no se puede volver a crear
                     if (marcaExistente.Activo)
                     {
                         mensaje = $"La marca '{marcaExistente.Nombre}' ya existe y está activa.";
@@ -75,20 +85,22 @@ namespace TillasDesktop.BLL.Services
                     }
                     else
                     {
-                        // Si ya existía pero estaba inactiva, la reactivamos
+                        // Si ya existía pero estaba dada de baja (inactiva), la reactivamos automáticamente
                         marcaExistente.Activo = true;
                         bool reactivada = _inventarioRepo.ActualizarMarca(marcaExistente);
 
+                        // Sincronizamos las propiedades del objeto recibido
                         marca.ID = marcaExistente.ID;
                         marca.Activo = true;
 
+                        // Define el mensaje según si la reactivación fue exitosa o falló
                         mensaje = reactivada ? $"La marca '{marcaExistente.Nombre}' fue reactivada exitosamente." : "No se pudo reactivar la marca.";
                         return reactivada;
                     }
                 }
                 else
                 {
-                    // Si no existía, la insertamos como nueva
+                    // Si no existía previamente, la marcamos como activa y la insertamos como nueva
                     marca.Activo = true;
                     bool resultado = _inventarioRepo.InsertarMarca(marca);
                     mensaje = resultado ? "Marca registrada correctamente." : "No se pudo registrar la marca.";
@@ -97,6 +109,7 @@ namespace TillasDesktop.BLL.Services
             }
             catch (Exception ex)
             {
+                // Captura cualquier error inesperado y devuelve el mensaje descriptivo
                 mensaje = "Error al registrar la marca: " + ex.Message;
                 return false;
             }
@@ -124,7 +137,7 @@ namespace TillasDesktop.BLL.Services
         {
             try
             {
-                // Trae todas del repositorio y filtra en memoria las que están activas
+                // Trae todas las categorías del repositorio y filtra en memoria las que están activas
                 return _inventarioRepo.ObtenerCategorias().Where(c => c.Activo).ToList();
             }
             catch (Exception)
@@ -133,7 +146,7 @@ namespace TillasDesktop.BLL.Services
             }
         }
 
-        // Método para registrar una nueva categoría validando que el nombre no esté en blanco.
+        // Método para registrar una nueva categoría validando que el nombre no esté en blanco o duplicado.
         public bool RegistrarCategoria(Categoria categoria, out string mensaje)
         {
             // Validamos que el nombre de la categoría sea válido.
@@ -173,7 +186,7 @@ namespace TillasDesktop.BLL.Services
                 }
                 else
                 {
-                    // Si no existía, la insertamos nueva
+                    // Si no existía, la insertamos como nueva categoría activa
                     categoria.Activo = true;
                     bool resultado = _inventarioRepo.InsertarCategoria(categoria);
                     mensaje = resultado ? "Categoría registrada correctamente." : "No se pudo registrar la categoría.";
@@ -217,6 +230,7 @@ namespace TillasDesktop.BLL.Services
 
             try
             {
+                // Intenta insertar el producto mediante el repositorio
                 bool resultado = _inventarioRepo.Insertar(nuevoProducto);
                 if (resultado)
                 {
@@ -237,6 +251,7 @@ namespace TillasDesktop.BLL.Services
         // Método para validar y actualizar los datos de un producto ya existente.
         public bool ActualizarProducto(Producto productoActualizado, out string mensajeRespuesta)
         {
+            // Valida que el código del modelo no esté vacío
             if (string.IsNullOrWhiteSpace(productoActualizado.Codigo_Modelo))
             {
                 mensajeRespuesta = "El código del modelo es obligatorio.";
@@ -261,7 +276,7 @@ namespace TillasDesktop.BLL.Services
             }
         }
 
-        // Método para realizar la baja lógica de un producto en el sistema.
+        // Método para realizar la baja lógica de un producto en el sistema, validando que no tenga stock activo.
         public bool EliminarProducto(int productoId, out string mensajeRespuesta)
         {
             try
@@ -334,6 +349,7 @@ namespace TillasDesktop.BLL.Services
         // Método para registrar un nuevo ingreso de stock por talle validando que los valores sean mayores a cero.
         public bool RegistrarIngresoStock(ProductoTalle nuevoStock, out string mensajeRespuesta)
         {
+            // Valida que el número de talle y la cantidad a ingresar sean positivos mayores a cero
             if (nuevoStock.Talle <= 0 || nuevoStock.Stock_Actual <= 0)
             {
                 mensajeRespuesta = "El talle y la cantidad deben ser mayores a cero.";
@@ -352,7 +368,7 @@ namespace TillasDesktop.BLL.Services
 
                 if (talleEnDb != null)
                 {
-                    // Si ya existe, sumamos la cantidad nueva al stock actual que ya tenía
+                    // Si ya existe, sumamos la cantidad nueva al stock actual que ya tenía acumulado
                     talleEnDb.Stock_Actual += nuevoStock.Stock_Actual;
 
                     // Actualizamos en la base de datos
@@ -366,7 +382,7 @@ namespace TillasDesktop.BLL.Services
                 }
                 else
                 {
-                    // Si no existe, lo insertamos como una fila completamente nueva
+                    // Si el talle no existía para este producto, lo insertamos como una fila completamente nueva
                     resultado = _inventarioRepo.InsertarTalleStock(nuevoStock);
                     mensajeRespuesta = resultado ? $"Se ingresaron {nuevoStock.Stock_Actual} unidades del talle {nuevoStock.Talle}." : "No se pudo registrar el ingreso de stock.";
                 }
@@ -383,6 +399,7 @@ namespace TillasDesktop.BLL.Services
         // Método para actualizar la cantidad o número de un talle existente validando la coherencia de los datos.
         public bool ActualizarStockTalle(ProductoTalle talleActualizado, out string mensajeRespuesta)
         {
+            // Valida que el talle sea válido y el stock no sea un número negativo
             if (talleActualizado.Talle <= 0 || talleActualizado.Stock_Actual < 0)
             {
                 mensajeRespuesta = "El talle debe ser válido y el stock no puede ser negativo.";
@@ -407,6 +424,7 @@ namespace TillasDesktop.BLL.Services
             }
         }
 
+        // Método para eliminar un talle específico de la gestión de stock mediante su ID
         public bool EliminarTalle(int idTalle, out string mensaje)
         {
             try

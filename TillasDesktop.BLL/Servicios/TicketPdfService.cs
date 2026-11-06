@@ -1,13 +1,24 @@
-﻿using System;
+﻿// Importa clases fundamentales del sistema (como la clase base Exception o tipos de datos)
+using System;
+// Importa colecciones genéricas para manejar listas de objetos (como List<T>)
 using System.Collections.Generic;
+// Importa herramientas para ejecutar procesos externos (utilizado para abrir el visor de PDF predeterminado de Windows)
 using System.Diagnostics;
+// Importa clases para interactuar con archivos y directorios del disco (Path, File, Directory)
 using System.IO;
+// Importa herramientas para codificación y manejo de textos (si fuera necesario procesar caracteres especiales)
 using System.Text;
+// Importa clases de enlace de datos de WPF (utilizado habitualmente en arquitecturas de interfaz)
 using System.Windows.Data;
+// Importa configuraciones regionales y de cultura (CultureInfo, fundamental para el formato de monedas y fechas locales)
 using System.Globalization;
+// Importa las interfaces fluidas de la librería QuestPDF para la creación declarativa de documentos
 using QuestPDF.Fluent;
+// Importa ayudas visuales, tamaños estándar y utilidades de diseño de QuestPDF
 using QuestPDF.Helpers;
+// Importa los componentes de infraestructura de QuestPDF (configuración de licencias, contenedores)
 using QuestPDF.Infrastructure;
+// Importa las entidades o DTOs (Data Transfer Objects) correspondientes al carrito de compras y facturación
 using TillasDesktop.Entities.Facturacion;
 
 namespace TillasDesktop.BLL.Servicios
@@ -15,9 +26,8 @@ namespace TillasDesktop.BLL.Servicios
     // Servicio dedicado exclusivamente a la generación de comprobantes PDF.
     public class TicketPdfService
     {
-        /// <summary>
+        
         /// Genera un ticket en formato PDF, lo guarda en el disco y lo abre automáticamente.
-        /// </summary>
         public void GenerarYGuardarTicket(string vendedor, string cliente, string metodoPago, decimal total, List<ItemCarritoDTO> carrito)
         {
             // Configuración obligatoria de QuestPDF para evitar la marca de agua y excepciones.

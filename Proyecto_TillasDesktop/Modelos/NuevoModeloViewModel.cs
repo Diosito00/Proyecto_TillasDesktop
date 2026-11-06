@@ -1,29 +1,39 @@
-﻿using System;
+﻿// Importa el espacio de nombres fundamental de .NET para tipos base y utilidades generales
+using System;
+// Importa las colecciones observables de WPF para llenar dinámicamente las listas desplegables (ComboBox) de marcas y categorías
 using System.Collections.ObjectModel;
+// Importa las extensiones de LINQ para realizar búsquedas y filtrados en memoria
 using System.Linq;
+// Importa clases base de WPF para la gestión de la aplicación y cuadros de mensajes interactivos
 using System.Windows;
+// Importa las utilidades de comandos y eventos de entrada de la interfaz de usuario en WPF
 using System.Windows.Input;
+// Importa las expresiones regulares (Regular Expressions) necesarias para validar formatos estrictos como el SKU o código de modelo
 using System.Text.RegularExpressions;
+// Importa las entidades del dominio de inventario (como Producto, Marca y Categoria)
 using TillasDesktop.Entities.Inventario;
+// Importa los servicios de la Capa de Negocios encargados de gestionar las operaciones y reglas del inventario
 using TillasDesktop.BLL.Services;
 
+// Define el espacio de nombres (namespace) correspondiente a los modelos de vista de la interfaz gráfica del sistema
 namespace TillasDesktop.UI.Modelos
 {
-    // Hereda de ViewModelBase para mantener la interfaz actualizada automáticamente cuando cambian los datos.
+    // Declara la clase pública NuevoModeloViewModel que hereda de ViewModelBase, encargada de administrar la lógica de alta y edición de modelos de calzado.
     public class NuevoModeloViewModel : ViewModelBase
     {
-        // Instancia del servicio que maneja la lógica de negocio  
+        // Instancia de solo lectura del servicio que maneja la lógica de negocio y se comunica con la base de datos de inventario
         private readonly InventarioService _inventarioService = new InventarioService();
 
-        // Título dinámico de la ventana ("NUEVO MODELO" o "EDITAR MODELO").
+        // Propiedades de control para el título dinámico de la ventana ("NUEVO MODELO" o "EDITAR MODELO") y el modo de operación
         public string TituloFormulario { get; set; }
         public bool EsModoEdicion { get; set; }
 
-        // Objeto que envuelve la entidad del producto y avisa a la pantalla cuando alguna de sus propiedades se modifica.
+        // Objeto envuelto (ProductoViewModel) que gestiona la entidad del producto y avisa a la pantalla cuando alguna de sus propiedades se modifica (Data Binding).
         public ProductoViewModel ProductoActual { get; set; }
 
-        // Propiedad de texto para liberar la escritura en el TextBox del precio (permite puntos y comas)
+        // Campo privado para almacenar el texto libre ingresado en el campo de precio (permite flexibilidad con puntos y comas)
         private string _precioVentaTexto;
+        // Propiedad pública vinculada al cuadro de texto del precio de venta con notificación de cambios
         public string PrecioVentaTexto
         {
             get => _precioVentaTexto;
@@ -34,26 +44,26 @@ namespace TillasDesktop.UI.Modelos
             }
         }
 
-        // Campo privado y propiedad pública para la marca que el usuario selecciona en el ComboBox de la interfaz.
+        // Campo privado y propiedad pública para la marca seleccionada en el ComboBox de la interfaz
         private Marca _marcaSeleccionada;
         public Marca MarcaSeleccionada { get => _marcaSeleccionada; set { _marcaSeleccionada = value; OnPropertyChanged(); } }
 
-        // Campo privado y propiedad pública para la categoría que el usuario selecciona en el ComboBox.
+        // Campo privado y propiedad pública para la categoría seleccionada en el ComboBox de la interfaz
         private Categoria _categoriaSeleccionada;
         public Categoria CategoriaSeleccionada { get => _categoriaSeleccionada; set { _categoriaSeleccionada = value; OnPropertyChanged(); } }
 
-        // Colecciones observables para llenar las listas desplegables (ComboBox) de marcas y categorías en la vista.
+        // Colecciones observables públicas para poblar las listas desplegables (ComboBox) de marcas y categorías activas en la vista
         public ObservableCollection<Marca> MarcasDisponibles { get; set; }
         public ObservableCollection<Categoria> CategoriasDisponibles { get; set; }
 
-        // Comando vinculado al botón de guardar del formulario.
+        // Comando público vinculado al botón de guardar del formulario de producto
         public ICommand GuardarCommand { get; private set; }
 
-        // Acciones (delegados) para ordenar que la ventana se cierre y para avisarle al listado principal que guardamos un producto.
+        // Acciones (delegados Actions) para ordenar de forma desacoplada que la ventana se cierre y para avisarle al listado principal que guardamos un producto con éxito.
         public Action CerrarVentana { get; set; }
         public Action OnModeloGuardado { get; set; }
 
-        // CONSTRUCTOR 1: Se usa cuando abrimos el formulario limpio para dar de alta un producto nuevo.
+        // CONSTRUCTOR 1: Se utiliza cuando abrimos el formulario limpio para dar de alta un producto nuevo.
         public NuevoModeloViewModel()
         {
             EsModoEdicion = false;
@@ -63,43 +73,46 @@ namespace TillasDesktop.UI.Modelos
             var entidadNueva = new Producto { Activo = true };
             ProductoActual = new ProductoViewModel(entidadNueva);
 
+            // Ejecuta el método común de carga de listas y comandos
             InicializarComunes();
         }
 
-        // CONSTRUCTOR 2: Se usa cuando seleccionamos un producto existente en la tabla para modificar sus datos.
+        // CONSTRUCTOR 2: Se utiliza cuando seleccionamos un producto existente en la tabla principal de inventario para modificar sus datos.
         public NuevoModeloViewModel(Producto productoExistente)
         {
             EsModoEdicion = true;
             TituloFormulario = "EDITAR MODELO";
 
-            // Envuelve la entidad clonada que se envió desde la tabla principal de Inventario.
+            // Envuelve la entidad clonada que se envió desde la tabla principal de Inventario para aislar los cambios temporales.
             ProductoActual = new ProductoViewModel(productoExistente);
 
+            // Ejecuta el método común de carga de listas y comandos
             InicializarComunes();
 
-            // Cuando editamos, los ComboBox deben mostrar la marca y categoría actual del producto.
-            // Buscamos en nuestras listas disponibles cuál coincide con los IDs guardados en InventarioService.
+            // Cuando editamos, los ComboBox deben mostrar por defecto la marca y categoría actual asignada al producto.
+            // Buscamos en nuestras listas disponibles cuál coincide exactamente con los IDs guardados en la entidad.
             MarcaSeleccionada = MarcasDisponibles.FirstOrDefault(m => m.ID == ProductoActual.Marca_ID);
             CategoriaSeleccionada = CategoriasDisponibles.FirstOrDefault(c => c.ID == ProductoActual.Categoria_ID);
         }
 
-        // Método auxiliar para evitar repetir código: carga las listas desde la base de datos y arma el comando de guardar.
+        // Método auxiliar privado para evitar duplicar código: carga las listas de la base de datos y configura el comando de guardado.
         private void InicializarComunes()
         {
-            // Llenamos las listas desplegables consultando las marcas y categorías guardados en InventarioService.
+            // Llenamos las colecciones consultando las marcas y categorías activas guardadas mediante el servicio de inventario.
             MarcasDisponibles = new ObservableCollection<Marca>(_inventarioService.ObtenerMarcasActivas());
             CategoriasDisponibles = new ObservableCollection<Categoria>(_inventarioService.ObtenerCategoriasActivas());
 
-            // Inicializamos el texto del precio con el valor numérico actual del producto
+            // Inicializamos el texto libre del precio utilizando el valor numérico decimal actual del producto convertido a cadena.
             PrecioVentaTexto = ProductoActual.Precio_Venta.ToString();
 
+            // Asigna el comando de guardado con su método delegado asociado
             GuardarCommand = new RelayCommand(Guardar);
         }
 
-        // Lógica que se ejecuta al hacer clic en el botón de guardar.
+        // Lógica principal de validación estricta y persistencia que se ejecuta al hacer clic en el botón de guardar.
         private void Guardar(object parametro)
         {
-            // Convertimos el texto libre del precio a decimal antes de validar
+            // Normalizamos y convertimos el texto libre del precio ingresado a decimal (reemplazando comas por puntos y usando cultura invariante)
             string precioLimpio = PrecioVentaTexto?.Replace(',', '.') ?? string.Empty;
             if (decimal.TryParse(precioLimpio, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal precioParsed))
             {
@@ -107,11 +120,10 @@ namespace TillasDesktop.UI.Modelos
             }
             else
             {
-                ProductoActual.Precio_Venta = -1; // Asignamos un valor inválido para que la validación de abajo lo capture
+                ProductoActual.Precio_Venta = -1; // Asignamos un valor numérico inválido intencionalmente para que la validación posterior lo capture
             }
 
-
-            //  Validaciones explícitas de campos requeridos y coherencia de datos (precio mayor a 0).
+            // Validaciones explícitas de campos requeridos obligatorios y coherencia de datos (ej. precio estrictamente mayor a 0 y selecciones en ComboBox).
             if (string.IsNullOrWhiteSpace(ProductoActual.Codigo_Modelo) ||
                 string.IsNullOrWhiteSpace(ProductoActual.Nombre) ||
                 ProductoActual.Precio_Venta <= 0 ||
@@ -119,15 +131,15 @@ namespace TillasDesktop.UI.Modelos
                 CategoriaSeleccionada == null)
             {
                 MessageBox.Show("Todos los campos son obligatorios y el precio debe ser mayor a 0.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                return; // Corta la ejecución si hay errores
             }
 
-            // 2. VALIDACIÓN DE FORMATO SKU MEDIANTE EXPRESIÓN REGULAR (Regex).
-            // ^[A-Z]{2} -> Exige exactamente 2 letras mayúsculas al inicio.
-            // -         -> Exige un guion.
-            // [A-Z0-9]{2,3} -> Exige entre 2 y 3 letras o números.
-            // -         -> Exige otro guion.
-            // \d{2}$    -> Exige exactamente 2 dígitos al final.
+            // VALIDACIÓN DE FORMATO SKU MEDIANTE EXPRESIÓN REGULAR (Regex):
+            // ^[A-Z]{2}    -> Exige exactamente 2 letras mayúsculas al inicio.
+            // -            -> Exige un guion separador.
+            // [A-Z0-9]{2,3}-> Exige entre 2 y 3 letras o números.
+            // -            -> Exige otro guion separador.
+            // \d{2}$       -> Exige exactamente 2 dígitos numéricos al final.
             if (!Regex.IsMatch(ProductoActual.Codigo_Modelo, @"^[A-Z]{2}-[A-Z0-9]{2,3}-\d{2}$"))
             {
                 MessageBox.Show("El formato del Código (SKU) es incorrecto.\nDebe ser similar a 'NK-AF1-01' o 'AD-SM-02' (Mayúsculas y guiones requeridos).",
@@ -135,7 +147,7 @@ namespace TillasDesktop.UI.Modelos
                 return;
             }
 
-            // Extraemos la entidad pura y le asignamos los IDs correspondientes a la marca y categoría elegidas en los ComboBox.
+            // Extraemos la entidad pura subyacente y le asignamos los IDs correspondientes a la marca y categoría elegidas en los ComboBox.
             Producto entidadParaGuardar = ProductoActual.ObtenerEntidadPura();
             entidadParaGuardar.Marca_ID = MarcaSeleccionada.ID;
             entidadParaGuardar.Categoria_ID = CategoriaSeleccionada.ID;
@@ -143,7 +155,7 @@ namespace TillasDesktop.UI.Modelos
             bool exito;
             string mensaje;
 
-            // Dependiendo del modo, llamamos al método del servicio para actualizar un producto existente o registrar uno nuevo.
+            // Dependiendo del modo operativo (Edición vs Alta), llamamos al método correspondiente del servicio de inventario.
             if (EsModoEdicion)
             {
                 exito = _inventarioService.ActualizarProducto(entidadParaGuardar, out mensaje);
@@ -151,27 +163,28 @@ namespace TillasDesktop.UI.Modelos
             else
             {
                 exito = _inventarioService.RegistrarNuevoProducto(entidadParaGuardar, out mensaje);
-                // Asigna el ID autogenerado por SQL Server a nuestra entidad en memoria (cuando se implemente ProductosRepository, por ahora es 0 pero no se muestra en la tabla).
+                // Si se creó con éxito, asignamos el ID autogenerado por la base de datos a nuestra entidad en memoria.
                 if (exito) ProductoActual.ID = entidadParaGuardar.ID;
             }
 
             // Si la base de datos confirmó la operación con éxito...
             if (exito)
             {
-                // Actualizamos los nombres en texto de la marca y categoría en el ViewModel 
-                // para que la tabla principal los refleje al instante sin necesidad de recargar todo.
+                // Actualizamos los nombres en texto de la marca y categoría directamente en el ViewModel 
+                // para que la tabla principal los refleje al instante sin necesidad de recargar todo el listado desde la BD.
                 ProductoActual.NombreMarca = MarcaSeleccionada.Nombre;
                 ProductoActual.NombreCategoria = CategoriaSeleccionada.Nombre;
 
+                // Muestra un mensaje emergente de éxito al operador
                 MessageBox.Show(EsModoEdicion ? "Modelo actualizado correctamente." : "Modelo creado correctamente.", "Operación Exitosa", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                // Disparamos los avisos para actualizar la tabla de la ventana principal y cerrar este formulario.
+                // Disparamos los delegados (acciones) para actualizar la tabla de la ventana principal y cerrar este formulario de manera limpia.
                 OnModeloGuardado?.Invoke();
                 CerrarVentana?.Invoke();
             }
             else
             {
-               // Si hubo algún rechazo en las reglas de negocio, mostramos el aviso.
+                // Si la capa de negocios o el servicio rechazaron la operación, mostramos el aviso con el motivo.
                 MessageBox.Show(mensaje, "Error de Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }

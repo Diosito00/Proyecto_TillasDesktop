@@ -1,61 +1,64 @@
-﻿using System;
+﻿// Importa el espacio de nombres fundamental de .NET para tipos base y utilidades generales
+using System;
+// Importa los servicios de la Capa de Negocios (BLL) encargados de la gestión de usuarios y seguridad
 using TillasDesktop.BLL.Services;
+// Importa las entidades del dominio de usuarios (modelo Usuario)
 using TillasDesktop.Entities.Usuarios;
 
+// Define el espacio de nombres (namespace) correspondiente a los modelos de vista de la interfaz gráfica del sistema
 namespace TillasDesktop.UI.Modelos
 {
-    // Hereda de ViewModelBase para mantener la pantalla sincronizada con los datos mediante notificaciones.
+    // Hereda de ViewModelBase para mantener la pantalla sincronizada con los datos mediante notificaciones (Patrón MVVM).
     public class LoginViewModel : ViewModelBase
     {
-        // Instancia del servicio que maneja la lógica de negocio de usuarios para verificar las credenciales.
+        // Instancia de solo lectura del servicio que maneja la lógica de negocio de usuarios para verificar las credenciales.
         private readonly UsuariosService _usuarioService;
 
-        // Campo privado que almacena el nombre de usuario o correo que escribe la persona.
+        // Campo privado que almacena el nombre de usuario o correo electrónico que ingresa la persona.
         private string _usuario;
 
-        // Propiedad pública vinculada al cuadro de texto del usuario en la pantalla de inicio de sesión.
+        // Propiedad pública vinculada al cuadro de texto del usuario en la pantalla de inicio de sesión con notificación de cambios.
         public string Usuario
         {
             get => _usuario;
-            set { _usuario = value; OnPropertyChanged(); }
+            set { _usuario = value; OnPropertyChanged(); } // Notifica a la interfaz cuando el texto cambia.
         }
 
-        // Constructor principal: inicializa el servicio de usuarios ni bien se abre la ventana de login.
+        // Constructor principal: inicializa el servicio de usuarios ni bien se abre la ventana de inicio de sesión (Login).
         public LoginViewModel()
         {
-            // Inicializa el servicio al momento de abrir la ventana de Login.
+            // Inicializa el servicio de negocio al momento de instanciar el ViewModel de Login.
             _usuarioService = new UsuariosService();
         }
 
-        // Método principal de autenticación. Recibe la contraseña directamente desde el Code-Behind (LoginWindow.xaml.cs) 
-        // porque los PasswordBox de WPF no soportan Binding directo por motivos de seguridad en memoria.
+        // Método principal de autenticación. Recibe la contraseña en texto claro enviada desde el Code-Behind (LoginWindow.xaml.cs) 
+        // debido a que los controles PasswordBox de WPF no admiten enlace de datos (Binding) directo por razones de seguridad en memoria.
         public string Autenticar(string password)
         {
-            /// Validamos que no hayan dejado el usuario o la contraseña en blanco; si falta alguno, cortamos acá.
+            // Validamos que el operador no haya dejado los campos de usuario o contraseña vacíos o en blanco; de ser así, cancelamos el proceso.
             if (string.IsNullOrWhiteSpace(Usuario) || string.IsNullOrWhiteSpace(password))
                 return null;
 
-            //  Limpieza de datos: El método Trim() elimina los espacios en blanco accidentales 
-            // al principio o al final del texto (muy común al copiar y pegar un email).
+            // Limpieza de datos: El método Trim() remueve espacios en blanco accidentales al inicio o final de la cadena (típicos al copiar/pegar).
             string credencialLimpia = Usuario.Trim();
 
-            // Consultamos a la base de datos a través de la capa de servicios para chequear si el usuario y la clave existen.
+            // Consultamos la base de datos mediante la capa de servicios para verificar si existe un operador activo con dicha credencial y clave.
             Usuario usuarioAutenticado = _usuarioService.AutenticarUsuario(credencialLimpia, password);
-            
-            // Si la base de datos nos devuelve un usuario válido...
+
+            // Si la capa de negocio y la base de datos confirman la validez y retornan un objeto de usuario válido...
             if (usuarioAutenticado != null)
             {
-                // Guardamos el nombre y el ID a nivel global para usarlos en toda la sesión
+                // Registramos las credenciales y datos de perfil en las variables globales de la aplicación para mantener el contexto durante toda la sesión.
                 Proyecto_TillasDesktop.App.NombreUsuarioActual = $"{usuarioAutenticado.Nombre} {usuarioAutenticado.Apellido}";
                 Proyecto_TillasDesktop.App.IdUsuarioActual = usuarioAutenticado.Id_Usuario;
                 Proyecto_TillasDesktop.App.RolUsuarioActual = $"{usuarioAutenticado.Rol}";
 
-                // Si el usuario existe y la clave es correcta, retornamos el rol real (Ej: "Admin", "Vendedor") 
-                // para que la ventana principal sepa qué botones ocultar o mostrar.
+                // Si la autenticación es exitosa, retornamos el rol asignado al operador (ej: "Admin", "Gerente", "Vendedor") 
+                // para permitir que la ventana principal configure la visibilidad de sus módulos.
                 return usuarioAutenticado.Rol;
             }
 
-            // Si el usuario no existe o la contraseña es incorrecta, devolvemos null para que la vista muestre el error.
+            // Si las credenciales no coinciden o el usuario no existe/está inactivo, retornamos null para que la vista notifique el error de acceso.
             return null;
         }
     }

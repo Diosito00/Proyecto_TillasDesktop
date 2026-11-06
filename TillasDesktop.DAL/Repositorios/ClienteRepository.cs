@@ -1,9 +1,16 @@
-﻿using System;
+﻿// Importa clases fundamentales del sistema (como clases base de excepciones y tipos de datos)
+using System;
+// Importa colecciones genéricas para manejar listas de objetos (List<T>)
 using System.Collections.Generic;
+// Importa el proveedor oficial de SQL Server para .NET (Microsoft.Data.SqlClient) para ejecutar comandos y consultas
 using Microsoft.Data.SqlClient;
+// Importa la clase base de conexión de la capa de acceso a datos (DAL) para heredar el método de conexión
 using TillasDesktop.DAL.Base;
+// Importa las entidades o modelos de datos correspondientes a los clientes (la estructura del objeto Cliente)
 using TillasDesktop.Entities.Clientes;
 
+
+// Define el espacio de nombres de los repositorios dentro de la capa de acceso a datos (DAL)
 namespace TillasDesktop.DAL.Repositorios
 {
     /// Clase encargada de manejar todas las operaciones de base de datos (CRUD) para la entidad Cliente.
@@ -20,6 +27,7 @@ namespace TillasDesktop.DAL.Repositorios
             // El bloque 'using' asegura que la conexión se cierre y libere recursos automáticamente al terminar.
             using (var conexion = ObtenerConexion())
             {
+                // Consulta SQL para seleccionar todos los registros de la tabla Clientes
                 string query = "SELECT * FROM Clientes";
 
                 // Abre físicamente el canal de comunicación con el servidor de base de datos.
@@ -68,51 +76,7 @@ namespace TillasDesktop.DAL.Repositorios
             return listaClientes;
         }
 
-        // OBTENER POR ID
-        public Cliente ObtenerPorId(int id)
-        {
-            Cliente cliente;
-            string query = "SELECT * FROM Clientes WHERE ID = @ID";
-
-            using (var con = ObtenerConexion())
-            using (var cmd = new SqlCommand(query, con))
-            {
-                    cmd.Parameters.AddWithValue("@ID", id);
-                    con.Open();
-
-                    using (SqlDataReader lector = cmd.ExecuteReader())
-                    {
-                        if (lector.Read())
-                        {
-                            cliente = new Cliente
-                            {
-                                // Leemos la columna 0 (ID) asegurando que sea un entero.
-                                ID = lector.GetInt32(0),
-
-                                // Verificamos si la columna 1 (Apellido) es nula en la BD; si lo es, asignamos un string vacío, de lo contrario leemos el texto.
-                                Apellido = lector.IsDBNull(1) ? string.Empty : lector.GetString(1),
-
-                                // Verificamos si la columna 2 (Nombre) es nula; si es así, asignamos un string vacío.
-                                Nombre = lector.IsDBNull(2) ? string.Empty : lector.GetString(2),
-
-                                // Verificamos y leemos la columna 3 (CUIT).
-                                CUIT = lector.IsDBNull(3) ? string.Empty : lector.GetString(3),
-
-                                // Verificamos y leemos la columna 4 (Telefono).
-                                Telefono = lector.IsDBNull(4) ? string.Empty : lector.GetString(4),
-
-                                // Verificamos y leemos la columna 5 (Email).
-                                Email = lector.IsDBNull(5) ? string.Empty : lector.GetString(5)
-                            };
-                            return cliente;
-                        }
-                    }
-                
-            }
-           
-
-            return null; // Retorna null si no se encuentra ningún registro con ese ID.
-        }
+       
 
         // INSERTAR UN NUEVO CLIENTE
         public bool Insertar(Cliente nuevoCliente)
@@ -124,6 +88,7 @@ namespace TillasDesktop.DAL.Repositorios
                 using (var conexion = ObtenerConexion())
                 {
                     // Consulta SQL de inserción indicando las columnas y los parámetros seguros (@).
+                    // y OUTPUT INSERTED.ID para capturar inmediatamente el ID autoincremental generado por SQL Server.
                     string query = @"INSERT INTO Clientes (Apellido, Nombre, CUIT, Telefono, Email) 
                                      OUTPUT INSERTED.ID
                                      VALUES (@Apellido, @Nombre, @CUIT, @Telefono, @Email)";
@@ -142,7 +107,7 @@ namespace TillasDesktop.DAL.Repositorios
                         // Abre el canal de comunicación con el servidor.
                         conexion.Open();
 
-                        // ExecuteScalar ejecuta la consulta y devuelve la primera columna de la primera fila (nuestro nuevo ID)
+                        // ExecuteScalar ejecuta la consulta y devuelve la primera columna de la primera fila (nuestro nuevo ID retornado por OUTPUT)
                         object resultado = comando.ExecuteScalar();
 
                         // Verificamos que el resultado sea válido antes de intentar convertirlo a entero
@@ -150,19 +115,20 @@ namespace TillasDesktop.DAL.Repositorios
                         {
                             // Asignamos el ID real de la base de datos a nuestra entidad
                             nuevoCliente.ID = Convert.ToInt32(resultado);
-                            return true;
+                            return true; // Inserción exitosa
                         }
 
                         return false;
                     }
                 }
             }
+            // Captura específica de excepciones provocadas por el motor de SQL Server
             catch (SqlException sqlEx)
             {
                 // El error 2627 o 2601 en SQL Server significa "Violación de restricción UNIQUE" (ej. CUIT o Email duplicado)
                 if (sqlEx.Number == 2627 || sqlEx.Number == 2601)
                 {
-                    // Inspeccionamos el mensaje original para saber qué campo causó el choque
+                    // Inspeccionamos el mensaje original para saber qué campo causó el choque y dar una respuesta amigable
                     if (!string.IsNullOrEmpty(nuevoCliente.CUIT) && sqlEx.Message.Contains(nuevoCliente.CUIT))
                         throw new Exception("Ya existe un cliente registrado con este CUIT.");
 
@@ -217,11 +183,12 @@ namespace TillasDesktop.DAL.Repositorios
                         // Ejecuta la actualización y guarda cuántas filas fueron modificadas.
                         int filasAfectadas = comando.ExecuteNonQuery();
 
-                        // Retorna true si la actualización afectó a una o más filas.
+                        // Retorna true si la actualización afectó a una o más filas. (es decir, el cliente existía y se actualizó).
                         return filasAfectadas > 0;
                     }
                 }
             }
+            // Controla errores de duplicidad de datos (CUIT o Email únicos) durante la actualización
             catch (SqlException sqlEx)
             {
                 if (sqlEx.Number == 2627 || sqlEx.Number == 2601)
@@ -266,7 +233,7 @@ namespace TillasDesktop.DAL.Repositorios
                         // Ejecuta el comando de borrado y almacena el número de filas afectadas.
                         int filasAfectadas = comando.ExecuteNonQuery();
 
-                        // Retorna true si el registro fue borrado correctamente.
+                        // Retorna true si el registro fue borrado correctamente. (si afectó al menos 1 fila).
                         return filasAfectadas > 0;
                     }
                 }

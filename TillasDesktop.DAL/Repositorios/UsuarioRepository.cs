@@ -1,15 +1,22 @@
-﻿using System;
+﻿// Importa clases fundamentales del sistema (conversiones, tipos básicos)
+using System;
+// Importa colecciones genéricas para trabajar con listas tipadas (List<T>)
 using System.Collections.Generic;
+// Importa el proveedor oficial de SQL Server para .NET (Microsoft.Data.SqlClient)
 using Microsoft.Data.SqlClient;
+// Importa la clase base de conexión para heredar el método de obtención de canales con la base de datos
 using TillasDesktop.DAL.Base;
+// Importa las entidades o modelos de datos vinculados a los usuarios del sistema
 using TillasDesktop.Entities.Usuarios;
 
+
+
+// Define el espacio de nombres correspondiente a los repositorios de la capa de acceso a datos (DAL)
 namespace TillasDesktop.DAL.Repositorios
 {
     
     /// Clase encargada de manejar todas las operaciones de base de datos (CRUD) para la entidad Usuario.
     /// Hereda de ConexionDb para obtener automáticamente la configuración de conexión al servidor SQL.
-    
     public class UsuarioRepository : ConexionDb
     {
         
@@ -86,60 +93,7 @@ namespace TillasDesktop.DAL.Repositorios
             return listaUsuarios;
         }
 
-        // Obtener por ID
-        public Usuario ObtenerPorId(int id)
-        {
-            Usuario usuario;
-            string query = "SELECT * FROM Usuarios WHERE Id_Usuario = @Id";
-
-            using (var con = ObtenerConexion())
-            using (var cmd = new SqlCommand(query, con))
-            {
-                cmd.Parameters.AddWithValue("@Id", id);
-                con.Open();
-
-                using (SqlDataReader lector = cmd.ExecuteReader())
-                {
-                    if (lector.Read())
-                    {
-                        usuario = new Usuario
-                        {
-                            // Leemos la columna 0 (id_usuario) asegurando que sea un entero.
-                            Id_Usuario = lector.GetInt32(0),
-
-                            // Verificamos si la columna 1 (nombre) es nula en la BD; si lo es, asignamos un string vacío, de lo contrario leemos el texto.
-                            Nombre = lector.IsDBNull(1) ? string.Empty : lector.GetString(1),
-
-                            // Verificamos si la columna 2 (apellido) es nula; si es así, asignamos un string vacío.
-                            Apellido = lector.IsDBNull(2) ? string.Empty : lector.GetString(2),
-
-                            // Verificamos y leemos la columna 3 (dni).
-                            Dni = lector.IsDBNull(3) ? string.Empty : lector.GetString(3),
-
-                            // Verificamos y leemos la columna 4 (email).
-                            Email = lector.IsDBNull(4) ? string.Empty : lector.GetString(4),
-
-                            // Verificamos y leemos la columna 5 (nombre_usuario).
-                            Nombre_Usuario = lector.IsDBNull(5) ? string.Empty : lector.GetString(5),
-
-                            // Verificamos y leemos la columna 6 (password).
-                            Password = lector.IsDBNull(6) ? string.Empty : lector.GetString(6),
-
-                            // Verificamos si la fecha de nacimiento es nula; si lo es, asignamos un DateTime? nulo, de lo contrario obtenemos la fecha.
-                            Fecha_Nacimiento = lector.IsDBNull(7) ? DateTime.MinValue : lector.GetDateTime(7),
-
-                            // Verificamos y leemos la columna 8 (rol).
-                            Rol = lector.IsDBNull(8) ? string.Empty : lector.GetString(8),
-
-                            // Leemos la columna 9 (activo) convirtiéndola a su valor booleano correspondiente.
-                            Activo = lector.GetBoolean(9)
-                        };
-                        return usuario;
-                    }
-                }
-            }
-            return null;
-        }
+        
 
 
         // INSERTAR UN NUEVO USUARIO (CREATE / CREACIÓN)
@@ -189,6 +143,7 @@ namespace TillasDesktop.DAL.Repositorios
                     }
                 }
             }
+            // Captura errores específicos provenientes del motor de base de datos SQL Server
             catch (SqlException sqlEx)
             {
                 // El error 2627 o 2601 en SQL Server significa "Violación de restricción UNIQUE"
@@ -272,6 +227,7 @@ namespace TillasDesktop.DAL.Repositorios
                     }
                 }
             }
+            // Controla excepciones de SQL Server durante la actualización (ej. duplicidad de DNI o email)
             catch (SqlException sqlEx)
             {
                 if (sqlEx.Number == 2627 || sqlEx.Number == 2601)
@@ -333,21 +289,27 @@ namespace TillasDesktop.DAL.Repositorios
         {
             try
             {
+                // Inicia la conexión mediante el patrón using
                 using (var conexion = ObtenerConexion())
                 {
-                    // Borrado permanente de la base de datos
+                    // Borrado permanente (DELETE) de la base de datos filtrando por ID
                     string query = "DELETE FROM Usuarios WHERE Id_Usuario = @Id_Usuario";
 
+                    // Prepara el comando SQL asociado
                     using (var comando = new SqlCommand(query, conexion))
                     {
+                        // Asigna el parámetro de ID de forma segura
                         comando.Parameters.AddWithValue("@Id_Usuario", idUsuario);
+                        // Abre la conexión física
                         conexion.Open();
+                        // Ejecuta el comando y retorna true si se eliminó el registro
                         return comando.ExecuteNonQuery() > 0;
                     }
                 }
             }
             catch (Exception ex)
             {
+                // Captura y encapsula errores en la eliminación física
                 throw new Exception("Error al eliminar físicamente el usuario: " + ex.Message);
             }
         }
@@ -364,15 +326,19 @@ namespace TillasDesktop.DAL.Repositorios
 
             try
             {
+                // Abre la conexión y prepara el comando SQL
                 using (var conexion = ObtenerConexion())
                 using (var comando = new SqlCommand(query, conexion))
                 {
+                    // Asigna los parámetros de credencial (usuario o correo) y contraseña de forma segura
                     comando.Parameters.AddWithValue("@Credencial", credencial);
                     comando.Parameters.AddWithValue("@Password", password);
 
                     conexion.Open();
+                    // Ejecuta el lector de datos
                     using (var lector = comando.ExecuteReader())
                     {
+                        // Si las credenciales son correctas, lee y mapea los datos básicos del usuario autenticado
                         if (lector.Read())
                         {
                             return new Usuario
@@ -388,6 +354,7 @@ namespace TillasDesktop.DAL.Repositorios
             }
             catch (Exception ex)
             {
+                // Captura y reporta errores durante el proceso de autenticación
                 throw new Exception("Error al intentar autenticar: " + ex.Message);
             }
 
