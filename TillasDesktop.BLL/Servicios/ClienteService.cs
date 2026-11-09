@@ -84,13 +84,16 @@ namespace TillasDesktop.BLL
         // Método público para eliminar (o dar de baja) un cliente a partir de su ID numérico
         public bool Eliminar(int idCliente)
         {
-            // Comprueba que el ID recibido sea un número válido y positivo
-            if (idCliente <= 0)
-                if (idCliente <= 0)
+            var cliente = _repositorio.ObtenerPorId(idCliente);
+
+            if (cliente == null)
             {
-                MessageBox.Show("ID de cliente inválido para eliminación.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return false;
+                throw new Exception("El cliente no existe.");
             }
+            if (cliente.Nombre.Contains("Consumidor Final"))
+            {
+                throw new Exception("El cliente 'Consumidor Final' no se puede dar de baja.");
+            }                
 
             // Si el ID es correcto, solicita al repositorio que ejecute la eliminación del registro
             _repositorio.Eliminar(idCliente);

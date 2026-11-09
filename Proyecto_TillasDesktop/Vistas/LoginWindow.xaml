@@ -94,9 +94,6 @@
                     <Button x:Name="btnIniciarSesion" Content="INICIAR SESIÓN" IsDefault="True" Style="{StaticResource BotonSecundario}"
                             Height="40" Click="BtnIniciarSesion_Click">
                     </Button>
-
-                    <!-- Enlaces inferiores de asistencia y recuperación -->
-                    <TextBlock Text="¿Olvidó su contraseña?"  Foreground="#1E3A8A" Cursor="Hand" HorizontalAlignment="Center"  Margin="0,15,0,10"  MouseDown="OlvidoPassword_Click"/>
                 </StackPanel>
             </Border>
         </Grid>

@@ -112,27 +112,26 @@ namespace TillasDesktop.UI.Modelos
                 // Obtenemos todas las ventas del período a través del servicio de reportes
                 var todasLasVentas = _reportesService.GenerarReporteVentas(inicioMes, hoy);
 
-                // Llenar el DataGrid con las últimas ventas reales registradas en el sistema, ordenadas por fecha descendente
-                var ultimasVentasBD = todasLasVentas
-                    .OrderByDescending(v => v.Fecha_Hora)
-                    .Take(5) // Tomamos estrictamente las últimas 5 operaciones
-                    .ToList();
-
-                // Limpia y puebla la colección observable para reflejar las últimas ventas en la grilla
-                UltimasVentasList.Clear();
-                foreach (var venta in ultimasVentasBD)
-                {
-                    UltimasVentasList.Add(venta);
-                }
-
                 // CONFIGURACIÓN POLIMÓRFICA SEGÚN ROL (Vendedor vs Administrador/Gerente)
                 if (RolUsuario.ToLower() == "vendedor")
                 {
-                    // Si es Vendedor, filtramos únicamente las ventas correspondientes al operador logueado actual
+                    // Filtramos únicamente las ventas correspondientes al operador logueado actual
                     var ventasVendedor = todasLasVentas
                         .Where(v => !string.IsNullOrEmpty(v.NombreVendedor) &&
                                     v.NombreVendedor.Equals(usuarioActual, StringComparison.OrdinalIgnoreCase))
                         .ToList();
+
+                    // Llenar el DataGrid SOLO con las últimas 5 ventas de ESTE vendedor
+                    var ultimasVentasBD = ventasVendedor
+                        .OrderByDescending(v => v.Fecha_Hora)
+                        .Take(5)
+                        .ToList();
+
+                    UltimasVentasList.Clear();
+                    foreach (var venta in ultimasVentasBD)
+                    {
+                        UltimasVentasList.Add(venta);
+                    }
 
                     // Calcula la recaudación personal obtenida en el día de hoy
                     decimal recaudacionVendedorHoy = ventasVendedor
@@ -163,6 +162,18 @@ namespace TillasDesktop.UI.Modelos
                 }
                 else // Si el rol es Administrador o Gerente
                 {
+                    // Llenar el DataGrid con las últimas 5 ventas GLOBALES (de todos los vendedores)
+                    var ultimasVentasGlobales = todasLasVentas
+                        .OrderByDescending(v => v.Fecha_Hora)
+                        .Take(5)
+                        .ToList();
+
+                    UltimasVentasList.Clear();
+                    foreach (var venta in ultimasVentasGlobales)
+                    {
+                        UltimasVentasList.Add(venta);
+                    }
+
                     // Calcula la recaudación global de la tienda en el día actual
                     decimal recaudacionDia = todasLasVentas
                         .Where(v => v.Fecha_Hora.Date == hoy.Date)
@@ -179,7 +190,7 @@ namespace TillasDesktop.UI.Modelos
                     Kpi1Valor = recaudacionDia.ToString("C0");
 
                     Kpi2Titulo = "VENTAS DEL MES";
-                    Kpi2Valor = $"{ventasTotalesMes} Pares";
+                    Kpi2Valor = $"{ventasTotalesMes} Operaciones";
 
                     Kpi3Titulo = "ALERTAS DE STOCK";
                     Kpi3Valor = $"{alertasStock} Modelos";

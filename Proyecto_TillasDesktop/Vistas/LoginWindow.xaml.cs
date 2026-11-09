@@ -128,11 +128,5 @@ namespace TillasDesktop.UI.Vistas
                 MessageBox.Show("Usuario o contraseña incorrectos, o su cuenta se encuentra inactiva.", "Error de Acceso", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        private void OlvidoPassword_Click(object sender, MouseButtonEventArgs e)
-        {
-            RecuperarPasswordWindow ventana = new RecuperarPasswordWindow();
-            ventana.ShowDialog();
-        }
     }
 }

@@ -209,8 +209,8 @@ namespace TillasDesktop.UI.Modelos
             if (obj is ClienteViewModel clienteFila)
             {
                 // Muestra un cuadro de diálogo de advertencia pidiendo confirmación al operador
-                var respuesta = MessageBox.Show($"¿Estás seguro de que deseas eliminar permanentemente al cliente '{clienteFila.Nombre} {clienteFila.Apellido}'?",
-                                                "Confirmar Eliminación",
+                var respuesta = MessageBox.Show($"¿Estás seguro de que deseas dar de baja al cliente '{clienteFila.Nombre} {clienteFila.Apellido}'?",
+                                                "Confirmar Baja",
                                                 MessageBoxButton.YesNo,
                                                 MessageBoxImage.Warning);
 

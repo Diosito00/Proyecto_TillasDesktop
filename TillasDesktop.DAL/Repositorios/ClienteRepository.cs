@@ -17,6 +17,60 @@ namespace TillasDesktop.DAL.Repositorios
     /// Hereda de ConexionDb para obtener automáticamente la configuración de conexión al servidor SQL.
     public class ClienteRepository : ConexionDb
     {
+        // OBTENER UN CLIENTE POR SU ID
+        public Cliente ObtenerPorId(int idCliente)
+        {
+            // Pedimos una conexión activa a la clase base utilizando la cadena configurada
+            using (var conexion = ObtenerConexion())
+            {
+                // Consulta SQL para seleccionar un único cliente filtrando por ID y verificando que esté activo
+                string query = "SELECT * FROM Clientes WHERE ID = @ID AND Activo = 1";
+
+                // Abrimos físicamente el canal de comunicación con el servidor de base de datos
+                conexion.Open();
+
+                // Preparamos el comando SQL pasándole la consulta y la conexión activa
+                using (var comando = new SqlCommand(query, conexion))
+                {
+                    // Asignamos de forma segura el ID recibido por parámetro
+                    comando.Parameters.AddWithValue("@ID", idCliente);
+
+                    // Ejecuta la consulta y devuelve un lector
+                    using (var lector = comando.ExecuteReader())
+                    {
+                        // Si el lector encuentra una fila (un registro coincidente)
+                        if (lector.Read())
+                        {
+                            // Mapeamos los datos de la fila actual al objeto Cliente de forma segura
+                            return new Cliente
+                            {
+                                // Leemos la columna 0 (ID) asegurando que sea un entero
+                                ID = lector.GetInt32(0),
+
+                                // Verificamos si la columna 1 (Apellido) es nula en la BD
+                                Apellido = lector.IsDBNull(1) ? string.Empty : lector.GetString(1),
+
+                                // Verificamos si la columna 2 (Nombre) es nula
+                                Nombre = lector.IsDBNull(2) ? string.Empty : lector.GetString(2),
+
+                                // Verificamos y leemos la columna 3 (CUIT)
+                                CUIT = lector.IsDBNull(3) ? string.Empty : lector.GetString(3),
+
+                                // Verificamos y leemos la columna 4 (Telefono)
+                                Telefono = lector.IsDBNull(4) ? string.Empty : lector.GetString(4),
+
+                                // Verificamos y leemos la columna 5 (Email)
+                                Email = lector.IsDBNull(5) ? string.Empty : lector.GetString(5)
+                            };
+                        }
+                    }
+                }
+            }
+
+            // Si no se encuentra ningún cliente con ese ID o no está activo, devolvemos null
+            return null;
+        }
+
         // OBTENER TODOS LOS CLIENTES
         public List<Cliente> ObtenerTodos()
         {
@@ -28,7 +82,7 @@ namespace TillasDesktop.DAL.Repositorios
             using (var conexion = ObtenerConexion())
             {
                 // Consulta SQL para seleccionar todos los registros de la tabla Clientes
-                string query = "SELECT * FROM Clientes";
+                string query = "SELECT * FROM Clientes WHERE Activo = 1";
 
                 // Abre físicamente el canal de comunicación con el servidor de base de datos.
                 conexion.Open();
@@ -210,7 +264,7 @@ namespace TillasDesktop.DAL.Repositorios
             }
         }
 
-        // BAJA FISICA
+        // BAJA LOGICA
         public bool Eliminar(int idCliente)
         {
             try
@@ -219,7 +273,7 @@ namespace TillasDesktop.DAL.Repositorios
                 using (var conexion = ObtenerConexion())
                 {
                     // Consulta SQL para borrar un registro de la tabla según su ID.
-                    string query = "DELETE FROM Clientes WHERE ID = @ID";
+                    string query = "UPDATE Clientes SET activo = 0 WHERE ID = @ID AND Activo = 1";
 
                     // Prepara el comando con la consulta y la conexión.
                     using (var comando = new SqlCommand(query, conexion))
