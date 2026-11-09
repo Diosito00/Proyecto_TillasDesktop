@@ -23,5 +23,6 @@ namespace TillasDesktop.Entities.Reportes
         // Propiedad de tipo decimal que guarda el precio unitario que tenía el producto al momento de la transacción
         public decimal PrecioUnitario { get; set; }
 
+        public decimal Subtotal { get; set; }
     }
 }

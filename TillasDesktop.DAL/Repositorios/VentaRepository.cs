@@ -506,7 +506,8 @@ namespace TillasDesktop.DAL.Repositorios
                             M.Nombre AS Marca,
                             PT.Talle,
                             DV.Cantidad,
-                            DV.Precio_Unitario
+                            DV.Precio_Unitario,
+                            DV.Subtotal
                          FROM Detalle_Ventas DV
                          INNER JOIN Producto_Talles PT ON DV.Producto_Talle_ID = PT.ID
                          INNER JOIN Productos P ON PT.Producto_ID = P.ID
@@ -535,7 +536,8 @@ namespace TillasDesktop.DAL.Repositorios
                                 Marca = lector.GetString(2),
                                 Talle = Convert.ToDecimal(lector.GetValue(3)),
                                 Cantidad = lector.GetInt32(4),
-                                PrecioUnitario = lector.GetDecimal(5)
+                                PrecioUnitario = lector.GetDecimal(5),
+                                Subtotal = lector.GetDecimal(6)
                             });
                         }
                     }
