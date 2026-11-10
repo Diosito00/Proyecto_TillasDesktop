@@ -135,13 +135,6 @@ SQL Server Express no incluye SQL Server Agent. Para liberar las reservas vencid
 ```text
 sqlcmd -S .\SQLEXPRESS -d TillasDB -E -Q "EXEC sp_LimpiarReservasVencidas"
 ```
-
-**Antes de usarlo en producción**
-
-- Las contraseñas de los usuarios se guardan en texto plano: deben almacenarse con hash y sal (PBKDF2 o BCrypt).
-- La conexión usa autenticación de Windows: conviene un usuario de SQL Server con permisos mínimos.
-- Cambiar las credenciales de prueba.
-
 ---
 
 ## ![07](https://img.shields.io/badge/07-555555?style=flat-square)![DESARROLLADORES](https://img.shields.io/badge/DESARROLLADORES-EC4899?style=flat-square) Desarrolladores
